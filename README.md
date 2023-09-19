@@ -114,6 +114,26 @@ IBetsManager <-- IDataManager : BetsMgr
 IGroupsManager <-- IDataManager : GroupsMgr
 ```
 
+## Diagramme de classes simplifié du Stub
+```mermaid
+classDiagram
+direction TB;
+
+IDataManager <|.. StubData
+
+UsersManager ..|> IUsersManager
+StubData --> UsersManager
+
+BetsManager ..|> IBetsManager
+StubData --> BetsManager
+
+GroupsManager ..|> IGroupsManager
+StubData --> GroupsManager
+
+StubData --> "*" User
+StubData --> "*" Bet
+StubData --> "*" Group
+```
 
 <div align = right>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
