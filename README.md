@@ -25,87 +25,94 @@
 
 ```mermaid
 classDiagram
+direction LR;
+
 class LargeImage{
     +/Base64 : string
 }
 
 class User{
-    +/Name : string
-    +/Bio : string
-    +/Icon : string
-    +/Characteristics : Dictionary~string, int~
-    ~ AddSkin(skin : Skin) bool
-    ~ RemoveSkin(skin: Skin) bool
-    + AddSkill(skill: Skill) bool
-    + RemoveSkill(skill: Skill) bool
-    + AddCharacteristics(someCharacteristics : params Tuple~string, int~[])
-    + RemoveCharacteristics(label : string) bool
-    + this~label : string~ : int?
+    +/ Id : string
+    +/ Pseudo : string
+    +/ Mail : string
+    +/ Password : string
+    +/ CreationDate : DateTime
+    +/ AllCoins : int
+    ~ AddGroup(group : Group) bool
+    ~ RemoveGroup(group : Group) bool
 }
-Champion --> "1" LargeImage : Image
-class ChampionClass{
-    <<enumeration>>
-    Unknown,
-    Assassin,
-    Fighter,
-    Mage,
-    Marksman,
-    Support,
-    Tank,
+User --> "1" LargeImage : Image
+Group --> "1" LargeImage : Image
+
+class Bet{
+    +/ Id : string    
+    +/ Title : string
+    +/ Name : string
+    +/ Description : string
+    +/ StartDate : DateTime
+    +/ EndDate : DateTime
+    +/ Choice : List<string>
+    +/ Theme: string
+    +/ Status: bool
 }
-Champion --> "1" ChampionClass : Class
-class Skin{
-    +/Name : string    
-    +/Description : string
-    +/Icon : string
-    +/Price : float
+Bet --> "*" User : Dictionary~User,Mise~
+
+class Mise{
+    +/ Cost : int    
+    +/ Choice : string
 }
-Skin --> "1" LargeImage : Image
-Champion "1" -- "*" Skin 
-class Skill{
-    +/Name : string    
-    +/Description : string
+
+class Group{
+    +/ Id : string
+    +/ Name : string    
+    +/ Image : string
+    +/ CreationDate : DateTime
 }
-class SkillType{
-    <<enumeration>>
-    Unknown,
-    Basic,
-    Passive,
-    Ultimate,
-}
-Skill --> "1" SkillType : Type
-Champion --> "*" Skill
-class Rune{
-    +/Name : string    
-    +/Description : string
-}
-Rune --> "1" LargeImage : Image
-class RuneFamily{
-    <<enumeration>>
-    Unknown,
-    Precision,
-    Domination
-}
-Rune --> "1" RuneFamily : Family
-class Category{
-    <<enumeration>>
-    Major,
-    Minor1,
-    Minor2,
-    Minor3,
-    OtherMinor1,
-    OtherMinor2
-}
-class RunePage{
-    +/Name : string
-    +/this[category : Category] : Rune?
-    - CheckRunes(newRuneCategory : Category)
-    - CheckFamilies(cat1 : Category, cat2 : Category) bool?
-    - UpdateMajorFamily(minor : Category, expectedValue : bool)
-}
-RunePage --> "*" Rune : Dictionary~Category,Rune~
+User --> "*" Group : groups
 ```
 
+## Diagramme de classes du modèle
+```mermaid
+classDiagram
+direction LR;
+class IGenericDataManager~T~{
+    <<interface>>
+    GetNbItems() Task~int~
+    GetItems(index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~T~~
+    GetNbItemsByName(substring : string)
+    GetItemsByName(substring : string, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~T~~
+    UpdateItem(oldItem : T, newItem : T) Task~T~~
+    AddItem(item : T) Task~T~
+    DeleteItem(item : T) Task~bool~
+}
+class IUsersManager{
+    <<interface>>
+    GetNbItemsByName(name : string)
+    GetItemsByName(name : string, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~Bet?~~
+    GetItemByMail(mail : string)
+}
+class IBetsManager{
+    <<interface>>
+    GetNbItemsByUser(user : User?)
+    GetItemsByUser(user : User?, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~Bet?~~
+}
+
+class IGroupsManager{
+    <<interface>>
+    GetNbItemsByName(name : string)
+    GetItemsByName(name : string, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~Group?~~
+}
+
+IGenericDataManager~User?~ <|.. IUsersManager : T--User?
+IGenericDataManager~Bet?~ <|.. IBetsManager : T--Bet?
+IGenericDataManager~Group?~ <|.. IGroupsManager : T--Group?
+class IDataManager{
+    <<interface>>
+}
+IUsersManager <-- IDataManager : UsersMgr
+IBetsManager <-- IDataManager : BetsMgr
+IGroupsManager <-- IDataManager : GroupsMgr
+```
 
 
 <div align = right>
