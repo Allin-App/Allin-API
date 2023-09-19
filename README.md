@@ -80,6 +80,7 @@ class IGenericDataManager~T~{
     <<interface>>
     GetNbItems() Task~int~
     GetItems(index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~T~~
+    GetItemById(id: string)
     GetNbItemsByName(substring : string)
     GetItemsByName(substring : string, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~T~~
     UpdateItem(oldItem : T, newItem : T) Task~T~~
@@ -88,20 +89,21 @@ class IGenericDataManager~T~{
 }
 class IUsersManager{
     <<interface>>
-    GetNbItemsByName(name : string)
-    GetItemsByName(name : string, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~Bet?~~
     GetItemByMail(mail : string)
+    GetNbItemsByGroup(group : Group)
+    GetItemsByGroup(group : Group, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~T~~
+    GetNbItemsByAllCoins(allCoins : int)
+    GetItemsByAllCoins(allCoins : int, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~T~~
 }
 class IBetsManager{
     <<interface>>
     GetNbItemsByUser(user : User?)
     GetItemsByUser(user : User?, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~Bet?~~
+    GetNbItemsByDescription(description : string)
+    GetItemsByDescription(description : string, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~Bet?~~
 }
-
 class IGroupsManager{
     <<interface>>
-    GetNbItemsByName(name : string)
-    GetItemsByName(name : string, index : int, count : int, orderingPropertyName : string?, descending : bool) Task~IEnumerable~Group?~~
 }
 
 IGenericDataManager~User?~ <|.. IUsersManager : T--User?
