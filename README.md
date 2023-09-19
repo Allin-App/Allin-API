@@ -52,8 +52,8 @@ class User{
     +/ Pseudo : string
     +/ Mail : string
     +/ Password : string
-    +/ CreationDate : DateTime
-    +/ AllCoins : int
+    + CreationDate : DateTime
+    + AllCoins : int
     ~ AddGroup(group : Group) bool
     ~ RemoveGroup(group : Group) bool
 }
@@ -64,12 +64,12 @@ class Bet{
     +/ Id : string    
     +/ Title : string
     +/ Name : string
-    +/ Description : string
-    +/ StartDate : DateTime
-    +/ EndDate : DateTime
-    +/ Choice : List<string>
+    +/ Choices : List<string>
     +/ Theme: string
     +/ Status: bool
+    + Description : string
+    + StartDate : DateTime
+    + EndDate : DateTime
 }
 Bet --> "*" User : Dictionary~User,Mise~
 
