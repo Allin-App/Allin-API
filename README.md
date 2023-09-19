@@ -12,7 +12,7 @@
 
 ### API - ALL IN !
 
-**Contexte** : Api pour le projet universitaire de troisieme année (B.U.T Informatique de Clermont-Ferrand) nommé "All In" 
+*Contexte* : Api pour le projet universitaire de troisieme année (B.U.T Informatique de Clermont-Ferrand) nommé **All In**.
 
 # Répartition du gitlab
 
@@ -22,21 +22,7 @@
 
 👉 [**Solution de l'application**](Sources/AllIn.sln)
 
-## Environnement de Travail
 
-Pour l'API :👇
-
-<div align = center>
-
----
-
-&nbsp; ![CSharp](https://img.shields.io/badge/C%20Sharp-239120.svg?style=for-the-badge&logo=C-Sharp&logoColor=white)
-&nbsp; ![Visual Studio](https://img.shields.io/badge/Visual%20Studio-5C2D91.svg?style=for-the-badge&logo=Visual-Studio&logoColor=white)
-&nbsp; ![Swagger](https://img.shields.io/badge/Swagger-85EA2D.svg?style=for-the-badge&logo=Swagger&logoColor=black)
-&nbsp; ![.NET](https://img.shields.io/badge/.NET-512BD4.svg?style=for-the-badge&logo=dotnet&logoColor=white)
----
-
-</div>
 ## Diagramme de classes du modèle
 
 ```mermaid
@@ -74,15 +60,14 @@ class Bet{
 Bet --> "*" User : Dictionary~User,Mise~
 
 class Mise{
-    +/ Cost : int    
-    +/ Choice : string
+    + Cost : int    
+    + Choice : string
 }
 
 class Group{
     +/ Id : string
     +/ Name : string    
-    +/ Image : string
-    +/ CreationDate : DateTime
+    + CreationDate : DateTime
 }
 User --> "*" Group : groups
 ```
@@ -150,14 +135,8 @@ StubData --> "*" User
 StubData --> "*" Bet
 StubData --> "*" Group
 ```
-## Deploiement
-- [x] &nbsp; ![IOS](https://img.shields.io/badge/IOS-000?style=for-the-badge&logo=apple&logoColor=black&color=white)
-- [x] &nbsp; ![Android](https://img.shields.io/badge/Android-000?style=for-the-badge&logo=android&logoColor=white&color=green)
+</div>
 
-## Technicien en charge de l'API
-
-- HASSOU Rayhan
-- EVARD Lucas 
 <div align = right>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Licence Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
 <right>
