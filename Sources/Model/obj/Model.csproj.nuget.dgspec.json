@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Model\\Model.csproj": {}
+    "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Model\\Model.csproj": {}
   },
   "projects": {
-    "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Model\\Model.csproj": {
+    "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Model\\Model.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Model\\Model.csproj",
+        "projectUniqueName": "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Model\\Model.csproj",
         "projectName": "Model",
-        "projectPath": "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Model\\Model.csproj",
-        "packagesPath": "C:\\Users\\emkartal1\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Model\\obj\\",
+        "projectPath": "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Model\\Model.csproj",
+        "packagesPath": "C:\\Users\\rahassou\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Model\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\emkartal1\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\rahassou\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -33,8 +33,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Shared\\Shared.csproj": {
-                "projectPath": "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Shared\\Shared.csproj"
+              "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Shared\\Shared.csproj": {
+                "projectPath": "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Shared\\Shared.csproj"
               }
             }
           }
@@ -68,20 +68,20 @@
         }
       }
     },
-    "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Shared\\Shared.csproj": {
+    "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Shared\\Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Shared\\Shared.csproj",
+        "projectUniqueName": "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Shared\\Shared.csproj",
         "projectName": "Shared",
-        "projectPath": "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Shared\\Shared.csproj",
-        "packagesPath": "C:\\Users\\emkartal1\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\emkartal1\\source\\repos\\AllIn\\Shared\\obj\\",
+        "projectPath": "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Shared\\Shared.csproj",
+        "packagesPath": "C:\\Users\\rahassou\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\rahassou\\Source\\Repos\\Api\\Sources\\Shared\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\emkartal1\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\rahassou\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
