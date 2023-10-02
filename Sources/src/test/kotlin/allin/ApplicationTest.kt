@@ -1,0 +1,4 @@
+package allin
+
+class ApplicationTest {
+}
