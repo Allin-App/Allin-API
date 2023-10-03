@@ -10,6 +10,7 @@ steps:
   - name: compilation
     image: maven:3-openjdk-11
     commands:
+        - cd Sources
         - mvn clean package
 
 
@@ -49,5 +50,6 @@ steps:
       IMAGENAME: hub.codefirst.iut.uca.fr/lucas.evard/api:latest
       CONTAINERNAME: api
       COMMAND: create
+      PRIVATE: true
       OVERWRITE: true
     depends_on: [docker-image]
