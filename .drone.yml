@@ -1,0 +1,48 @@
+kind: pipeline
+type: docker
+name: CI
+
+trigger:
+  event:
+    - push
+
+steps:
+  - name: compilation
+    image: maven:3-openjdk-11
+    commands:
+        - mvn install
+
+
+
+---
+
+kind: pipeline
+type: docker
+name: CD
+
+trigger:
+  event:
+    - push
+steps:
+
+  - name: hadolint
+    image: hadolint/hadolint:latest-alpine
+    commands:
+      - hadolint Sources/Dockerfile
+
+  - name: docker-image
+    image: plugins/docker
+    settings:
+      dockerfile: Sources/Dockerfile
+      context: Sources
+      registry: hub.codefirst.iut.uca.fr
+      repo: hub.codefirst.iut.uca.fr/AllDev/API
+
+  - name: deploy-container
+    image: hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest
+    environment:
+      IMAGENAME: hub.codefirst.iut.uca.fr/AllDev/API:latest
+      CONTAINERNAME: api
+      COMMAND: create
+      OVERWRITE: true
+    depends_on: [docker-image]
