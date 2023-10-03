@@ -49,6 +49,6 @@ steps:
       CONTAINERNAME: api
       COMMAND: create
       OVERWRITE: true
+      ADMINS: lucasevard,emrekartal,arthurvalin,lucasdelanier
     depends_on: [docker-image]
-    ADMINS: lucasevard,emrekartal,arthurvalin,lucasdelanier
 
