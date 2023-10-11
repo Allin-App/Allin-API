@@ -1,5 +1,6 @@
 package allin.routing
 
+import allin.model.CheckUser
 import allin.model.User
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -7,17 +8,35 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
-val users = mutableListOf(User("user1", "user1@example.com", "mdp",1000))
+val users = mutableListOf<User>()
+
 fun Application.UserRouter() {
     routing {
         route("/users") {
             get {
                 call.respond(users)
             }
+        }
+
+        route("/users/register"){
             post {
                 val newUser = call.receive<User>()
                 users.add(newUser)
                 call.respond(HttpStatusCode.Created, newUser)
+            }
+        }
+
+        route("/users/login"){
+            post {
+                val checkUser = call.receive<CheckUser>()
+                val user = users.find { it.username == checkUser.username }
+                if (user != null) {
+                    if(user.password==checkUser.password)
+                        call.respond(HttpStatusCode.fromValue(200),user)
+                    else call.respond(HttpStatusCode.NotFound)
+                } else {
+                    call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
 
@@ -55,3 +74,5 @@ fun Application.UserRouter() {
         }
     }
 }
+// REGISTER 201 created 400 bad request
+// LOGIN 200 OK 404
