@@ -1,31 +1,18 @@
-/*package allin.plugins
+package allin.routing
 
 import allin.model.User
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.html.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.html.body
-import kotlinx.html.h1
 
-val users = mutableListOf<User>()
-fun Application.configureRouting() {
+val users = mutableListOf(User("user1", "user1@example.com", "mdp",1000))
+fun Application.UserRouter() {
     routing {
-        get("/") {
-            call.respondHtml(HttpStatusCode.OK) {
-                body {
-                    h1 {
-                        +"Bienvenue dans l'API de l'application ALLin!"
-                    }
-                }
-            }
-        }
-
         route("/users") {
             get {
-                call.respondText(users.joinToString("\n"), ContentType.Text.Plain)
+                call.respond(users)
             }
             post {
                 val newUser = call.receive<User>()
@@ -68,4 +55,3 @@ fun Application.configureRouting() {
         }
     }
 }
-*/
