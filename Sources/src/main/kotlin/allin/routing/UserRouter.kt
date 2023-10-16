@@ -20,25 +20,28 @@ fun Application.UserRouter() {
 
         route("/users/register"){
             post {
-                val newUser = call.receive<User>()
-                users.add(newUser)
-                call.respond(HttpStatusCode.Created, newUser)
+                val TempUser = call.receive<User>()
+                val user = users.find { it.username == TempUser.username || it.email == TempUser.email }
+                if(user == null) {
+                    users.add(TempUser)
+                    call.respond(HttpStatusCode.Created, TempUser)
+                }
+                call.respond(HttpStatusCode.Conflict)
             }
         }
 
-        route("/users/login"){
+        route("/users/login") {
             post {
                 val checkUser = call.receive<CheckUser>()
-                val user = users.find { it.username == checkUser.username }
-                if (user != null) {
-                    if(user.password==checkUser.password)
-                        call.respond(HttpStatusCode.fromValue(200),user)
-                    else call.respond(HttpStatusCode.NotFound)
+                val user = users.find { it.username == checkUser.login || it.email == checkUser.login }
+                if (user != null && user.password == checkUser.password) {
+                    call.respond(HttpStatusCode.OK, user)
                 } else {
                     call.respond(HttpStatusCode.NotFound)
                 }
             }
         }
+
 
         route("/users/{username}") {
             get {
