@@ -2,23 +2,28 @@ package allin.routing
 
 import allin.model.CheckUser
 import allin.model.User
-import allin.model.isEmailValid
-import io.ktor.client.utils.*
+import com.typesafe.config.ConfigFactory
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
+import io.ktor.server.config.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import allin.utils.RegexChecker
+import allin.utils.TokenManager
 
 val users = mutableListOf<User>()
-
+val tokenManager= TokenManager(HoconApplicationConfig(ConfigFactory.load()))
+val RegexChecker= RegexChecker()
 fun Application.UserRouter() {
 
     routing {
         route("/users/register"){
             post {
                 val TempUser = call.receive<User>()
-                if (isEmailValid(TempUser.email)){
+                if (RegexChecker.isEmailInvalid(TempUser.email)){
                     call.respond(HttpStatusCode.Forbidden,"Input a valid mail !")
                 }
                 val user = users.find { it.username == TempUser.username || it.email == TempUser.email }
@@ -35,6 +40,7 @@ fun Application.UserRouter() {
                 val checkUser = call.receive<CheckUser>()
                 val user = users.find { it.username == checkUser.login || it.email == checkUser.login }
                 if (user != null && user.password == checkUser.password) {
+                    user.token=tokenManager.generateJWTToken(user)
                     call.respond(HttpStatusCode.OK, user)
                 } else {
                     call.respond(HttpStatusCode.NotFound,"Login and/or password incorrect.")
@@ -54,7 +60,19 @@ fun Application.UserRouter() {
                 }
             }
         }
+
+        authenticate {
+            get("/users/token") {
+                val principal = call.principal<JWTPrincipal>()
+                val username = principal!!.payload.getClaim("username").asString()
+                val user = users.find { it.username == username }
+                if (user != null) {
+                    call.respond(HttpStatusCode.OK, user)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, "User not found with the valid token !")
+                }
+            }
+        }
+
     }
 }
-// REGISTER 201 created 400 bad request
-// LOGIN 200 OK 404
