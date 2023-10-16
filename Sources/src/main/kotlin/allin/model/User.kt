@@ -7,3 +7,8 @@ data class User(val username: String, val email: String, val password: String, v
 
 @Serializable
 data class CheckUser(val login: String,val password: String)
+
+fun isEmailValid(email: String): Boolean {
+    val emailRegex = Regex("^[A-Za-z0-9+_.-]+@(.+)$")
+    return !emailRegex.matches(email)
+}
