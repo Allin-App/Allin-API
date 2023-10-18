@@ -1,5 +1,6 @@
 package allin.routing
 
+import allin.dto.*
 import allin.model.CheckUser
 import allin.model.User
 import com.typesafe.config.ConfigFactory
@@ -29,7 +30,7 @@ fun Application.UserRouter() {
                 val user = users.find { it.username == TempUser.username || it.email == TempUser.email }
                 if(user == null) {
                     users.add(TempUser)
-                    call.respond(HttpStatusCode.Created, TempUser)
+                    call.respond(HttpStatusCode.Created, convertUserToUserDTO(TempUser))
                 }
                 call.respond(HttpStatusCode.Conflict,"Mail or/and username already exist")
             }
@@ -40,8 +41,8 @@ fun Application.UserRouter() {
                 val checkUser = call.receive<CheckUser>()
                 val user = users.find { it.username == checkUser.login || it.email == checkUser.login }
                 if (user != null && user.password == checkUser.password) {
-                    user.token=tokenManager.generateJWTToken(user)
-                    call.respond(HttpStatusCode.OK, user)
+                    user.token=tokenManager.generateOrReplaceJWTToken(user)
+                    call.respond(HttpStatusCode.OK, convertUserToUserDTOToken(user))
                 } else {
                     call.respond(HttpStatusCode.NotFound,"Login and/or password incorrect.")
                 }
@@ -54,7 +55,7 @@ fun Application.UserRouter() {
                 val user = users.find { it.username == checkUser.login || it.email == checkUser.login }
                 if (user != null && user.password == checkUser.password) {
                     users.remove(user)
-                    call.respond(HttpStatusCode.Accepted, user)
+                    call.respond(HttpStatusCode.Accepted,convertUserToUserDTO(user))
                 } else {
                     call.respond(HttpStatusCode.NotFound,"Login and/or password incorrect.")
                 }
@@ -67,7 +68,7 @@ fun Application.UserRouter() {
                 val username = principal!!.payload.getClaim("username").asString()
                 val user = users.find { it.username == username }
                 if (user != null) {
-                    call.respond(HttpStatusCode.OK, user)
+                    call.respond(HttpStatusCode.OK,convertUserToUserDTO(user))
                 } else {
                     call.respond(HttpStatusCode.NotFound, "User not found with the valid token !")
                 }

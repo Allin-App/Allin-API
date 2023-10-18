@@ -12,8 +12,9 @@ class TokenManager (val config: HoconApplicationConfig){
     val audience=config.property("audience").getString()
     val secret=config.property("secret").getString()
     val issuer=config.property("issuer").getString()
-    val expirationDate = System.currentTimeMillis() + 60000
-    fun generateJWTToken(user : User): String {
+    private fun generateJWTToken(user : User): String {
+        val expirationDate = System.currentTimeMillis() + 604800000 // une semaine en miliseconde
+
         val token = JWT.create()
             .withAudience(audience)
             .withIssuer(issuer)
@@ -28,5 +29,23 @@ class TokenManager (val config: HoconApplicationConfig){
             .withAudience(audience)
             .withIssuer(issuer)
             .build()
+    }
+
+    fun generateOrReplaceJWTToken(user: User): String {
+        val userToken = getUserToken(user)
+        if (userToken != null && !isTokenExpired(userToken)) {
+            return userToken
+        } else {
+            return generateJWTToken(user)
+        }
+    }
+
+    private fun isTokenExpired(token: String): Boolean {
+        val expirationTime = JWT.decode(token).expiresAt.time
+        return System.currentTimeMillis() > expirationTime
+    }
+
+    private fun getUserToken(user: User): String? {
+        return user.token
     }
 }
