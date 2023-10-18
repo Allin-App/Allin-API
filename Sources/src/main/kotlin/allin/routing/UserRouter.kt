@@ -3,6 +3,7 @@ package allin.routing
 import allin.dto.*
 import allin.model.CheckUser
 import allin.model.User
+import allin.utils.CryptManager
 import com.typesafe.config.ConfigFactory
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -18,6 +19,7 @@ import allin.utils.TokenManager
 val users = mutableListOf<User>()
 val tokenManager= TokenManager(HoconApplicationConfig(ConfigFactory.load()))
 val RegexChecker= RegexChecker()
+val CryptManager= CryptManager()
 fun Application.UserRouter() {
 
     routing {
@@ -29,8 +31,9 @@ fun Application.UserRouter() {
                 }
                 val user = users.find { it.username == TempUser.username || it.email == TempUser.email }
                 if(user == null) {
+                    CryptManager.passwordCrypt(TempUser)
                     users.add(TempUser)
-                    call.respond(HttpStatusCode.Created, convertUserToUserDTO(TempUser))
+                    call.respond(HttpStatusCode.Created, TempUser)
                 }
                 call.respond(HttpStatusCode.Conflict,"Mail or/and username already exist")
             }
@@ -40,7 +43,7 @@ fun Application.UserRouter() {
             post {
                 val checkUser = call.receive<CheckUser>()
                 val user = users.find { it.username == checkUser.login || it.email == checkUser.login }
-                if (user != null && user.password == checkUser.password) {
+                if (user != null && CryptManager.passwordDecrypt(user,checkUser.password)) {
                     user.token=tokenManager.generateOrReplaceJWTToken(user)
                     call.respond(HttpStatusCode.OK, convertUserToUserDTOToken(user))
                 } else {
