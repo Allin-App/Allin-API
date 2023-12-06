@@ -24,7 +24,7 @@
 **Description** : Ce dépôt contient l'ensemble du code de l'API pour la partie back-end de l'application *ALL IN* et la connexion à la base de données.
 </br>
 
-**Utilité**:information_source: : Son rôle est de simplifier le processus de développement des interfaces clients d'*All In*, que ce soit pour les applications iOS, Android ou tout autre futur client.
+**Utilité** : :information_source: Son rôle est de simplifier le processus de développement des interfaces clients d'*All In*, que ce soit pour les applications iOS, Android ou tout autre futur client.
 </br>
 
 # Répartition du gitlab
@@ -35,18 +35,11 @@
 
 # Technologies
 
-<div style="display: flex; align-items: center;">
-  <img src="Documentation/Images/Ktor.png" style="width: 50px; margin-right: 10px;">
-  <h3 style="margin-bottom: 30px;">KTOR</h3>
-</div>
-</br>
+<img src="Documentation/Images/Ktor.png" width="50"/> **KTOR**
 
 - Nous avons opté pour le framework Ktor afin de développer l'API, en raison des nombreux avantages qu'il offre. Parmi ceux-ci, on peut citer sa facilité de prise en main, sa légèreté en termes de code, son utilisation d'un langage moderne (*Kotlin*), ainsi qu'une documentation détaillée et complète du framework.
 
-<div style="display: flex; align-items: center;">
-  <img src="Documentation/Images/PostgreSQL.png" style="width: 50px; margin-right: 10px;">
-  <h3 style="margin-bottom: 30px;">PostgreSQL</h3>
-</div>
+<img src="Documentation/Images/PostgreSQL.png" width="50"/> **PostgreSQL**
 
 - Pour stocker les données des utilisateurs et des paris, nous utilisons une base de données PostgreSQL sur laquelle l'API s'appuie pour récupérer et enregistrer des données. En raison de sa conformité aux dernières normes SQL, garantissant une compatibilité et une évolutivité optimales, ainsi que de son efficacité à gérer un grand nombre de données.
 </br>
