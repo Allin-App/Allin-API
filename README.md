@@ -37,7 +37,7 @@
 
 <img src="Documentation/Images/Ktor.png" width="50"/> **KTOR**
 
-- Nous avons opté pour le framework Ktor afin de développer l'API, en raison des nombreux avantages qu'il offre. Parmi ceux-ci, on peut citer sa facilité de prise en main, sa légèreté en termes de code, son utilisation d'un langage moderne (*Kotlin*), ainsi qu'une documentation détaillée et complète du framework.
+- L'API est réalisée avec le framework Ktor, en raison des nombreux avantages qu'il offre. Sa facilité de prise en main, sa légèreté en termes de code, son utilisation d'un langage moderne (*Kotlin*), ainsi qu'une documentation détaillée et complète du framework.
 
 <img src="Documentation/Images/PostgreSQL.png" width="50"/> **PostgreSQL**
 
@@ -46,7 +46,7 @@
 
 # Outils
 
-Pour la partie API nous avons utilisés plusieurs outils :
+Pour la partie API, nous utilisons plusieurs outils et méthodes :
 
 ### Swagger
 
