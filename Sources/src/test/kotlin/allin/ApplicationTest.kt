@@ -1,4 +1,0 @@
-package allin
-
-class ApplicationTest {
-}
