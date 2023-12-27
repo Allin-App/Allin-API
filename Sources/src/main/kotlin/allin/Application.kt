@@ -1,6 +1,7 @@
 package allin
 
 import allin.routing.BasicRouting
+import allin.routing.BetRouter
 import allin.routing.UserRouter
 import com.typesafe.config.ConfigFactory
 import io.ktor.serialization.kotlinx.json.*
@@ -38,4 +39,5 @@ private fun Application.extracted() {
     }
     BasicRouting()
     UserRouter()
+    BetRouter()
 }
