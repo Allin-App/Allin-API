@@ -3,19 +3,29 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import allin.model.*
+import allin.utils.AppConfig
 import io.ktor.http.*
 import io.ktor.server.response.*
 
 val bets = mutableListOf<Bet>()
+val tokenManagerBet= AppConfig.tokenManager
+
+fun CreateId() : Int{
+    return bets.size
+}
+
 fun Application.BetRouter(){
     routing{
         route("/bets/add"){
             post{
-                val bet = call.receive<Bet>()
-                val findbet = bets.find { it.id == bet.id }
+                val bet = call.receive<BetWithoutId>()
+                val id = CreateId()
+                val username = tokenManagerBet.getUsernameFromToken(bet.createdBy)
+                val findbet = bets.find { it.id == id }
                 if(findbet==null){
-                    bets.add(bet)
-                    call.respond(HttpStatusCode.Created, bet)
+                    val betWithId = convertBetWithoutIdToBet(bet,id,username)
+                    bets.add(betWithId)
+                    call.respond(HttpStatusCode.Created, betWithId)
                 }
                 call.respond(HttpStatusCode.Conflict,"Bet already exist")
             }

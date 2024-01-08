@@ -1,5 +1,6 @@
 package allin.model
 
+import allin.dto.UserDTO
 import kotlinx.serialization.Serializable
 
 @Serializable

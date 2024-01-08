@@ -1,5 +1,6 @@
 package allin
 
+import allin.model.User
 import allin.routing.BasicRouting
 import allin.routing.BetRouter
 import allin.routing.UserRouter
@@ -21,8 +22,8 @@ fun main() {
 }
 
 private fun Application.extracted() {
-    val config=HoconApplicationConfig(ConfigFactory.load())
-    val tokenManager= TokenManager(config)
+    val config = HoconApplicationConfig(ConfigFactory.load())
+    val tokenManager = TokenManager.getInstance(config)
     authentication {
         jwt {
             verifier(tokenManager.verifyJWTToken())

@@ -4,15 +4,16 @@ import allin.model.User
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.interfaces.DecodedJWT
 import io.ktor.server.config.*
 import java.util.*
 
-class TokenManager (val config: HoconApplicationConfig){
+class TokenManager private constructor(val config: HoconApplicationConfig) {
 
     val audience=config.property("audience").getString()
     val secret=config.property("secret").getString()
     val issuer=config.property("issuer").getString()
-    private fun generateJWTToken(user : User): String {
+    fun generateJWTToken(user : User): String {
         val expirationDate = System.currentTimeMillis() + 604800000 // une semaine en miliseconde
 
         val token = JWT.create()
@@ -40,12 +41,25 @@ class TokenManager (val config: HoconApplicationConfig){
         }
     }
 
-    private fun isTokenExpired(token: String): Boolean {
+    fun isTokenExpired(token: String): Boolean {
         val expirationTime = JWT.decode(token).expiresAt.time
         return System.currentTimeMillis() > expirationTime
     }
 
-    private fun getUserToken(user: User): String? {
+    fun getUserToken(user: User): String? {
         return user.token
+    }
+
+    fun getUsernameFromToken(token: String) : String{
+        val decodedJWT: DecodedJWT = JWT.decode(token)
+        return decodedJWT.getClaim("username").asString()
+    }
+    companion object {
+        private var instance: TokenManager? = null
+        fun getInstance(config: HoconApplicationConfig): TokenManager {
+            return instance ?: synchronized(this) {
+                instance ?: TokenManager(config).also { instance = it }
+            }
+        }
     }
 }
