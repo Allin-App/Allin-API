@@ -32,9 +32,21 @@ fun Application.BetRouter(){
         }
         route("/bets/gets"){
             get{
-                if(bets.size>0)
-                    call.respond(HttpStatusCode.Accepted, bets)
-                else call.respond(HttpStatusCode.NoContent)
+               // if(bets.size>0)
+                    call.respond(HttpStatusCode.Accepted, "{\n" +
+                            "    \"id\": 0,\n" +
+                            "    \"theme\": \"Computer Science\",\n" +
+                            "    \"sentenceBet\": \"When the TP of CI/CD have to be finished ?\",\n" +
+                            "    \"endRegistration\": \"2023-10-01 18:30:00\",\n" +
+                            "    \"endBet\": \"2023-10-01 18:30:00\",\n" +
+                            "    \"isPrivate\": true,\n" +
+                            "    \"response\": [\n" +
+                            "        \"ok\",\n" +
+                            "        \"lol\"\n" +
+                            "    ],\n" +
+                            "    \"createdBy\": \"test\"\n" +
+                            "}")
+               // else call.respond(HttpStatusCode.NoContent)
             }
         }
         route("/bets/delete"){
