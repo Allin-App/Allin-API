@@ -32,7 +32,9 @@ fun Application.BetRouter(){
         }
         route("/bets/gets"){
             get{
-                call.respond(HttpStatusCode.Accepted, bets)
+                if(bets.size>0)
+                    call.respond(HttpStatusCode.Accepted, bets)
+                else call.respond(HttpStatusCode.NoContent)
             }
         }
         route("/bets/delete"){
