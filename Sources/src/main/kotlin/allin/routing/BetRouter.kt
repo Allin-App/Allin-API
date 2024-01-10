@@ -30,6 +30,11 @@ fun Application.BetRouter(){
                 call.respond(HttpStatusCode.Conflict,"Bet already exist")
             }
         }
+        route("/bets/gets"){
+            get{
+                call.respond(HttpStatusCode.Accepted, bets)
+            }
+        }
         route("/bets/delete"){
             post{
                 val idbet = call.receive<Map<String, Int>>()["id"]
