@@ -33,6 +33,11 @@
             <version>${ktor_version}</version>
         </dependency>
         <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.1</version>
+        </dependency>
+        <dependency>
             <groupId>io.ktor</groupId>
             <artifactId>ktor-server-netty-jvm</artifactId>
             <version>${ktor_version}</version>
