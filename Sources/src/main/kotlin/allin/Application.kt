@@ -1,6 +1,4 @@
 package allin
-
-import allin.model.User
 import allin.routing.BasicRouting
 import allin.routing.BetRouter
 import allin.routing.UserRouter
