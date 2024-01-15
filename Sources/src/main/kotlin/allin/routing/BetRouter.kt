@@ -5,7 +5,10 @@ import io.ktor.server.routing.*
 import allin.model.*
 import allin.utils.AppConfig
 import io.ktor.http.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
+import java.time.ZonedDateTime
 
 val bets = mutableListOf<Bet>()
 val tokenManagerBet= AppConfig.tokenManager
@@ -16,19 +19,21 @@ fun CreateId() : Int{
 
 fun Application.BetRouter(){
     routing{
+        authenticate {
         route("/bets/add"){
             post{
-                val bet = call.receive<BetWithoutId>()
+                val bet = call.receive<Bet>()
+                val token= call.principal<JWTPrincipal>()
                 val id = CreateId()
-                val username = tokenManagerBet.getUsernameFromToken(bet.createdBy)
+                bet.createdBy = tokenManagerBet.getUsernameFromToken(token.toString())
                 val findbet = bets.find { it.id == id }
                 if(findbet==null){
-                    val betWithId = convertBetWithoutIdToBet(bet,id,username)
-                    bets.add(betWithId)
-                    call.respond(HttpStatusCode.Created, betWithId)
+                    bets.add(bet)
+                    call.respond(HttpStatusCode.Created, bet)
                 }
                 call.respond(HttpStatusCode.Conflict,"Bet already exist")
             }
+        }
         }
         route("/bets/gets"){
             get{

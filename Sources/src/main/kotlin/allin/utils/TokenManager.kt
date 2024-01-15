@@ -1,5 +1,6 @@
 package allin.utils
 
+import allin.dto.UserDTO
 import allin.model.User
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
@@ -15,7 +16,6 @@ class TokenManager private constructor(val config: HoconApplicationConfig) {
     val issuer=config.property("issuer").getString()
     fun generateJWTToken(user : User): String {
         val expirationDate = System.currentTimeMillis() + 604800000 // une semaine en miliseconde
-
         val token = JWT.create()
             .withAudience(audience)
             .withIssuer(issuer)
@@ -41,6 +41,26 @@ class TokenManager private constructor(val config: HoconApplicationConfig) {
         }
     }
 
+    fun generateOrReplaceJWTToken(user: UserDTO): String {
+        val userToken = getUserToken(user)
+        if (userToken != null && !isTokenExpired(userToken)) {
+            return userToken
+        } else {
+            return generateJWTToken(user)
+        }
+    }
+
+    fun generateJWTToken(user : UserDTO): String {
+        val expirationDate = System.currentTimeMillis() + 604800000 // une semaine en miliseconde
+        val token = JWT.create()
+            .withAudience(audience)
+            .withIssuer(issuer)
+            .withClaim("username", user.username)
+            .withExpiresAt(Date(expirationDate))
+            .sign(Algorithm.HMAC256(secret))
+        return token
+    }
+
     fun isTokenExpired(token: String): Boolean {
         val expirationTime = JWT.decode(token).expiresAt.time
         return System.currentTimeMillis() > expirationTime
@@ -49,7 +69,9 @@ class TokenManager private constructor(val config: HoconApplicationConfig) {
     fun getUserToken(user: User): String? {
         return user.token
     }
-
+    fun getUserToken(user: UserDTO): String? {
+        return user.token
+    }
     fun getUsernameFromToken(token: String) : String{
         val decodedJWT: DecodedJWT = JWT.decode(token)
         return decodedJWT.getClaim("username").asString()
