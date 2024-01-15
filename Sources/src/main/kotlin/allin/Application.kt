@@ -14,6 +14,13 @@ import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
+import org.ktorm.database.Database
+
+val db_database=System.getenv().get("POSTGRES_DB")
+val db_user=System.getenv().get("POSTGRES_USER")
+val db_password=System.getenv().get("POSTGRES_PASSWORD")
+val database = Database.connect("jdbc:postgresql:$db_database", user = db_user, password = db_password)
+
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -24,6 +31,7 @@ fun main() {
 private fun Application.extracted() {
     val config = HoconApplicationConfig(ConfigFactory.load())
     val tokenManager = TokenManager.getInstance(config)
+    println("jdbc:postgresql:$db_database$db_user$db_password")
     authentication {
         jwt {
             verifier(tokenManager.verifyJWTToken())
