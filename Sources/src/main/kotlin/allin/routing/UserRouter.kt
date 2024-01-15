@@ -24,8 +24,6 @@ val RegexCheckerUser = AppConfig.regexChecker
 val CryptManagerUser = AppConfig.cryptManager
 val tokenManagerUser = AppConfig.tokenManager
 const val DEFAULT_COINS = 500
-val database = Database.connect("jdbc:postgresql://localhost:5432/Allin", user = "postgres", password = "lulu")
-
 fun Application.UserRouter() {
 
     routing {
