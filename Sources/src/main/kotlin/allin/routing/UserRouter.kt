@@ -1,81 +1,98 @@
 package allin.routing
 
-import allin.dto.*
+import allin.dto.convertUserToUserDTO
+import allin.dto.convertUserToUserDTOToken
+import allin.ext.hasToken
+import allin.ext.verifyUserFromToken
+import allin.model.ApiMessage
 import allin.model.CheckUser
 import allin.model.User
+import allin.model.UserRequest
 import allin.utils.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.util.*
+import org.ktorm.database.Database
 
 val users = mutableListOf<User>()
+val RegexCheckerUser = AppConfig.regexChecker
+val CryptManagerUser = AppConfig.cryptManager
+val tokenManagerUser = AppConfig.tokenManager
+const val DEFAULT_COINS = 500
+
 val RegexCheckerUser= AppConfig.regexChecker
 val CryptManagerUser= AppConfig.cryptManager
 val tokenManagerUser=AppConfig.tokenManager
-
+val database = Database.connect("jdbc:postgresql://localhost:5432/Allin", user = "postgres", password = "lulu")
 
 fun Application.UserRouter() {
 
     routing {
-        route("/users/register"){
+        route("/users/register") {
             post {
-                val TempUser = call.receive<User>()
-                if (RegexCheckerUser.isEmailInvalid(TempUser.email)){
-                    call.respond(HttpStatusCode.Forbidden,"Input a valid mail !")
+                val tempUser = call.receive<UserRequest>()
+                if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
+                    call.respond(HttpStatusCode.Forbidden, ApiMessage.InvalidMail)
                 }
-                val user = users.find { it.username == TempUser.username || it.email == TempUser.email }
-                if(user == null) {
-                    CryptManagerUser.passwordCrypt(TempUser)
-                    TempUser.token=tokenManagerUser.generateOrReplaceJWTToken(TempUser)
-                    users.add(TempUser)
-                    call.respond(HttpStatusCode.Created, TempUser)
+                users.find { it.username == tempUser.username || it.email == tempUser.email }?.let { user ->
+                    call.respond(HttpStatusCode.Conflict, ApiMessage.UserAlreadyExist)
+                } ?: run {
+                    val user = User(
+                        id = UUID.randomUUID().toString(),
+                        username = tempUser.username,
+                        email = tempUser.email,
+                        password = tempUser.password,
+                        nbCoins = DEFAULT_COINS,
+                        token = null
+                    )
+                    CryptManagerUser.passwordCrypt(user)
+                    user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
+                    users.add(user)
+                    call.respond(HttpStatusCode.Created, user)
                 }
-                call.respond(HttpStatusCode.Conflict,"Mail or/and username already exist")
             }
         }
 
         route("/users/login") {
             post {
                 val checkUser = call.receive<CheckUser>()
-                val user = users.find { it.username == checkUser.login || it.email == checkUser.login }
-                if (user != null && CryptManagerUser.passwordDecrypt(user,checkUser.password)) {
-                    user.token=tokenManagerUser.generateOrReplaceJWTToken(user)
-                    call.respond(HttpStatusCode.OK, convertUserToUserDTOToken(user))
-                } else {
-                    call.respond(HttpStatusCode.NotFound,"Login and/or password incorrect.")
-                }
-            }
-        }
-
-        route("/users/delete") {
-            post {
-                val checkUser = call.receive<CheckUser>()
-                val user = users.find { it.username == checkUser.login || it.email == checkUser.login }
-                if (user != null && user.password == checkUser.password) {
-                    users.remove(user)
-                    call.respond(HttpStatusCode.Accepted,convertUserToUserDTO(user))
-                } else {
-                    call.respond(HttpStatusCode.NotFound,"Login and/or password incorrect.")
-                }
+                users.find { it.username == checkUser.login || it.email == checkUser.login }?.let { user ->
+                    if (CryptManagerUser.passwordDecrypt(user, checkUser.password)) {
+                        user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
+                        call.respond(HttpStatusCode.OK, convertUserToUserDTOToken(user))
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, ApiMessage.IncorrectLoginPassword)
+                    }
+                } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.IncorrectLoginPassword)
             }
         }
 
         authenticate {
+            post("/users/delete") {
+                hasToken { principal ->
+                    verifyUserFromToken(principal) { user ->
+                        val checkUser = call.receive<CheckUser>()
+                        if (user.username == checkUser.login && user.password == checkUser.password) {
+                            users.remove(user)
+                            call.respond(HttpStatusCode.Accepted, convertUserToUserDTO(user))
+                        } else {
+                            call.respond(HttpStatusCode.NotFound, ApiMessage.IncorrectLoginPassword)
+                        }
+                    }
+                }
+            }
+
             get("/users/token") {
-                val principal = call.principal<JWTPrincipal>()
-                val username = principal!!.payload.getClaim("username").asString()
-                val user = users.find { it.username == username }
-                if (user != null) {
-                    call.respond(HttpStatusCode.OK,convertUserToUserDTO(user))
-                } else {
-                    call.respond(HttpStatusCode.NotFound, "User not found with the valid token !")
+                hasToken { principal ->
+                    verifyUserFromToken(principal) { user ->
+                        call.respond(HttpStatusCode.OK, convertUserToUserDTO(user))
+                    }
                 }
             }
         }
-
     }
 }

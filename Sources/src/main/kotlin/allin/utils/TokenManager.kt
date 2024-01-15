@@ -41,6 +41,26 @@ class TokenManager private constructor(val config: HoconApplicationConfig) {
         }
     }
 
+    fun generateOrReplaceJWTToken(user: UserDTO): String {
+        val userToken = getUserToken(user)
+        if (userToken != null && !isTokenExpired(userToken)) {
+            return userToken
+        } else {
+            return generateJWTToken(user)
+        }
+    }
+
+    fun generateJWTToken(user : UserDTO): String {
+        val expirationDate = System.currentTimeMillis() + 604800000 // une semaine en miliseconde
+        val token = JWT.create()
+            .withAudience(audience)
+            .withIssuer(issuer)
+            .withClaim("username", user.username)
+            .withExpiresAt(Date(expirationDate))
+            .sign(Algorithm.HMAC256(secret))
+        return token
+    }
+
     fun isTokenExpired(token: String): Boolean {
         val expirationTime = JWT.decode(token).expiresAt.time
         return System.currentTimeMillis() > expirationTime
