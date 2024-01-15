@@ -1,8 +1,8 @@
 package allin.entities
 
+import allin.database
 import allin.dto.UserDTO
 import allin.model.User
-import allin.routing.database
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import org.ktorm.schema.Table
