@@ -19,19 +19,25 @@ import org.ktorm.database.Database
 val db_database=System.getenv().get("POSTGRES_DB")
 val db_user=System.getenv().get("POSTGRES_USER")
 val db_password=System.getenv().get("POSTGRES_PASSWORD")
-val database = Database.connect("jdbc:postgresql:$db_database", user = db_user, password = db_password)
-
-
+var database : Database = instanceBD()
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         extracted()
     }.start(wait = true)
 }
 
+fun instanceBD(): Database{
+    try{
+        database = Database.connect("jdbc:postgresql:$db_database", user = db_user, password = db_password)
+    }catch (e:Exception){
+        println("jdbc:postgresql:$db_database$db_user$db_password")
+    }
+    return database
+}
+
 private fun Application.extracted() {
     val config = HoconApplicationConfig(ConfigFactory.load())
     val tokenManager = TokenManager.getInstance(config)
-    println("jdbc:postgresql:$db_database$db_user$db_password")
     authentication {
         jwt {
             verifier(tokenManager.verifyJWTToken())
