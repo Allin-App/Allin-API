@@ -1,25 +1,27 @@
 package allin.serializer
 
-import kotlinx.serialization.KSerializer
+import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.text.SimpleDateFormat
+import java.util.*
 
-object ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("ZonedDateTime", PrimitiveKind.LONG)
+@Serializer(Date::class)
+class DateSerializer : KSerializer<Date> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: ZonedDateTime) {
-        encoder.encodeLong(value.toEpochSecond())
+    val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.FRANCE)
+
+    override fun deserialize(decoder: Decoder): Date {
+        val dateString = decoder.decodeString()
+        return formatter.parse(dateString)
     }
 
-    override fun deserialize(decoder: Decoder): ZonedDateTime {
-        val epoch = decoder.decodeLong()
-        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(epoch), ZoneId.systemDefault())
+    override fun serialize(encoder: Encoder, value: Date) {
+        val dateString = formatter.format(value)
+        encoder.encodeString(dateString)
     }
 }

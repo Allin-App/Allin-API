@@ -1,37 +1,19 @@
 package allin.model
 
-import allin.serializer.ZonedDateTimeSerializer
+import allin.dto.UserDTOWithToken
+import allin.serializer.DateSerializer
 import kotlinx.serialization.Serializable
-import java.time.ZonedDateTime
 import java.util.*
 
 @Serializable
-data class Bet(
-    val id: String,
-    val theme: String,
-    val sentenceBet: String,
-    @Serializable(ZonedDateTimeSerializer::class) val endRegistration: ZonedDateTime,
-    @Serializable(ZonedDateTimeSerializer::class) var endBet: ZonedDateTime,
-    var isPrivate: Boolean,
-    var response: MutableList<String>,
-    val createdBy: String
-)
+data class Bet(val id: Int, val theme: String, val sentenceBet: String, @Serializable(DateSerializer::class) val endRegistration: Date, @Serializable(DateSerializer::class) var endBet : Date, var isPrivate : Boolean, var response : MutableList<String>, val createdBy : String)
 
 @Serializable
-data class UpdatedBetData(
-    val id: String,
-    @Serializable(ZonedDateTimeSerializer::class) val endBet: ZonedDateTime,
-    val isPrivate: Boolean,
-    val response: MutableList<String>
-)
+data class UpdatedBetData(val id: Int,@Serializable(DateSerializer::class) val endBet: Date, val isPrivate: Boolean, val response: MutableList<String>)
 
 @Serializable
-data class BetWithoutId(
-    val theme: String,
-    val sentenceBet: String,
-    @Serializable(ZonedDateTimeSerializer::class) val endRegistration: ZonedDateTime,
-    @Serializable(ZonedDateTimeSerializer::class) var endBet: ZonedDateTime,
-    var isPrivate: Boolean,
-    var response: MutableList<String>,
-    val createdBy: String
-)
+data class BetWithoutId(val theme: String, val sentenceBet: String, @Serializable(DateSerializer::class) val endRegistration: Date, @Serializable(DateSerializer::class) var endBet : Date, var isPrivate : Boolean, var response : MutableList<String>, val createdBy : String)
+
+fun convertBetWithoutIdToBet(betWithoutId: BetWithoutId,id : Int, username : String): Bet {
+    return Bet(id,betWithoutId.theme,betWithoutId.sentenceBet,betWithoutId.endRegistration, betWithoutId.endBet, betWithoutId.isPrivate, betWithoutId.response, username)
+}

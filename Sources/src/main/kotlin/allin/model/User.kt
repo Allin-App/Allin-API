@@ -1,26 +1,10 @@
 package allin.model
 
+import allin.dto.UserDTO
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class User(
-    val id: String,
-    val username: String,
-    val email: String,
-    var password: String,
-    var nbCoins: Int = 1000,
-    var token: String? = null
-)
+data class User(val username: String, val email: String, var password: String, var nbCoins: Int = 1000, var token: String? = null)
 
 @Serializable
-data class UserRequest(
-    val username: String,
-    val email: String,
-    var password: String
-)
-
-@Serializable
-data class CheckUser(
-    val login: String,
-    val password: String
-)
+data class CheckUser(val login: String,val password: String)
