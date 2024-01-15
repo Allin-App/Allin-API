@@ -1,7 +1,9 @@
 package allin.routing
 
-import allin.dto.convertUserToUserDTO
-import allin.dto.convertUserToUserDTOToken
+import allin.entities.UsersEntity.addUserEntity
+import allin.entities.UsersEntity.deleteUserByUsername
+import allin.entities.UsersEntity.getUserByUsernameAndPassword
+import allin.entities.UsersEntity.getUserToUserDTO
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -15,18 +17,13 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.util.*
 import org.ktorm.database.Database
+import java.util.*
 
-val users = mutableListOf<User>()
 val RegexCheckerUser = AppConfig.regexChecker
 val CryptManagerUser = AppConfig.cryptManager
 val tokenManagerUser = AppConfig.tokenManager
 const val DEFAULT_COINS = 500
-
-val RegexCheckerUser= AppConfig.regexChecker
-val CryptManagerUser= AppConfig.cryptManager
-val tokenManagerUser=AppConfig.tokenManager
 val database = Database.connect("jdbc:postgresql://localhost:5432/Allin", user = "postgres", password = "lulu")
 
 fun Application.UserRouter() {
@@ -38,6 +35,7 @@ fun Application.UserRouter() {
                 if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
                     call.respond(HttpStatusCode.Forbidden, ApiMessage.InvalidMail)
                 }
+                val users = getUserToUserDTO()
                 users.find { it.username == tempUser.username || it.email == tempUser.email }?.let { user ->
                     call.respond(HttpStatusCode.Conflict, ApiMessage.UserAlreadyExist)
                 } ?: run {
@@ -51,7 +49,7 @@ fun Application.UserRouter() {
                     )
                     CryptManagerUser.passwordCrypt(user)
                     user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
-                    users.add(user)
+                    addUserEntity(user)
                     call.respond(HttpStatusCode.Created, user)
                 }
             }
@@ -60,36 +58,41 @@ fun Application.UserRouter() {
         route("/users/login") {
             post {
                 val checkUser = call.receive<CheckUser>()
-                users.find { it.username == checkUser.login || it.email == checkUser.login }?.let { user ->
-                    if (CryptManagerUser.passwordDecrypt(user, checkUser.password)) {
-                        user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
-                        call.respond(HttpStatusCode.OK, convertUserToUserDTOToken(user))
-                    } else {
-                        call.respond(HttpStatusCode.NotFound, ApiMessage.IncorrectLoginPassword)
-                    }
-                } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.IncorrectLoginPassword)
+                val user = getUserByUsernameAndPassword(checkUser.login)
+                if (CryptManagerUser.passwordDecrypt(user.second ?: "", checkUser.password)) {
+                    user.first?.let { userDtoWithToken ->
+                        userDtoWithToken.token = tokenManagerUser.generateOrReplaceJWTToken(userDtoWithToken)
+                        call.respond(HttpStatusCode.OK, userDtoWithToken)
+                    } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.UserNotFound)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, ApiMessage.IncorrectLoginPassword)
+                }
             }
         }
 
         authenticate {
             post("/users/delete") {
                 hasToken { principal ->
-                    verifyUserFromToken(principal) { user ->
+                    verifyUserFromToken(principal) { _, password ->
                         val checkUser = call.receive<CheckUser>()
-                        if (user.username == checkUser.login && user.password == checkUser.password) {
-                            users.remove(user)
-                            call.respond(HttpStatusCode.Accepted, convertUserToUserDTO(user))
+
+                        if (CryptManagerUser.passwordDecrypt(password, checkUser.password)) {
+                            if (!deleteUserByUsername(checkUser.login)) {
+                                call.respond(HttpStatusCode.InternalServerError, "This user can't be delete now !")
+                            }
+                            call.respond(HttpStatusCode.Accepted, password)
                         } else {
-                            call.respond(HttpStatusCode.NotFound, ApiMessage.IncorrectLoginPassword)
+                            call.respond(HttpStatusCode.NotFound, "Login and/or password incorrect.")
                         }
+
                     }
                 }
             }
 
             get("/users/token") {
                 hasToken { principal ->
-                    verifyUserFromToken(principal) { user ->
-                        call.respond(HttpStatusCode.OK, convertUserToUserDTO(user))
+                    verifyUserFromToken(principal) { userDto, _ ->
+                        call.respond(HttpStatusCode.OK, userDto)
                     }
                 }
             }
