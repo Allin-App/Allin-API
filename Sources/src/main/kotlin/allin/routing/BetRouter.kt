@@ -1,8 +1,11 @@
 package allin.routing
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.routing.*
-import allin.model.*
+
+import allin.ext.hasToken
+import allin.ext.verifyUserFromToken
+import allin.model.ApiMessage
+import allin.model.Bet
+import allin.model.BetWithoutId
+import allin.model.UpdatedBetData
 import allin.utils.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -40,6 +43,7 @@ fun Application.BetRouter() {
                 }
             }
         }
+
         route("/bets/gets") {
             get {
                 // if(bets.size>0)
@@ -47,6 +51,16 @@ fun Application.BetRouter() {
                 // else call.respond(HttpStatusCode.NoContent)
             }
         }
+
+        route("/bets/get/{id}") {
+            get {
+                val id = call.parameters["id"] ?: ""
+                bets.find { it.id == id }?.let { bet ->
+                    call.respond(HttpStatusCode.Accepted, bet)
+                } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
+            }
+        }
+
         route("/bets/delete") {
             post {
                 val idbet = call.receive<Map<String, String>>()["id"]
@@ -71,7 +85,7 @@ fun Application.BetRouter() {
         authenticate {
             get("/bets/current") {
                 hasToken { principal ->
-                    verifyUserFromToken(principal) { user ->
+                    verifyUserFromToken(principal) { user, _ ->
                         val bets = participations
                             .filter { it.username == user.username }
                             .mapNotNull { itParticipation -> bets.find { it.id == itParticipation.betId } }

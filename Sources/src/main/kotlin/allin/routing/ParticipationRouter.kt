@@ -21,7 +21,7 @@ fun Application.ParticipationRouter() {
             post("/participations/add") {
                 hasToken { principal ->
                     val participation = call.receive<ParticipationRequest>()
-                    verifyUserFromToken(principal) { user ->
+                    verifyUserFromToken(principal) { user, _ ->
                         if (user.nbCoins >= participation.stake) {
                             participations.add(
                                 Participation(
@@ -43,8 +43,8 @@ fun Application.ParticipationRouter() {
                 hasToken { principal ->
                     val participationId = call.receive<String>()
                     participations.find { it.id == participationId }?.let { participation ->
-                        verifyUserFromToken(principal) { user ->
-                            user.nbCoins += participation.stake
+                        verifyUserFromToken(principal) { user, _ ->
+                            // user.nbCoins += participation.stake
                             participations.remove(participation)
                             call.respond(HttpStatusCode.NoContent)
                         }

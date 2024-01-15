@@ -1,8 +1,8 @@
 package allin.ext
 
+import allin.dto.UserDTO
+import allin.entities.UsersEntity
 import allin.model.ApiMessage
-import allin.model.User
-import allin.routing.users
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -15,9 +15,10 @@ suspend fun PipelineContext<*, ApplicationCall>.hasToken(content: suspend (princ
 
 suspend fun PipelineContext<*, ApplicationCall>.verifyUserFromToken(
     principal: JWTPrincipal,
-    content: suspend (user: User) -> Unit
+    content: suspend (user: UserDTO, password: String) -> Unit
 ) {
     val username = principal.payload.getClaim("username").asString()
-    users.find { it.username == username }?.let { content(it) }
+    val userPassword = UsersEntity.getUserByUsernameAndPassword(username)
+    userPassword.first?.let { content(it, userPassword.second ?: "") }
         ?: call.respond(HttpStatusCode.NotFound, ApiMessage.TokenUserNotFound)
 }
