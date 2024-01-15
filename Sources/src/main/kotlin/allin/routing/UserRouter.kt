@@ -16,12 +16,18 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
+import org.ktorm.database.Database
 
 val users = mutableListOf<User>()
 val RegexCheckerUser = AppConfig.regexChecker
 val CryptManagerUser = AppConfig.cryptManager
 val tokenManagerUser = AppConfig.tokenManager
 const val DEFAULT_COINS = 500
+
+val RegexCheckerUser= AppConfig.regexChecker
+val CryptManagerUser= AppConfig.cryptManager
+val tokenManagerUser=AppConfig.tokenManager
+val database = Database.connect("jdbc:postgresql://localhost:5432/Allin", user = "postgres", password = "lulu")
 
 fun Application.UserRouter() {
 
@@ -79,7 +85,7 @@ fun Application.UserRouter() {
                     }
                 }
             }
-            
+
             get("/users/token") {
                 hasToken { principal ->
                     verifyUserFromToken(principal) { user ->

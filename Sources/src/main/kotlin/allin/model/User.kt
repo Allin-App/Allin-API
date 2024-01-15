@@ -8,7 +8,7 @@ data class User(
     val username: String,
     val email: String,
     var password: String,
-    var nbCoins: Int = 1000,
+    var nbCoins: Int = 500,
     var token: String? = null
 )
 

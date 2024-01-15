@@ -1,11 +1,8 @@
 package allin.routing
-
-import allin.ext.hasToken
-import allin.ext.verifyUserFromToken
-import allin.model.ApiMessage
-import allin.model.Bet
-import allin.model.BetWithoutId
-import allin.model.UpdatedBetData
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.routing.*
+import allin.model.*
 import allin.utils.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
