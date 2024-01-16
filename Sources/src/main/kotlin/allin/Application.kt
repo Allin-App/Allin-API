@@ -1,6 +1,5 @@
 package allin
 
-import allin.entities.UserEntity
 import allin.entities.UsersEntity
 import allin.routing.BasicRouting
 import allin.routing.BetRouter
@@ -21,7 +20,9 @@ import org.ktorm.database.Database
 val db_database=System.getenv().get("POSTGRES_DB")
 val db_user=System.getenv().get("POSTGRES_USER")
 val db_password=System.getenv().get("POSTGRES_PASSWORD")
-val database = Database.connect("jdbc:postgresql://$db_database", user = db_user, password = db_password)
+val db_host=System.getenv().get("POSTGRES_HOST")
+
+val database = Database.connect("jdbc:postgresql://AllDev-postgresapi/$db_database", user = db_user, password = db_password)
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
