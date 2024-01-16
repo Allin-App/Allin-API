@@ -28,9 +28,9 @@ fun main() {
 
 fun instanceBD(): Database{
     try{
-        database = Database.connect("jdbc:postgresql://$db_database/", user = db_user, password = db_password)
+        database = Database.connect("jdbc:postgresql://$db_database", user = db_user, password = db_password)
     }catch (e:Exception){
-        println("jdbc:postgresql:$db_database$db_user$db_password")
+        //println("jdbc:postgresql://$db_database$db_user$db_password")
     }
     return database
 }
