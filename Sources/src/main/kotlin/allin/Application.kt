@@ -5,7 +5,7 @@ import allin.routing.BasicRouting
 import allin.routing.BetRouter
 import allin.routing.ParticipationRouter
 import allin.routing.UserRouter
-import allin.utils.TokenManager
+import allin.utils.*
 import com.typesafe.config.ConfigFactory
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*

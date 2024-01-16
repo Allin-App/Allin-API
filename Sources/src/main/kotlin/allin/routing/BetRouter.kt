@@ -4,7 +4,6 @@ import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
 import allin.model.Bet
-import allin.model.BetWithoutId
 import allin.model.UpdatedBetData
 import allin.utils.AppConfig
 import io.ktor.http.*
@@ -22,7 +21,7 @@ fun Application.BetRouter() {
     routing {
         route("/bets/add") {
             post {
-                val bet = call.receive<BetWithoutId>()
+                val bet = call.receive<Bet>()
                 val id = UUID.randomUUID().toString()
                 val username = tokenManagerBet.getUsernameFromToken(bet.createdBy)
                 bets.find { it.id == id }?.let {
