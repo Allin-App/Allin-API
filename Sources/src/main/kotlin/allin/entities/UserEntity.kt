@@ -3,8 +3,10 @@ package allin.entities
 import allin.database
 import allin.dto.UserDTO
 import allin.model.User
+import allin.utils.Execute
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
+import org.ktorm.expression.SqlExpression
 import org.ktorm.schema.Table
 import org.ktorm.schema.double
 import org.ktorm.schema.int
@@ -20,7 +22,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     val id = int("id").primaryKey()
     val username = varchar("username")
     val password = varchar("password")
-    val nbCoins = double("nbCoins")
+    val nbCoins = double("coins")
     val email = varchar("email")
 
     fun getUserToUserDTO(): MutableList<UserDTO> {
@@ -33,6 +35,12 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
             )
         }.toMutableList()
     }
+
+    fun createUserTable(){
+        val request="CREATE TABLE IF not exists utilisateur ( id SERIAL PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins double precision,email VARCHAR(255))"
+        database.Execute(request)
+    }
+
 
     fun getUserByUsernameAndPassword(login: String): Pair<UserDTO?, String?> {
         return database.from(UsersEntity)

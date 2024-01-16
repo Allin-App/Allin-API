@@ -1,5 +1,7 @@
 package allin
 
+import allin.entities.UserEntity
+import allin.entities.UsersEntity
 import allin.routing.BasicRouting
 import allin.routing.BetRouter
 import allin.routing.ParticipationRouter
@@ -19,20 +21,12 @@ import org.ktorm.database.Database
 val db_database=System.getenv().get("POSTGRES_DB")
 val db_user=System.getenv().get("POSTGRES_USER")
 val db_password=System.getenv().get("POSTGRES_PASSWORD")
-var database : Database = instanceBD()
+val database = Database.connect("jdbc:postgresql://$db_database", user = db_user, password = db_password)
+
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         extracted()
     }.start(wait = true)
-}
-
-fun instanceBD(): Database{
-    try{
-        database = Database.connect("jdbc:postgresql://$db_database", user = db_user, password = db_password)
-    }catch (e:Exception){
-        //println("jdbc:postgresql://$db_database$db_user$db_password")
-    }
-    return database
 }
 
 private fun Application.extracted() {
@@ -56,4 +50,5 @@ private fun Application.extracted() {
     UserRouter()
     BetRouter()
     ParticipationRouter()
+    UsersEntity.createUserTable()
 }
