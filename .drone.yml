@@ -39,12 +39,14 @@ steps:
       OVERWRITE: false
       PRIVATE: false
       ADMINS: lucasevard,emrekartal,arthurvalin,lucasdelanier
-      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_ROOT_PASSWORD:
         from_secret: db_root_password
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DB:
         from_secret: db_database
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_USER:
         from_secret: db_user
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
+        from_secret: db_password
 
   - name: docker-image
     image: plugins/docker
@@ -65,6 +67,12 @@ steps:
       CONTAINERNAME: api
       COMMAND: create
       OVERWRITE: true
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DB:
+          from_secret: db_database
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_USER:
+          from_secret: db_user
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
+          from_secret: db_password
       ADMINS: lucasevard,emrekartal,arthurvalin,lucasdelanier
     depends_on: [docker-image]
 
