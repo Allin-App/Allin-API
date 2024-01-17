@@ -13,6 +13,22 @@ steps:
         - cd Sources
         - mvn clean package
 
+  - name: code-analysis
+    image: openjdk:8-jdk
+    environment:
+      SONAR_TOKEN:
+        from_secret: SECRET_TOKEN
+    settings:
+      sources: ./src/
+    commands:
+      - export SONAR_SCANNER_VERSION=4.7.0.2747
+      - export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+      - curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
+      - unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+      - export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+      - export SONAR_SCANNER_OPTS="-server"
+      - sonar-scanner -D sonar.projectKey=Api-Allin -D sonar.sources=./src -D sonar.host.url=https://codefirst.iut.uca.fr/sonar
+
 
 ---
 
@@ -47,6 +63,8 @@ steps:
         from_secret: db_user
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
         from_secret: db_password
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_HOST:
+        from_secret: db_host
 
   - name: docker-image
     image: plugins/docker
