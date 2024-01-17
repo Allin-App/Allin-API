@@ -91,6 +91,8 @@ steps:
           from_secret: db_password
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_HOST:
         from_secret: db_host
+      CODEFIRST_CLIENTDRONE_ENV_SALT:
+        from_secret: SALT
       ADMINS: lucasevard,emrekartal,arthurvalin,lucasdelanier
     depends_on: [docker-image]
 
