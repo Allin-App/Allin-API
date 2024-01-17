@@ -4,7 +4,16 @@ import allin.model.User
 import org.mindrot.jbcrypt.BCrypt
 
 class CryptManager {
-    val salt=System.getenv().get("SALT")
+    val salt=addDollarsSecrets(System.getenv().get("SALT").toString())
+    // Cette fonction permet de remettre les $ que drone supprime dans les secrets drone
+    fun addDollarsSecrets(chaine: String): String {
+        val stringBuilder = StringBuilder(chaine)
+        stringBuilder.insert(0, '$')
+        stringBuilder.insert(3, '$')
+        stringBuilder.insert(6, '$')
+
+        return stringBuilder.toString()
+    }
     fun passwordCrypt(password : String): String {
         return BCrypt.hashpw(password,salt)
     }
