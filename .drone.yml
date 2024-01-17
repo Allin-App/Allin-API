@@ -63,8 +63,6 @@ steps:
         from_secret: db_user
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
         from_secret: db_password
-      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_HOST:
-        from_secret: db_host
 
   - name: docker-image
     image: plugins/docker
@@ -91,6 +89,8 @@ steps:
           from_secret: db_user
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD:
           from_secret: db_password
+      CODEFIRST_CLIENTDRONE_ENV_POSTGRES_HOST:
+        from_secret: db_host
       ADMINS: lucasevard,emrekartal,arthurvalin,lucasdelanier
     depends_on: [docker-image]
 
