@@ -6,7 +6,6 @@ import allin.model.User
 import allin.utils.Execute
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
-import org.ktorm.expression.SqlExpression
 import org.ktorm.schema.Table
 import org.ktorm.schema.double
 import org.ktorm.schema.int

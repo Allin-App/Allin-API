@@ -17,7 +17,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.ktorm.database.Database
 import java.util.*
 
 val RegexCheckerUser = AppConfig.regexChecker
@@ -34,7 +33,7 @@ fun Application.UserRouter() {
                     call.respond(HttpStatusCode.Forbidden, ApiMessage.InvalidMail)
                 }
                 val users = getUserToUserDTO()
-                users.find { it.username == tempUser.username || it.email == tempUser.email }?.let { user ->
+                users.find { it.username == tempUser.username || it.email == tempUser.email }?.let { _ ->
                     call.respond(HttpStatusCode.Conflict, ApiMessage.UserAlreadyExist)
                 } ?: run {
                     val user = User(

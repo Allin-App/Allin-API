@@ -43,7 +43,7 @@ fun Application.ParticipationRouter() {
                 hasToken { principal ->
                     val participationId = call.receive<String>()
                     participations.find { it.id == participationId }?.let { participation ->
-                        verifyUserFromToken(principal) { user, _ ->
+                        verifyUserFromToken(principal) { _, _ ->
                             // user.nbCoins += participation.stake
                             participations.remove(participation)
                             call.respond(HttpStatusCode.NoContent)

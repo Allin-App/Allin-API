@@ -4,15 +4,15 @@ import allin.model.User
 import org.mindrot.jbcrypt.BCrypt
 
 class CryptManager {
-    //val salt=BCrypt.gensalt()
+    val salt=System.getenv().get("SALT")
     fun passwordCrypt(password : String): String {
-        return BCrypt.hashpw(password,"\$2a\$10\$42wsdBeoLKaF6SM9oADONe")
+        return BCrypt.hashpw(password,salt)
     }
     fun passwordCrypt(user: User){
-        user.password=BCrypt.hashpw(user.password,"\$2a\$10\$42wsdBeoLKaF6SM9oADONe")
+        user.password=BCrypt.hashpw(user.password,salt)
     }
     fun passwordDecrypt(password: String, passwordClear: String): Boolean{
-        return BCrypt.hashpw(passwordClear,"\$2a\$10\$42wsdBeoLKaF6SM9oADONe")==password
+        return BCrypt.hashpw(passwordClear,salt)==password
     }
 
     fun CheckPassword(hashed: String, clear: String): Boolean{
