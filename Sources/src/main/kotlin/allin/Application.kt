@@ -22,7 +22,7 @@ val db_user=System.getenv().get("POSTGRES_USER")
 val db_password=System.getenv().get("POSTGRES_PASSWORD")
 val db_host=System.getenv().get("POSTGRES_HOST")
 
-val database = Database.connect("jdbc:postgresql://AllDev-postgresapi/$db_database", user = db_user, password = db_password)
+val database = Database.connect("jdbc:postgresql://$db_host/$db_database", user = db_user, password = db_password)
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
