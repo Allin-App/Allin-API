@@ -63,6 +63,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
 
     fun addUserEntity(user : User){
         database.insert(UsersEntity){
+            set(it.id,user.id)
             set(it.nbCoins,user.nbCoins)
             set(it.username,user.username)
             set(it.password,user.password)
