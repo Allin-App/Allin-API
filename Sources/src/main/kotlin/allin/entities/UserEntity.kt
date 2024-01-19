@@ -6,10 +6,9 @@ import allin.model.User
 import allin.utils.Execute
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
-import org.ktorm.schema.Table
-import org.ktorm.schema.double
-import org.ktorm.schema.int
-import org.ktorm.schema.varchar
+import org.ktorm.schema.*
+import java.util.*
+import java.util.UUID.fromString
 
 interface UserEntity : Entity<UserEntity> {
     val username: String
@@ -18,7 +17,7 @@ interface UserEntity : Entity<UserEntity> {
     var nbCoins: Double
 }
 object UsersEntity : Table<UserEntity>("utilisateur") {
-    val id = int("id").primaryKey()
+    val id = uuid("id").primaryKey()
     val username = varchar("username")
     val password = varchar("password")
     val nbCoins = double("coins")
@@ -63,7 +62,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
 
     fun addUserEntity(user : User){
         database.insert(UsersEntity){
-            set(it.id,user.id)
+            set(it.id,fromString(user.id))
             set(it.nbCoins,user.nbCoins)
             set(it.username,user.username)
             set(it.password,user.password)

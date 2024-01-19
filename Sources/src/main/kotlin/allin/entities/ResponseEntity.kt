@@ -27,8 +27,7 @@ object ResponsesEntity : Table<ResponseEntity>("response") {
         return database.from(ResponsesEntity)
             .select(response)
             .where { id eq idBet }
-            .map { it[response].toString() }
-            .toMutableList()
+            .map { it[response].toString() }.toMutableList()
     }
 
     fun addResponse(responses : MutableList<String>, idBet : UUID ) {
