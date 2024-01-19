@@ -27,6 +27,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     fun getUserToUserDTO(): MutableList<UserDTO> {
         return database.from(UsersEntity).select().map {
             row -> UserDTO(
+                row[id].toString(),
                 row[username].toString(),
                 row[email].toString(),
                 row[nbCoins]?:0.0,
@@ -36,7 +37,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     }
 
     fun createUserTable(){
-        val request="CREATE TABLE IF not exists utilisateur ( id SERIAL PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins double precision,email VARCHAR(255))"
+        val request="CREATE TABLE IF not exists utilisateur ( id uuid PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins double precision,email VARCHAR(255))"
         database.Execute(request)
     }
 
@@ -48,6 +49,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
             .map { row ->
                 Pair(
                     UserDTO(
+                        row[id].toString(),
                         row[username].toString(),
                         row[email].toString(),
                         row[nbCoins] ?: 0.0,

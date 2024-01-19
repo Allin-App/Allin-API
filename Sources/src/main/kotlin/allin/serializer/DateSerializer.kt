@@ -1,13 +1,18 @@
 package allin.serializer
 
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import java.sql.Timestamp
+import java.time.Instant
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+
 
 @Serializer(ZonedDateTime::class)
 object ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
@@ -23,5 +28,12 @@ object ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
     override fun deserialize(decoder: Decoder): ZonedDateTime {
         val dateString = decoder.decodeString()
         return ZonedDateTime.parse(dateString, formatter)
+    }
+    fun convertTimestampToZonedDateTime(ts: Instant?): ZonedDateTime {
+
+        println(ts.toString())
+
+        val zoneId = ZoneId.of("Asia/Kolkata")
+        return ZonedDateTime.ofInstant(ts, zoneId)
     }
 }

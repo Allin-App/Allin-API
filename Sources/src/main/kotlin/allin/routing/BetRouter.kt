@@ -1,5 +1,7 @@
 package allin.routing
 
+import allin.entities.BetsEntity.addBetEntity
+import allin.entities.BetsEntity.getBets
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -14,16 +16,19 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
 
-val bets = mutableListOf<Bet>()
+//val bets = mutableListOf<Bet>()
 val tokenManagerBet = AppConfig.tokenManager
 
 fun Application.BetRouter() {
     routing {
         route("/bets/add") {
+            authenticate {
             post {
+                hasToken { principal ->
                 val bet = call.receive<Bet>()
                 val id = UUID.randomUUID().toString()
-                val username = tokenManagerBet.getUsernameFromToken(bet.createdBy)
+                val username = tokenManagerBet.getUsernameFromToken(principal)
+                val bets = getBets()
                 bets.find { it.id == id }?.let {
                     call.respond(HttpStatusCode.Conflict, ApiMessage.BetAlreadyExist)
                 } ?: run {
@@ -37,15 +42,21 @@ fun Application.BetRouter() {
                         bet.response,
                         username
                     )
-                    bets.add(betWithId)
+                    //bets.add(betWithId)
+                    addBetEntity(betWithId)
                     call.respond(HttpStatusCode.Created, betWithId)
                 }
+                }
+
+            }
+
             }
         }
 
         route("/bets/gets") {
             get {
                 // if(bets.size>0)
+                val bets= getBets()
                 call.respond(HttpStatusCode.Accepted, bets.toList())
                 // else call.respond(HttpStatusCode.NoContent)
             }
@@ -53,6 +64,7 @@ fun Application.BetRouter() {
 
         route("/bets/get/{id}") {
             get {
+                val bets= getBets()
                 val id = call.parameters["id"] ?: ""
                 bets.find { it.id == id }?.let { bet ->
                     call.respond(HttpStatusCode.Accepted, bet)
@@ -63,6 +75,7 @@ fun Application.BetRouter() {
         route("/bets/delete") {
             post {
                 val idbet = call.receive<Map<String, String>>()["id"]
+                val bets= getBets()
                 bets.find { it.id == idbet }?.let { findbet ->
                     bets.remove(findbet)
                     call.respond(HttpStatusCode.Accepted, findbet)
@@ -72,6 +85,7 @@ fun Application.BetRouter() {
         route("bets/update") {
             post {
                 val updatedBetData = call.receive<UpdatedBetData>()
+                val bets= getBets()
                 bets.find { it.id == updatedBetData.id }?.let { findbet ->
                     findbet.endBet = updatedBetData.endBet
                     findbet.isPrivate = updatedBetData.isPrivate
@@ -83,6 +97,7 @@ fun Application.BetRouter() {
 
         authenticate {
             get("/bets/current") {
+                val bets= getBets()
                 hasToken { principal ->
                     verifyUserFromToken(principal) { user, _ ->
                         val bets = participations

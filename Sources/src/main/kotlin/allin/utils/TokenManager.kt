@@ -6,6 +6,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.config.*
 import java.util.*
 
@@ -70,9 +71,8 @@ class TokenManager private constructor(val config: HoconApplicationConfig) {
     fun getUserToken(user: User): String? = user.token
     fun getUserToken(user: UserDTO): String? = user.token
 
-    fun getUsernameFromToken(token: String): String {
-        val decodedJWT: DecodedJWT = JWT.decode(token)
-        return decodedJWT.getClaim("username").asString()
+    fun getUsernameFromToken(principal: JWTPrincipal): String {
+        return principal.payload.getClaim("username").asString()
     }
 
     companion object {
