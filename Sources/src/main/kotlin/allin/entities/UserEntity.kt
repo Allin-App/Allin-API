@@ -7,7 +7,6 @@ import allin.utils.Execute
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import org.ktorm.schema.*
-import java.util.*
 import java.util.UUID.fromString
 
 interface UserEntity : Entity<UserEntity> {
@@ -40,6 +39,11 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
         database.Execute(request)
     }
 
+    fun modifyCoins(user: String, cost : Int){
+        val request = "UPDATE utilisateur SET coins = coins - $cost WHERE username = '$user';"
+        database.Execute(request)
+
+    }
 
     fun getUserByUsernameAndPassword(login: String): Pair<UserDTO?, String?> {
         return database.from(UsersEntity)

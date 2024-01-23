@@ -3,6 +3,7 @@ package allin.routing
 import allin.entities.ParticipationsEntity.addParticipationEntity
 import allin.entities.ParticipationsEntity.deleteParticipation
 import allin.entities.ParticipationsEntity.getParticipationEntity
+import allin.entities.UsersEntity.modifyCoins
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -33,6 +34,7 @@ fun Application.ParticipationRouter() {
                                     stake = participation.stake
                                 )
                             )
+                            modifyCoins(user.username,participation.stake)
                             call.respond(HttpStatusCode.Created)
                         } else {
                             call.respond(HttpStatusCode.Forbidden, ApiMessage.NotEnoughCoins)
@@ -45,8 +47,6 @@ fun Application.ParticipationRouter() {
                     val participationId = call.receive<String>()
                     getParticipationEntity().find { it.id == participationId }?.let { participation ->
                         verifyUserFromToken(principal) { _, _ ->
-                            // user.nbCoins += participation.stake
-                            //participations.remove(participation)
                             deleteParticipation(participation)
                             call.respond(HttpStatusCode.NoContent)
                         }

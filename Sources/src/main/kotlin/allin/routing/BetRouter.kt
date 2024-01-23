@@ -2,7 +2,6 @@ package allin.routing
 
 import allin.entities.BetsEntity.addBetEntity
 import allin.entities.BetsEntity.getBets
-import allin.entities.ParticipationsEntity
 import allin.entities.ParticipationsEntity.getParticipationEntity
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken

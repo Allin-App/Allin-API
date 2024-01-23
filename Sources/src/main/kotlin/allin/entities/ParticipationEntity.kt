@@ -39,6 +39,36 @@ object ParticipationsEntity : Table<BetEntity>("participation") {
         }
     }
 
+    fun getParticipationEntityFromBetId(betid: String): MutableList<Participation> {
+        return database.from(ParticipationsEntity)
+            .select()
+            .where { betId eq UUID.fromString(betid) }
+            .map { row ->
+                Participation(
+                    row[id].toString(),
+                    row[betId].toString(),
+                    row[username].toString(),
+                    row[answer].toString(),
+                    row[stake] ?: 0,
+                )
+            }.toMutableList()
+    }
+
+    fun getParticipationEntityFromUserId(user: String, betid: String): MutableList<Participation> {
+        return database.from(ParticipationsEntity)
+            .select()
+            .where { (betId eq UUID.fromString(betid)) and (username eq user) }
+            .map { row ->
+                Participation(
+                    row[id].toString(),
+                    row[betId].toString(),
+                    row[username].toString(),
+                    row[answer].toString(),
+                    row[stake] ?: 0,
+                )
+            }.toMutableList()
+    }
+
     fun getParticipationEntity(): MutableList<Participation> {
         return database.from(ParticipationsEntity).select().map {
             row -> Participation(
