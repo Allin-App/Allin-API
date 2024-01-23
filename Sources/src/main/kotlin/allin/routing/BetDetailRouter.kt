@@ -6,7 +6,6 @@ import allin.entities.ParticipationsEntity.getParticipationEntityFromUserId
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.BetDetail
-import allin.model.Participation
 import allin.model.getBetAnswerDetail
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -24,22 +23,22 @@ fun Application.BetDetailRouter() {
                         val participations = getParticipationEntityFromBetId(id)
                         val selectedBet = getBets().find { it.id == id }
                         if (selectedBet != null) {
-                                call.respond(
-                                    HttpStatusCode.Accepted,
-                                    BetDetail(
-                                        selectedBet,
-                                        getBetAnswerDetail(participations),
-                                        participations.toList(),
-                                        getParticipationEntityFromUserId(user.username,id).lastOrNull()
-                                    )
+                            call.respond(
+                                HttpStatusCode.Accepted,
+                                BetDetail(
+                                    selectedBet,
+                                    getBetAnswerDetail(selectedBet, participations),
+                                    participations.toList(),
+                                    getParticipationEntityFromUserId(user.username, id).lastOrNull()
                                 )
-                            } else {
-                                call.respond(HttpStatusCode.NotFound, "Bet not found")
-                            }
+                            )
+                        } else {
+                            call.respond(HttpStatusCode.NotFound, "Bet not found")
                         }
                     }
                 }
             }
         }
     }
+}
 

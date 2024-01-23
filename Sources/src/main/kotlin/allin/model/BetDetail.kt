@@ -19,16 +19,16 @@ data class BetDetail(
     val userParticipation: Participation? // La participation du User current
 )
 
-fun getBetAnswerDetail(participations: List<Participation>): List<BetAnswerDetail> {
-    val groupedParticipations = participations.groupBy { it.answer }
-    val betAnswerDetails = mutableListOf<BetAnswerDetail>()
-    for ((answer, participationList) in groupedParticipations) {
-        val totalStakes = participationList.sumBy { it.stake }
-        val totalParticipants = participationList.size
-        val highestStake = participationList.maxByOrNull { it.stake }?.stake ?: 0
-        val odds = 1.0f
-        val betAnswerDetail = BetAnswerDetail(answer, totalStakes, totalParticipants, highestStake, odds)
-        betAnswerDetails.add(betAnswerDetail)
+fun getBetAnswerDetail(bet: Bet, participations: List<Participation>): List<BetAnswerDetail> {
+    return bet.response.map { response ->
+        val responseParticipations = participations.filter { it.answer == response }
+        BetAnswerDetail(
+            response = response,
+            totalStakes = responseParticipations.sumOf { it.stake },
+            totalParticipants = responseParticipations.size,
+            highestStake = responseParticipations.maxOfOrNull { it.stake } ?: 0,
+            odds = if (participations.isEmpty()) 1f else responseParticipations.size / participations.size.toFloat()
+        )
     }
-    return betAnswerDetails
+
 }
