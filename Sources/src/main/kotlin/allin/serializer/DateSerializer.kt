@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
 
 @Serializer(ZonedDateTime::class)
 object ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
-    private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
+    private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z")
 
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("ZonedDateTime", PrimitiveKind.STRING)

@@ -17,7 +17,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
 
-//val bets = mutableListOf<Bet>()
 val tokenManagerBet = AppConfig.tokenManager
 
 fun Application.BetRouter() {
@@ -43,7 +42,6 @@ fun Application.BetRouter() {
                         bet.response,
                         username
                     )
-                    //bets.add(betWithId)
                     addBetEntity(betWithId)
                     call.respond(HttpStatusCode.Created, betWithId)
                 }
