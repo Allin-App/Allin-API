@@ -2,6 +2,8 @@ package allin.routing
 
 import allin.entities.BetsEntity.addBetEntity
 import allin.entities.BetsEntity.getBets
+import allin.entities.ParticipationsEntity
+import allin.entities.ParticipationsEntity.getParticipationEntity
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -100,7 +102,7 @@ fun Application.BetRouter() {
                 val bets= getBets()
                 hasToken { principal ->
                     verifyUserFromToken(principal) { user, _ ->
-                        val bets = participations
+                        val bets = getParticipationEntity()
                             .filter { it.username == user.username }
                             .mapNotNull { itParticipation -> bets.find { it.id == itParticipation.betId } }
                         call.respond(HttpStatusCode.OK, bets)

@@ -1,9 +1,6 @@
 package allin
 
-import allin.entities.BetEntity
-import allin.entities.BetsEntity
-import allin.entities.ResponsesEntity
-import allin.entities.UsersEntity
+import allin.entities.*
 import allin.routing.BasicRouting
 import allin.routing.BetRouter
 import allin.routing.ParticipationRouter
@@ -57,4 +54,5 @@ private fun Application.extracted() {
     UsersEntity.createUserTable()
     BetsEntity.createBetsTable()
     ResponsesEntity.createResponseTable()
+    ParticipationsEntity.createParticipationTable()
 }
