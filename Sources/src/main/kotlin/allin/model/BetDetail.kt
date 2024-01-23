@@ -15,7 +15,7 @@ data class BetAnswerDetail(
 data class BetDetail(
     val bet: Bet, // Le Bet
     val answers: List<BetAnswerDetail>?, // Pour chaque réponse possible du bet les détails
-    val participations: List<Participation>, // La liste des participations
+    val participations: List<Participation>?, // La liste des participations
     val userParticipation: Participation? // La participation du User current
 )
 

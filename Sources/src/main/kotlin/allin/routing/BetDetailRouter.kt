@@ -6,6 +6,7 @@ import allin.entities.ParticipationsEntity.getParticipationEntityFromUserId
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.BetDetail
+import allin.model.Participation
 import allin.model.getBetAnswerDetail
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -16,7 +17,7 @@ import io.ktor.server.routing.*
 fun Application.BetDetailRouter() {
     routing {
         authenticate {
-            get("/BetDetail/get/{id}") {
+            get("/betdetail/get/{id}") {
                 hasToken { principal ->
                     verifyUserFromToken(principal) { user, _ ->
                         val id = call.parameters["id"].toString()
@@ -29,7 +30,7 @@ fun Application.BetDetailRouter() {
                                         selectedBet,
                                         getBetAnswerDetail(participations),
                                         participations.toList(),
-                                        getParticipationEntityFromUserId(user.username,id).last()
+                                        getParticipationEntityFromUserId(user.username,id).lastOrNull()
                                     )
                                 )
                             } else {
