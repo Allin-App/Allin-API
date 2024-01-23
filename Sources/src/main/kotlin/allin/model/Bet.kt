@@ -1,5 +1,6 @@
 package allin.model
 
+import allin.serializer.UUIDSerializer
 import allin.serializer.ZonedDateTimeSerializer
 import kotlinx.serialization.Serializable
 import java.time.ZonedDateTime

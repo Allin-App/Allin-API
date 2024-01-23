@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter
 
 @Serializer(ZonedDateTime::class)
 object ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
-    private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_ZONED_DATE_TIME
+    private val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z")
 
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("ZonedDateTime", PrimitiveKind.STRING)
@@ -28,12 +28,5 @@ object ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
     override fun deserialize(decoder: Decoder): ZonedDateTime {
         val dateString = decoder.decodeString()
         return ZonedDateTime.parse(dateString, formatter)
-    }
-    fun convertTimestampToZonedDateTime(ts: Instant?): ZonedDateTime {
-
-        println(ts.toString())
-
-        val zoneId = ZoneId.of("Asia/Kolkata")
-        return ZonedDateTime.ofInstant(ts, zoneId)
     }
 }
