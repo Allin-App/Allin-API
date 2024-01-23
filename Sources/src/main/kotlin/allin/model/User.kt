@@ -1,4 +1,4 @@
-package allin.model
+    package allin.model
 
 import kotlinx.serialization.Serializable
 

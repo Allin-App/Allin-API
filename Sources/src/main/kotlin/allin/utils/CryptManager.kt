@@ -18,7 +18,6 @@ class CryptManager {
         return BCrypt.hashpw(password,salt)
     }
     fun passwordCrypt(user: User){
-        println(salt)
         user.password=BCrypt.hashpw(user.password,salt)
     }
     fun passwordDecrypt(password: String, passwordClear: String): Boolean{
