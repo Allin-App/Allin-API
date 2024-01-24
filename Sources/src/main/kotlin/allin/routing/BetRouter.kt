@@ -2,6 +2,7 @@ package allin.routing
 
 import allin.entities.BetsEntity.addBetEntity
 import allin.entities.BetsEntity.getBets
+import allin.entities.ParticipationsEntity.getParticipationEntity
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -16,7 +17,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
 
-//val bets = mutableListOf<Bet>()
 val tokenManagerBet = AppConfig.tokenManager
 
 fun Application.BetRouter() {
@@ -42,7 +42,6 @@ fun Application.BetRouter() {
                         bet.response,
                         username
                     )
-                    //bets.add(betWithId)
                     addBetEntity(betWithId)
                     call.respond(HttpStatusCode.Created, betWithId)
                 }
@@ -100,7 +99,7 @@ fun Application.BetRouter() {
                 val bets= getBets()
                 hasToken { principal ->
                     verifyUserFromToken(principal) { user, _ ->
-                        val bets = participations
+                        val bets = getParticipationEntity()
                             .filter { it.username == user.username }
                             .mapNotNull { itParticipation -> bets.find { it.id == itParticipation.betId } }
                         call.respond(HttpStatusCode.OK, bets)

@@ -1,13 +1,7 @@
 package allin
 
-import allin.entities.BetEntity
-import allin.entities.BetsEntity
-import allin.entities.ResponsesEntity
-import allin.entities.UsersEntity
-import allin.routing.BasicRouting
-import allin.routing.BetRouter
-import allin.routing.ParticipationRouter
-import allin.routing.UserRouter
+import allin.entities.*
+import allin.routing.*
 import allin.utils.*
 import com.typesafe.config.ConfigFactory
 import io.ktor.serialization.kotlinx.json.*
@@ -54,7 +48,9 @@ private fun Application.extracted() {
     UserRouter()
     BetRouter()
     ParticipationRouter()
+    BetDetailRouter()
     UsersEntity.createUserTable()
     BetsEntity.createBetsTable()
     ResponsesEntity.createResponseTable()
+    ParticipationsEntity.createParticipationTable()
 }
