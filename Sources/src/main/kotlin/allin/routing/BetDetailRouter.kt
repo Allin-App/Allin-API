@@ -1,8 +1,6 @@
 package allin.routing
 
-import allin.entities.BetsEntity.getBets
-import allin.entities.ParticipationsEntity.getParticipationEntityFromBetId
-import allin.entities.ParticipationsEntity.getParticipationEntityFromUserId
+import allin.dataSource
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.BetDetail
@@ -14,14 +12,18 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.BetDetailRouter() {
+    val userDataSource = this.dataSource.userDataSource
+    val betDataSource = this.dataSource.betDataSource
+    val participationDataSource = this.dataSource.participationDataSource
+
     routing {
         authenticate {
             get("/betdetail/get/{id}") {
                 hasToken { principal ->
-                    verifyUserFromToken(principal) { user, _ ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
                         val id = call.parameters["id"].toString()
-                        val participations = getParticipationEntityFromBetId(id)
-                        val selectedBet = getBets().find { it.id == id }
+                        val participations = participationDataSource.getParticipationFromBetId(id)
+                        val selectedBet = betDataSource.getBetById(id)
                         if (selectedBet != null) {
                             call.respond(
                                 HttpStatusCode.Accepted,
@@ -29,7 +31,7 @@ fun Application.BetDetailRouter() {
                                     selectedBet,
                                     getBetAnswerDetail(selectedBet, participations),
                                     participations.toList(),
-                                    getParticipationEntityFromUserId(user.username, id).lastOrNull()
+                                    participationDataSource.getParticipationFromUserId(user.username, id).lastOrNull()
                                 )
                             )
                         } else {

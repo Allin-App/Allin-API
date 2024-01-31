@@ -1,8 +1,10 @@
 package allin
 
-import allin.entities.*
+import allin.data.AllInDataSource
+import allin.data.mock.MockDataSource
+import allin.data.postgres.PostgresDataSource
 import allin.routing.*
-import allin.utils.*
+import allin.utils.TokenManager
 import com.typesafe.config.ConfigFactory
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -12,14 +14,16 @@ import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
-import org.ktorm.database.Database
 
-val db_database=System.getenv().get("POSTGRES_DB")
-val db_user=System.getenv().get("POSTGRES_USER")
-val db_password=System.getenv().get("POSTGRES_PASSWORD")
-val db_host=System.getenv().get("POSTGRES_HOST")
+val data_source = System.getenv()["DATA_SOURCE"]
 
-val database = Database.connect("jdbc:postgresql://$db_host/$db_database", user = db_user, password = db_password)
+private val allInDataSource: AllInDataSource = when (data_source) {
+    "mock" -> MockDataSource()
+    "postgres" -> PostgresDataSource()
+    else -> MockDataSource()
+}
+val Application.dataSource: AllInDataSource
+    get() = allInDataSource
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -49,8 +53,4 @@ private fun Application.extracted() {
     BetRouter()
     ParticipationRouter()
     BetDetailRouter()
-    UsersEntity.createUserTable()
-    BetsEntity.createBetsTable()
-    ResponsesEntity.createResponseTable()
-    ParticipationsEntity.createParticipationTable()
 }

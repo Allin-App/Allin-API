@@ -1,8 +1,5 @@
 package allin.entities
 
-import allin.database
-import allin.utils.Execute
-import org.ktorm.dsl.*
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Table
 import org.ktorm.schema.uuid
@@ -18,6 +15,8 @@ interface ResponseEntity : Entity<ResponseEntity> {
 object ResponsesEntity : Table<ResponseEntity>("response") {
     val id = uuid("id").primaryKey()
     val response = varchar("response").primaryKey()
+
+    /*
     fun createResponseTable(){
         val request="CREATE TABLE IF NOT EXISTS response (id UUID,response VARCHAR(250),CONSTRAINT pk_response_id PRIMARY KEY (id,response));"
         database.Execute(request)
@@ -38,4 +37,5 @@ object ResponsesEntity : Table<ResponseEntity>("response") {
             }
         }
     }
+    */
 }

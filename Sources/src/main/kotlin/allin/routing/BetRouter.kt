@@ -1,10 +1,6 @@
 package allin.routing
 
-import allin.entities.BetsEntity.addBetEntity
-import allin.entities.BetsEntity.getBets
-import allin.entities.BetsEntity.getBetsNotFinished
-import allin.entities.ParticipationsEntity.getParticipationEntity
-import allin.entities.ParticipationsEntity.getParticipationEntityFromUserId
+import allin.dataSource
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -22,34 +18,37 @@ import java.util.*
 val tokenManagerBet = AppConfig.tokenManager
 
 fun Application.BetRouter() {
+    val userDataSource = this.dataSource.userDataSource
+    val betDataSource = this.dataSource.betDataSource
+    val participationDataSource = this.dataSource.participationDataSource
+
     routing {
         route("/bets/add") {
             authenticate {
-            post {
-                hasToken { principal ->
-                val bet = call.receive<Bet>()
-                val id = UUID.randomUUID().toString()
-                val username = tokenManagerBet.getUsernameFromToken(principal)
-                val bets = getBets()
-                bets.find { it.id == id }?.let {
-                    call.respond(HttpStatusCode.Conflict, ApiMessage.BetAlreadyExist)
-                } ?: run {
-                    val betWithId = Bet(
-                        id,
-                        bet.theme,
-                        bet.sentenceBet,
-                        bet.endRegistration,
-                        bet.endBet,
-                        bet.isPrivate,
-                        bet.response,
-                        username
-                    )
-                    addBetEntity(betWithId)
-                    call.respond(HttpStatusCode.Created, betWithId)
-                }
-                }
+                post {
+                    hasToken { principal ->
+                        val bet = call.receive<Bet>()
+                        val id = UUID.randomUUID().toString()
+                        val username = tokenManagerBet.getUsernameFromToken(principal)
+                        betDataSource.getBetById(id)?.let {
+                            call.respond(HttpStatusCode.Conflict, ApiMessage.BetAlreadyExist)
+                        } ?: run {
+                            val betWithId = Bet(
+                                id,
+                                bet.theme,
+                                bet.sentenceBet,
+                                bet.endRegistration,
+                                bet.endBet,
+                                bet.isPrivate,
+                                bet.response,
+                                username
+                            )
+                            betDataSource.addBet(betWithId)
+                            call.respond(HttpStatusCode.Created, betWithId)
+                        }
+                    }
 
-            }
+                }
 
             }
         }
@@ -57,17 +56,15 @@ fun Application.BetRouter() {
         route("/bets/gets") {
             get {
                 // if(bets.size>0)
-                val bets= getBets()
-                call.respond(HttpStatusCode.Accepted, bets.toList())
+                call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets())
                 // else call.respond(HttpStatusCode.NoContent)
             }
         }
 
         route("/bets/get/{id}") {
             get {
-                val bets= getBets()
                 val id = call.parameters["id"] ?: ""
-                bets.find { it.id == id }?.let { bet ->
+                betDataSource.getBetById(id)?.let { bet ->
                     call.respond(HttpStatusCode.Accepted, bet)
                 } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
             }
@@ -75,35 +72,35 @@ fun Application.BetRouter() {
 
         route("/bets/delete") {
             post {
-                val idbet = call.receive<Map<String, String>>()["id"]
-                val bets= getBets()
-                bets.find { it.id == idbet }?.let { findbet ->
-                    bets.remove(findbet)
-                    call.respond(HttpStatusCode.Accepted, findbet)
-                } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
+                val id = call.receive<Map<String, String>>()["id"] ?: ""
+                if (betDataSource.removeBet(id)) {
+                    call.respond(HttpStatusCode.Accepted)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
+                }
+
             }
         }
         route("bets/update") {
             post {
                 val updatedBetData = call.receive<UpdatedBetData>()
-                val bets= getBets()
-                bets.find { it.id == updatedBetData.id }?.let { findbet ->
-                    findbet.endBet = updatedBetData.endBet
-                    findbet.isPrivate = updatedBetData.isPrivate
-                    findbet.response = updatedBetData.response
-                    call.respond(HttpStatusCode.Accepted, findbet)
-                } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
+                if (betDataSource.updateBet(updatedBetData)) {
+                    call.respond(HttpStatusCode.Accepted)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
+                }
             }
         }
 
         authenticate {
             get("/bets/current") {
                 hasToken { principal ->
-                    verifyUserFromToken(principal) { user, _ ->
-                        val currentBets = getBetsNotFinished()
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        val currentBets = betDataSource.getBetsNotFinished()
                             .filter { bet ->
-                                val userParticipation = getParticipationEntityFromUserId(user.username, bet.id)
-                                userParticipation.isNotEmpty() || bet.createdBy == user.username
+                                val userParticipation =
+                                    participationDataSource.getParticipationFromUserId(user.username, bet.id)
+                                userParticipation.isNotEmpty()
                             }
 
                         call.respond(HttpStatusCode.OK, currentBets)
