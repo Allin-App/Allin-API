@@ -1,9 +1,9 @@
-    package allin.model
+package allin.model
 
 import kotlinx.serialization.Serializable
+import kotlin.random.Random
 
-
-@Serializable
+    @Serializable
 data class User(
     val id: String,
     val username: String,
@@ -25,3 +25,7 @@ data class CheckUser(
     val login: String,
     val password: String
 )
+
+    fun getDailyGift() : Int{
+        return Random.nextInt(10,150)
+    }

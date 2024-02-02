@@ -4,9 +4,12 @@ import allin.database
 import allin.dto.UserDTO
 import allin.model.User
 import allin.utils.Execute
+import io.ktor.util.date.*
+import org.h2.util.DateTimeUtils.currentTimestamp
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import org.ktorm.schema.*
+import java.time.Duration
 import java.util.*
 import java.util.UUID.fromString
 
@@ -22,6 +25,8 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     val password = varchar("password")
     val nbCoins = double("coins")
     val email = varchar("email")
+    val lastGift = varchar("lastgift")
+
 
     fun getUserToUserDTO(): MutableList<UserDTO> {
         return database.from(UsersEntity).select().map {
@@ -36,7 +41,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     }
 
     fun createUserTable(){
-        val request="CREATE TABLE IF not exists utilisateur ( id uuid PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins double precision,email VARCHAR(255))"
+        val request="CREATE TABLE IF not exists utilisateur ( id uuid PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins double precision,email VARCHAR(255), lastgift timestamp)"
         database.Execute(request)
     }
 
@@ -74,6 +79,18 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
             it.username eq username
         }
         return deletedCount > 0
+    }
+
+    fun canHaveDailyGift(username: String): Boolean {
+        val request = "SELECT CASE WHEN lastgift IS NULL THEN TRUE ELSE lastgift < current_timestamp - interval '1 day' END AS can_have_daily_gift, " +
+                "CASE WHEN lastgift IS NULL THEN null ELSE current_timestamp - lastgift END AS time_remaining " +
+                "FROM utilisateur WHERE username = '$username';"
+        val returnCode= database.Execute(request)
+
+        if(returnCode?.next().toString()=="true"){
+            return true
+        }
+        return false
     }
 }
 
