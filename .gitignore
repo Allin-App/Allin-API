@@ -36,3 +36,5 @@ out/
 .vscode/
 
 !**/src/target/**
+**/src/target/**
+/src/target

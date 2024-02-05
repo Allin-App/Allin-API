@@ -1,6 +1,5 @@
 package allin.utils
 
-import allin.database
 import org.ktorm.database.Database
 import java.sql.ResultSet
 
@@ -20,9 +19,9 @@ fun Database.ExecuteWithResult(request: String): ResultSet? {
     return null
 }
 
-fun Database.Execute(request: String){
-    if(!request.isNullOrEmpty())
-        database.useTransaction {
+fun Database.Execute(request: String) {
+    if (request.isNotEmpty())
+        this.useTransaction {
             val connection = it.connection
             connection.prepareStatement(request).execute()
             connection.commit()

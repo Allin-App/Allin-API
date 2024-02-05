@@ -1,9 +1,6 @@
 package allin.routing
 
-import allin.entities.ParticipationsEntity.addParticipationEntity
-import allin.entities.ParticipationsEntity.deleteParticipation
-import allin.entities.ParticipationsEntity.getParticipationEntity
-import allin.entities.UsersEntity.modifyCoins
+import allin.dataSource
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -17,15 +14,20 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
 
+
 fun Application.ParticipationRouter() {
+
+    val userDataSource = this.dataSource.userDataSource
+    val participationDataSource = this.dataSource.participationDataSource
+
     routing {
         authenticate {
             post("/participations/add") {
                 hasToken { principal ->
                     val participation = call.receive<ParticipationRequest>()
-                    verifyUserFromToken(principal) { user, _ ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
                         if (user.nbCoins >= participation.stake) {
-                            addParticipationEntity(
+                            participationDataSource.addParticipation(
                                 Participation(
                                     id = UUID.randomUUID().toString(),
                                     betId = participation.betId,
@@ -34,7 +36,9 @@ fun Application.ParticipationRouter() {
                                     stake = participation.stake
                                 )
                             )
-                            modifyCoins(user.username,participation.stake)
+
+                            userDataSource.modifyUserCoins(username = user.username, amount = participation.stake)
+
                             call.respond(HttpStatusCode.Created)
                         } else {
                             call.respond(HttpStatusCode.Forbidden, ApiMessage.NotEnoughCoins)
@@ -43,14 +47,13 @@ fun Application.ParticipationRouter() {
                 }
             }
             delete("/participations/delete") {
-                hasToken { principal ->
+                hasToken {
                     val participationId = call.receive<String>()
-                    getParticipationEntity().find { it.id == participationId }?.let { participation ->
-                        verifyUserFromToken(principal) { _, _ ->
-                            deleteParticipation(participation)
-                            call.respond(HttpStatusCode.NoContent)
-                        }
-                    } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.ParticipationNotFound)
+                    if (participationDataSource.deleteParticipation(participationId)) {
+                        call.respond(HttpStatusCode.NoContent)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, ApiMessage.ParticipationNotFound)
+                    }
                 }
             }
         }

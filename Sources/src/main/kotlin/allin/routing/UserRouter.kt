@@ -1,11 +1,6 @@
 package allin.routing
 
-import allin.entities.UsersEntity.addCoinByUsername
-import allin.entities.UsersEntity.addUserEntity
-import allin.entities.UsersEntity.canHaveDailyGift
-import allin.entities.UsersEntity.deleteUserByUsername
-import allin.entities.UsersEntity.getUserByUsernameAndPassword
-import allin.entities.UsersEntity.getUserToUserDTO
+import allin.dataSource
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.*
@@ -22,7 +17,11 @@ val RegexCheckerUser = AppConfig.regexChecker
 val CryptManagerUser = AppConfig.cryptManager
 val tokenManagerUser = AppConfig.tokenManager
 const val DEFAULT_COINS = 500
+
+
 fun Application.UserRouter() {
+
+    val userDataSource = this.dataSource.userDataSource
 
     routing {
         route("/users/register") {
@@ -31,30 +30,29 @@ fun Application.UserRouter() {
                 if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
                     call.respond(HttpStatusCode.Forbidden, ApiMessage.InvalidMail)
                 }
-                val users = getUserToUserDTO()
-                users.find { it.username == tempUser.username || it.email == tempUser.email }?.let { _ ->
+                if (userDataSource.userExists(tempUser.username, tempUser.email)) {
                     call.respond(HttpStatusCode.Conflict, ApiMessage.UserAlreadyExist)
-                } ?: run {
-                    val user = User(
-                        id = UUID.randomUUID().toString(),
-                        username = tempUser.username,
-                        email = tempUser.email,
-                        password = tempUser.password,
-                        nbCoins = DEFAULT_COINS,
-                        token = null
-                    )
-                    CryptManagerUser.passwordCrypt(user)
-                    user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
-                    addUserEntity(user)
-                    call.respond(HttpStatusCode.Created, user)
                 }
+
+                val user = User(
+                    id = UUID.randomUUID().toString(),
+                    username = tempUser.username,
+                    email = tempUser.email,
+                    password = tempUser.password,
+                    nbCoins = DEFAULT_COINS,
+                    token = null
+                )
+                CryptManagerUser.passwordCrypt(user)
+                user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
+                userDataSource.addUser(user)
+                call.respond(HttpStatusCode.Created, user)
             }
         }
 
         route("/users/login") {
             post {
                 val checkUser = call.receive<CheckUser>()
-                val user = getUserByUsernameAndPassword(checkUser.login)
+                val user = userDataSource.getUserByUsername(checkUser.login)
                 if (CryptManagerUser.passwordDecrypt(user.second ?: "", checkUser.password)) {
                     user.first?.let { userDtoWithToken ->
                         userDtoWithToken.token = tokenManagerUser.generateOrReplaceJWTToken(userDtoWithToken)
@@ -69,11 +67,10 @@ fun Application.UserRouter() {
         authenticate {
             post("/users/delete") {
                 hasToken { principal ->
-                    verifyUserFromToken(principal) { _, password ->
+                    verifyUserFromToken(userDataSource, principal) { _, password ->
                         val checkUser = call.receive<CheckUser>()
-
                         if (CryptManagerUser.passwordDecrypt(password, checkUser.password)) {
-                            if (!deleteUserByUsername(checkUser.login)) {
+                            if (!userDataSource.deleteUser(checkUser.login)) {
                                 call.respond(HttpStatusCode.InternalServerError, "This user can't be delete now !")
                             }
                             call.respond(HttpStatusCode.Accepted, password)
@@ -87,7 +84,7 @@ fun Application.UserRouter() {
 
             get("/users/token") {
                 hasToken { principal ->
-                    verifyUserFromToken(principal) { userDto, _ ->
+                    verifyUserFromToken(userDataSource, principal) { userDto, _ ->
                         call.respond(HttpStatusCode.OK, userDto)
                     }
                 }

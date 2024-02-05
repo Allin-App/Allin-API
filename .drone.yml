@@ -52,7 +52,7 @@ steps:
       IMAGENAME: postgres:latest
       CONTAINERNAME: postgresapi
       COMMAND: create
-      OVERWRITE: false
+      OVERWRITE: true
       PRIVATE: false
       ADMINS: lucasevard,emrekartal,arthurvalin,lucasdelanier
       CODEFIRST_CLIENTDRONE_ENV_POSTGRES_ROOT_PASSWORD:
