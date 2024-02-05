@@ -4,7 +4,6 @@ import allin.data.UserDataSource
 import allin.dto.UserDTO
 import allin.entities.UsersEntity
 import allin.model.User
-import allin.utils.Execute
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.util.*
@@ -52,7 +51,9 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
     }
 
     override fun modifyUserCoins(username: String, amount: Int) {
-        val request = "UPDATE utilisateur SET coins = coins - $amount WHERE username = '$username';"
-        database.Execute(request)
+        database.update(UsersEntity) {
+            set(UsersEntity.nbCoins, UsersEntity.nbCoins - amount)
+            where { UsersEntity.username eq username }
+        }
     }
 }

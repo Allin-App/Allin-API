@@ -54,9 +54,7 @@ private fun Application.extracted() {
             }
         }
     }
-    install(ContentNegotiation) {
-        json()
-    }
+    install(ContentNegotiation) { json() }
 
     BasicRouting()
     UserRouter()

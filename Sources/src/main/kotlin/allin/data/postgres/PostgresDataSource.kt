@@ -23,10 +23,51 @@ class PostgresDataSource : AllInDataSource() {
             password = dbPassword
         )
 
-        database.Execute("CREATE TABLE IF not exists utilisateur ( id uuid PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins double precision,email VARCHAR(255))")
-        database.Execute("CREATE TABLE IF not exists bet ( id uuid PRIMARY KEY, theme VARCHAR(255), endregistration timestamp,endbet timestamp,sentencebet varchar(500),isprivate boolean, createdby varchar(250))")
-        database.Execute("CREATE TABLE IF NOT EXISTS participation (id uuid PRIMARY KEY,bet uuid,username varchar(250),answer varchar(250),stake int);")
-        database.Execute("CREATE TABLE IF NOT EXISTS response (id UUID,response VARCHAR(250),CONSTRAINT pk_response_id PRIMARY KEY (id,response));")
+        database.Execute(
+            """
+            CREATE TABLE IF not exists utilisateur ( 
+                id uuid PRIMARY KEY, 
+                username VARCHAR(255), 
+                password VARCHAR(255),
+                coins double precision,
+                email VARCHAR(255)
+            )""".trimIndent()
+        )
+
+        database.Execute(
+            """
+            CREATE TABLE IF not exists bet (
+                id uuid PRIMARY KEY, 
+                theme VARCHAR(255), 
+                endregistration timestamp,
+                endbet timestamp,
+                sentencebet varchar(500),
+                isprivate boolean, 
+                createdby varchar(250),
+                status varchar(20),
+                type varchar(20)
+            )""".trimIndent()
+        )
+
+        database.Execute(
+            """
+            CREATE TABLE IF NOT EXISTS participation (
+                id uuid PRIMARY KEY,
+                bet uuid,
+                username varchar(250),
+                answer varchar(250),
+                stake int
+            )""".trimIndent()
+        )
+
+        database.Execute(
+            """
+            CREATE TABLE IF NOT EXISTS response (
+                id UUID,
+                response VARCHAR(250),
+                CONSTRAINT pk_response_id PRIMARY KEY (id,response)
+            )""".trimIndent()
+        )
     }
 
     override val userDataSource: UserDataSource = PostgresUserDataSource(database)
