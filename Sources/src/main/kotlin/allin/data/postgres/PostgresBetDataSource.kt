@@ -70,6 +70,8 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             set(it.theme, bet.theme)
             set(it.isPrivate, bet.isPrivate)
             set(it.createdBy, bet.createdBy)
+            set(it.status, bet.status)
+            set(it.theme, bet.theme)
         }
 
         if (bet.type == BetType.CUSTOM) {
