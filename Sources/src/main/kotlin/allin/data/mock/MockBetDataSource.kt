@@ -29,8 +29,8 @@ class MockBetDataSource : BetDataSource {
 
     override fun updateBetStatuses(date: ZonedDateTime) {
         bets.forEachIndexed { idx, bet ->
-            if (bet.endRegistration >= date) {
-                if (bet.endBet >= date) {
+            if (date >= bet.endRegistration) {
+                if (date >= bet.endBet) {
                     bets[idx] = bet.copy(status = BetStatus.WAITING)
                 } else {
                     bets[idx] = bet.copy(status = BetStatus.CLOSING)

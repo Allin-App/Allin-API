@@ -7,6 +7,7 @@ import allin.routing.*
 import allin.utils.TokenManager
 import allin.utils.kronJob
 import com.typesafe.config.ConfigFactory
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -14,7 +15,6 @@ import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
-import kotlinx.serialization.json.Json
 import java.time.ZonedDateTime
 import kotlin.time.ExperimentalTime
 import kotlin.time.minutes
@@ -32,13 +32,6 @@ private val allInDataSource: AllInDataSource = when (data_source) {
 val Application.dataSource: AllInDataSource
     get() = allInDataSource
 
-
-val json by lazy {
-    Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
-}
 
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
@@ -62,7 +55,7 @@ private fun Application.extracted() {
         }
     }
     install(ContentNegotiation) {
-        json
+        json()
     }
 
     BasicRouting()

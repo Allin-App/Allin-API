@@ -97,16 +97,16 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
         database.update(BetsEntity) {
             set(BetsEntity.status, BetStatus.WAITING)
             where {
-                (BetsEntity.endRegistration greaterEq date.toInstant()) and
-                        (BetsEntity.endBet less date.toInstant())
+                (date.toInstant() greaterEq BetsEntity.endRegistration) and
+                        (date.toInstant() less BetsEntity.endBet)
             }
         }
 
         database.update(BetsEntity) {
             set(BetsEntity.status, BetStatus.CLOSING)
             where {
-                (BetsEntity.endRegistration greaterEq date.toInstant()) and
-                        (BetsEntity.endBet greaterEq date.toInstant())
+                (date.toInstant() greaterEq BetsEntity.endRegistration) and
+                        (date.toInstant() greaterEq BetsEntity.endBet)
             }
         }
     }
