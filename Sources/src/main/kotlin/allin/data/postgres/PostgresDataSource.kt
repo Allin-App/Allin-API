@@ -44,8 +44,8 @@ class PostgresDataSource : AllInDataSource() {
                 sentencebet varchar(500),
                 isprivate boolean, 
                 createdby varchar(250),
-                status varchar(20),
-                type varchar(20)
+                status smallint,
+                type smallint
             )""".trimIndent()
         )
 
