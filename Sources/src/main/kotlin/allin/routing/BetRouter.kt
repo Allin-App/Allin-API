@@ -34,18 +34,7 @@ fun Application.BetRouter() {
                         betDataSource.getBetById(id)?.let {
                             call.respond(HttpStatusCode.Conflict, ApiMessage.BetAlreadyExist)
                         } ?: run {
-                            val betWithId = Bet(
-                                id = id,
-                                theme = bet.theme,
-                                sentenceBet = bet.sentenceBet,
-                                status = bet.status,
-                                type = bet.type,
-                                endRegistration = bet.endRegistration,
-                                endBet = bet.endBet,
-                                isPrivate = bet.isPrivate,
-                                response = bet.response,
-                                createdBy = username
-                            )
+                            val betWithId = bet.copy(id = id, createdBy = username)
                             betDataSource.addBet(betWithId)
                             call.respond(HttpStatusCode.Created, betWithId)
                         }
