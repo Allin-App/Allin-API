@@ -1,15 +1,14 @@
 package allin.routing
 
+import allin.entities.UsersEntity.addCoinByUsername
 import allin.entities.UsersEntity.addUserEntity
+import allin.entities.UsersEntity.canHaveDailyGift
 import allin.entities.UsersEntity.deleteUserByUsername
 import allin.entities.UsersEntity.getUserByUsernameAndPassword
 import allin.entities.UsersEntity.getUserToUserDTO
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
-import allin.model.ApiMessage
-import allin.model.CheckUser
-import allin.model.User
-import allin.model.UserRequest
+import allin.model.*
 import allin.utils.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -90,6 +89,18 @@ fun Application.UserRouter() {
                 hasToken { principal ->
                     verifyUserFromToken(principal) { userDto, _ ->
                         call.respond(HttpStatusCode.OK, userDto)
+                    }
+                }
+            }
+            get("/users/gift") {
+                hasToken { principal ->
+                    verifyUserFromToken(principal) { userDto, _ ->
+                        if(canHaveDailyGift(userDto.username)){
+                            val dailyGift = getDailyGift()
+                            addCoinByUsername(userDto.username,dailyGift)
+                            call.respond(HttpStatusCode.OK,dailyGift)
+                        }
+                        else call.respond(HttpStatusCode.MethodNotAllowed,"Le cadeau ne peut pas être récupéré")
                     }
                 }
             }
