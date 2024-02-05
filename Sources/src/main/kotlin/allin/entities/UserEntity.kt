@@ -4,51 +4,56 @@ import allin.database
 import allin.dto.UserDTO
 import allin.model.User
 import allin.utils.Execute
-import io.ktor.util.date.*
-import org.h2.util.DateTimeUtils.currentTimestamp
+import allin.utils.ExecuteWithResult
+import org.ktorm.database.use
 import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import org.ktorm.schema.*
-import java.time.Duration
-import java.util.*
+import java.time.Instant.now
 import java.util.UUID.fromString
 
 interface UserEntity : Entity<UserEntity> {
     val username: String
     var email: String
     var password: String
-    var nbCoins: Double
+    var nbCoins: Int
 }
 object UsersEntity : Table<UserEntity>("utilisateur") {
     val id = uuid("id").primaryKey()
     val username = varchar("username")
     val password = varchar("password")
-    val nbCoins = double("coins")
+    val nbCoins = int("coins")
     val email = varchar("email")
-    val lastGift = varchar("lastgift")
+    val lastGift = timestamp("lastgift")
 
 
     fun getUserToUserDTO(): MutableList<UserDTO> {
         return database.from(UsersEntity).select().map {
-            row -> UserDTO(
-                row[id].toString(),
-                row[username].toString(),
-                row[email].toString(),
-                row[nbCoins]?:0.0,
-                null
-            )
+                row -> UserDTO(
+            row[id].toString(),
+            row[username].toString(),
+            row[email].toString(),
+            row[nbCoins]?:0,
+            null
+        )
         }.toMutableList()
     }
 
     fun createUserTable(){
-        val request="CREATE TABLE IF not exists utilisateur ( id uuid PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins double precision,email VARCHAR(255), lastgift timestamp)"
+        val request="CREATE TABLE IF not exists utilisateur ( id uuid PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins numeric,email VARCHAR(255), lastgift timestamp)"
         database.Execute(request)
     }
 
     fun modifyCoins(user: String, cost : Int){
         val request = "UPDATE utilisateur SET coins = coins - $cost WHERE username = '$user';"
         database.Execute(request)
+    }
 
+    fun addCoinByUsername(username: String, coins : Int){
+        database.update(UsersEntity){
+            set(nbCoins,coins+ nbCoins)
+            where {it.username eq username}
+        }
     }
 
     fun getUserByUsernameAndPassword(login: String): Pair<UserDTO?, String?> {
@@ -61,7 +66,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
                         row[id].toString(),
                         row[username].toString(),
                         row[email].toString(),
-                        row[nbCoins] ?: 0.0,
+                        row[nbCoins] ?: 0,
                         null
                     ),
                     row[password].toString()
@@ -77,6 +82,7 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
             set(it.username,user.username)
             set(it.password,user.password)
             set(it.email,user.email)
+            set(it.lastGift,now())
         }
     }
     fun deleteUserByUsername(username: String): Boolean {
@@ -87,14 +93,25 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     }
 
     fun canHaveDailyGift(username: String): Boolean {
-        val request = "SELECT CASE WHEN lastgift IS NULL THEN TRUE ELSE lastgift < current_timestamp - interval '1 day' END AS can_have_daily_gift, " +
-                "CASE WHEN lastgift IS NULL THEN null ELSE current_timestamp - lastgift END AS time_remaining " +
-                "FROM utilisateur WHERE username = '$username';"
-        val returnCode= database.Execute(request)
+        val request = "SELECT CASE WHEN NOW() - lastgift > INTERVAL '1 day' THEN true ELSE false END AS is_lastgift_greater_than_1_day FROM utilisateur WHERE username = '$username';"
+        val resultSet = database.ExecuteWithResult(request)
 
-        if(returnCode?.next().toString()=="true"){
-            return true
+        resultSet?.use {
+            if (resultSet.next()) {
+                val isDailyGift = resultSet.getBoolean("is_lastgift_greater_than_1_day")
+                if (isDailyGift) {
+                    database.update(UsersEntity) {
+                        set(lastGift, now())
+                        where { it.username eq username }
+                    }
+                }
+                return isDailyGift
+            }
         }
         return false
     }
+
 }
+
+
+

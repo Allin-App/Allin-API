@@ -4,7 +4,7 @@ import allin.database
 import org.ktorm.database.Database
 import java.sql.ResultSet
 
-fun Database.Execute(request: String): ResultSet? {
+fun Database.ExecuteWithResult(request: String): ResultSet? {
     try {
         if (!request.isNullOrEmpty()) {
             return database.useTransaction { transaction ->
@@ -18,4 +18,13 @@ fun Database.Execute(request: String): ResultSet? {
         return null
     }
     return null
+}
+
+fun Database.Execute(request: String){
+    if(!request.isNullOrEmpty())
+        database.useTransaction {
+            val connection = it.connection
+            connection.prepareStatement(request).execute()
+            connection.commit()
+        }
 }

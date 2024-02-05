@@ -1,5 +1,6 @@
 package allin.routing
 
+import allin.entities.UsersEntity.addCoinByUsername
 import allin.entities.UsersEntity.addUserEntity
 import allin.entities.UsersEntity.canHaveDailyGift
 import allin.entities.UsersEntity.deleteUserByUsername
@@ -94,8 +95,11 @@ fun Application.UserRouter() {
             get("/users/gift") {
                 hasToken { principal ->
                     verifyUserFromToken(principal) { userDto, _ ->
-                        if(canHaveDailyGift(userDto.username))
-                            call.respond(HttpStatusCode.OK, getDailyGift())
+                        if(canHaveDailyGift(userDto.username)){
+                            val dailyGift = getDailyGift()
+                            addCoinByUsername(userDto.username,dailyGift)
+                            call.respond(HttpStatusCode.OK,dailyGift)
+                        }
                         else call.respond(HttpStatusCode.MethodNotAllowed,"Le cadeau ne peut pas être récupéré")
                     }
                 }
