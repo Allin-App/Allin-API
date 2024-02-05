@@ -20,7 +20,7 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.minutes
 
 @ExperimentalTime
-val BET_VERIFY_DELAY = 5.minutes
+val BET_VERIFY_DELAY = 1.minutes
 
 val data_source = System.getenv()["DATA_SOURCE"]
 
