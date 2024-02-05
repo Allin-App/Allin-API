@@ -2,6 +2,7 @@ package allin.data.mock
 
 import allin.data.BetDataSource
 import allin.model.Bet
+import allin.model.BetStatus
 import allin.model.UpdatedBetData
 import java.time.ZonedDateTime
 
@@ -24,6 +25,18 @@ class MockBetDataSource : BetDataSource {
 
     override fun addBet(bet: Bet) {
         bets += bet
+    }
+
+    override fun updateBetStatuses(date: ZonedDateTime) {
+        bets.forEachIndexed { idx, bet ->
+            if (bet.endRegistration >= date) {
+                if (bet.endBet >= date) {
+                    bets[idx] = bet.copy(status = BetStatus.WAITING)
+                } else {
+                    bets[idx] = bet.copy(status = BetStatus.CLOSING)
+                }
+            }
+        }
     }
 
     private val bets by lazy { mutableListOf<Bet>() }

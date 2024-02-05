@@ -20,6 +20,8 @@ val RegexCheckerUser = AppConfig.regexChecker
 val CryptManagerUser = AppConfig.cryptManager
 val tokenManagerUser = AppConfig.tokenManager
 const val DEFAULT_COINS = 500
+
+
 fun Application.UserRouter() {
 
     val userDataSource = this.dataSource.userDataSource

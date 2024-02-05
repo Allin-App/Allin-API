@@ -17,6 +17,7 @@ import java.util.*
 
 val tokenManagerBet = AppConfig.tokenManager
 
+
 fun Application.BetRouter() {
     val userDataSource = this.dataSource.userDataSource
     val betDataSource = this.dataSource.betDataSource
@@ -34,14 +35,16 @@ fun Application.BetRouter() {
                             call.respond(HttpStatusCode.Conflict, ApiMessage.BetAlreadyExist)
                         } ?: run {
                             val betWithId = Bet(
-                                id,
-                                bet.theme,
-                                bet.sentenceBet,
-                                bet.endRegistration,
-                                bet.endBet,
-                                bet.isPrivate,
-                                bet.response,
-                                username
+                                id = id,
+                                theme = bet.theme,
+                                sentenceBet = bet.sentenceBet,
+                                status = bet.status,
+                                type = bet.type,
+                                endRegistration = bet.endRegistration,
+                                endBet = bet.endBet,
+                                isPrivate = bet.isPrivate,
+                                response = bet.response,
+                                createdBy = username
                             )
                             betDataSource.addBet(betWithId)
                             call.respond(HttpStatusCode.Created, betWithId)

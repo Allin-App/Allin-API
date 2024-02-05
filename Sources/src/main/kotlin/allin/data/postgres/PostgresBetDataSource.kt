@@ -2,9 +2,14 @@ package allin.data.postgres
 
 import allin.data.BetDataSource
 import allin.entities.BetsEntity
+import allin.entities.NO_VALUE
+import allin.entities.ResponsesEntity
+import allin.entities.ResponsesEntity.response
+import allin.entities.YES_VALUE
 import allin.model.Bet
+import allin.model.BetStatus
+import allin.model.BetType
 import allin.model.UpdatedBetData
-import allin.utils.Execute
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.time.ZoneId
@@ -21,8 +26,21 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             endRegistration = this[BetsEntity.endRegistration]!!.atZone(ZoneId.of("Europe/Paris")),
             endBet = this[BetsEntity.endBet]!!.atZone(ZoneId.of("Europe/Paris")),
             isPrivate = this[BetsEntity.isPrivate] ?: false,
-            response = mutableListOf(), // ResponsesEntity.getResponse(UUID.fromString(this[BetsEntity.id].toString())),
-            createdBy = this[BetsEntity.createdBy].toString()
+            status = this[BetsEntity.status] ?: BetStatus.IN_PROGRESS,
+            type = this[BetsEntity.type] ?: BetType.CUSTOM,
+            createdBy = this[BetsEntity.createdBy].toString(),
+            response = let {
+                val idBet = this[BetsEntity.id].toString()
+                val type = this[BetsEntity.type] ?: BetType.CUSTOM
+                if (type == BetType.CUSTOM) {
+                    database.from(ResponsesEntity)
+                        .select(response)
+                        .where { ResponsesEntity.id eq UUID.fromString(idBet) }
+                        .map { it[response].toString() }
+                } else {
+                    listOf(YES_VALUE, NO_VALUE)
+                }
+            }
         )
 
     private fun Query.mapToBet() = this.map { it.toBet() }
@@ -53,7 +71,15 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             set(it.isPrivate, bet.isPrivate)
             set(it.createdBy, bet.createdBy)
         }
-        // ResponsesEntity.addResponse(bet.response, UUID.fromString(bet.id))
+
+        if (bet.type == BetType.CUSTOM) {
+            bet.response.forEach { selected ->
+                database.insert(ResponsesEntity) {
+                    set(it.id, UUID.fromString(bet.id))
+                    set(it.response, selected)
+                }
+            }
+        }
     }
 
     override fun removeBet(id: String): Boolean {
@@ -67,9 +93,21 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
         } > 0
     }
 
-    fun createBetsTable() {
-        val request =
-            "CREATE TABLE IF not exists bet ( id uuid PRIMARY KEY, theme VARCHAR(255), endregistration timestamp,endbet timestamp,sentencebet varchar(500),isprivate boolean, createdby varchar(250))"
-        database.Execute(request)
+    override fun updateBetStatuses(date: ZonedDateTime) {
+        database.update(BetsEntity) {
+            set(BetsEntity.status, BetStatus.WAITING)
+            where {
+                (BetsEntity.endRegistration greaterEq date.toInstant()) and
+                        (BetsEntity.endBet less date.toInstant())
+            }
+        }
+
+        database.update(BetsEntity) {
+            set(BetsEntity.status, BetStatus.CLOSING)
+            where {
+                (BetsEntity.endRegistration greaterEq date.toInstant()) and
+                        (BetsEntity.endBet greaterEq date.toInstant())
+            }
+        }
     }
 }

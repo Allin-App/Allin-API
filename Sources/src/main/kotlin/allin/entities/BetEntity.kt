@@ -1,5 +1,7 @@
 package allin.entities
 
+import allin.model.BetStatus
+import allin.model.BetType
 import org.ktorm.entity.Entity
 import org.ktorm.schema.*
 import java.time.ZonedDateTime
@@ -11,6 +13,8 @@ interface BetEntity : Entity<BetEntity> {
     val endRegistration: ZonedDateTime
     val endBet: ZonedDateTime
     val isPrivate: Boolean
+    val status: BetStatus
+    val type: BetType
     val createdBy: String
 }
 
@@ -21,5 +25,7 @@ object BetsEntity : Table<BetEntity>("bet") {
     val endRegistration = timestamp("endregistration")
     val endBet = timestamp("endbet")
     val isPrivate = boolean("isprivate")
+    val status = enum<BetStatus>("status")
+    val type = enum<BetType>("type")
     val createdBy = varchar("createdby")
 }

@@ -3,7 +3,6 @@ package allin.data.postgres
 import allin.data.ParticipationDataSource
 import allin.entities.ParticipationsEntity
 import allin.model.Participation
-import allin.utils.Execute
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.util.*
@@ -20,12 +19,6 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
         )
 
     private fun Query.mapToParticipation() = this.map { it.toParticipation() }
-
-    fun createParticipationTable() {
-        val request =
-            "CREATE TABLE IF NOT EXISTS participation (id uuid PRIMARY KEY,bet uuid,username varchar(250),answer varchar(250),stake int);"
-        database.Execute(request)
-    }
 
     override fun addParticipation(participation: Participation) {
         database.insert(ParticipationsEntity) {

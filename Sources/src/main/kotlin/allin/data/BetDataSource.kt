@@ -2,6 +2,7 @@ package allin.data
 
 import allin.model.Bet
 import allin.model.UpdatedBetData
+import java.time.ZonedDateTime
 
 interface BetDataSource {
     fun getAllBets(): List<Bet>
@@ -10,4 +11,5 @@ interface BetDataSource {
     fun addBet(bet: Bet)
     fun removeBet(id: String): Boolean
     fun updateBet(data: UpdatedBetData): Boolean
+    fun updateBetStatuses(date: ZonedDateTime)
 }

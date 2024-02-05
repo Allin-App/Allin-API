@@ -10,8 +10,10 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
 
+
 suspend fun PipelineContext<*, ApplicationCall>.hasToken(content: suspend (principal: JWTPrincipal) -> Unit) =
     call.principal<JWTPrincipal>()?.let { content(it) } ?: call.respond(HttpStatusCode.Unauthorized)
+
 
 suspend fun PipelineContext<*, ApplicationCall>.verifyUserFromToken(
     userDataSource: UserDataSource,

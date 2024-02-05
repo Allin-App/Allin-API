@@ -55,10 +55,4 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
         val request = "UPDATE utilisateur SET coins = coins - $amount WHERE username = '$username';"
         database.Execute(request)
     }
-
-    fun createUserTable() {
-        val request =
-            "CREATE TABLE IF not exists utilisateur ( id uuid PRIMARY KEY, username VARCHAR(255), password VARCHAR(255),coins double precision,email VARCHAR(255))"
-        database.Execute(request)
-    }
 }
