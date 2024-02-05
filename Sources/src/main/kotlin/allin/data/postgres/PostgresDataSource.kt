@@ -36,10 +36,10 @@ class PostgresDataSource : AllInDataSource() {
 
         database.Execute(
             """
-            CREATE TYPE bet.status AS ENUM
+            CREATE TYPE betstatus AS ENUM
             ('InProgress', 'Waiting', 'Closing', 'Finished', 'Cancelled');
                 
-            CREATE TYPE bet.type AS ENUM
+            CREATE TYPE bettype AS ENUM
             ('Match', 'Binary', 'Custom');
                 
             CREATE TABLE IF not exists bet (
@@ -50,8 +50,8 @@ class PostgresDataSource : AllInDataSource() {
                 sentencebet varchar(500),
                 isprivate boolean, 
                 createdby varchar(250),
-                status bet.status,
-                type bet.type
+                status betstatus,
+                type bettype
             )""".trimIndent()
         )
 
