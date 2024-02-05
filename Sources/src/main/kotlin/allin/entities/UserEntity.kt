@@ -10,7 +10,6 @@ import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import org.ktorm.schema.*
 import java.time.Instant.now
-import java.util.*
 import java.util.UUID.fromString
 
 interface UserEntity : Entity<UserEntity> {
@@ -27,15 +26,16 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     val email = varchar("email")
     val lastGift = timestamp("lastgift")
 
+
     fun getUserToUserDTO(): MutableList<UserDTO> {
         return database.from(UsersEntity).select().map {
-            row -> UserDTO(
-                row[id].toString(),
-                row[username].toString(),
-                row[email].toString(),
-                row[nbCoins]?:0,
-                null
-            )
+                row -> UserDTO(
+            row[id].toString(),
+            row[username].toString(),
+            row[email].toString(),
+            row[nbCoins]?:0,
+            null
+        )
         }.toMutableList()
     }
 
@@ -47,7 +47,13 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     fun modifyCoins(user: String, cost : Int){
         val request = "UPDATE utilisateur SET coins = coins - $cost WHERE username = '$user';"
         database.Execute(request)
+    }
 
+    fun addCoinByUsername(username: String, coins : Int){
+        database.update(UsersEntity){
+            set(nbCoins,coins+ nbCoins)
+            where {it.username eq username}
+        }
     }
 
     fun getUserByUsernameAndPassword(login: String): Pair<UserDTO?, String?> {
@@ -106,5 +112,6 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
     }
 
 }
+
 
 
