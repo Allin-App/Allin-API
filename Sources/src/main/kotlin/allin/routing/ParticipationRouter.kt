@@ -1,5 +1,9 @@
 package allin.routing
 
+import allin.entities.ParticipationsEntity.addParticipationEntity
+import allin.entities.ParticipationsEntity.deleteParticipation
+import allin.entities.ParticipationsEntity.getParticipationEntity
+import allin.entities.UsersEntity.modifyCoins
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -13,8 +17,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
 
-val participations = mutableListOf<Participation>()
-
 fun Application.ParticipationRouter() {
     routing {
         authenticate {
@@ -23,7 +25,7 @@ fun Application.ParticipationRouter() {
                     val participation = call.receive<ParticipationRequest>()
                     verifyUserFromToken(principal) { user, _ ->
                         if (user.nbCoins >= participation.stake) {
-                            participations.add(
+                            addParticipationEntity(
                                 Participation(
                                     id = UUID.randomUUID().toString(),
                                     betId = participation.betId,
@@ -32,6 +34,7 @@ fun Application.ParticipationRouter() {
                                     stake = participation.stake
                                 )
                             )
+                            modifyCoins(user.username,participation.stake)
                             call.respond(HttpStatusCode.Created)
                         } else {
                             call.respond(HttpStatusCode.Forbidden, ApiMessage.NotEnoughCoins)
@@ -42,10 +45,9 @@ fun Application.ParticipationRouter() {
             delete("/participations/delete") {
                 hasToken { principal ->
                     val participationId = call.receive<String>()
-                    participations.find { it.id == participationId }?.let { participation ->
+                    getParticipationEntity().find { it.id == participationId }?.let { participation ->
                         verifyUserFromToken(principal) { _, _ ->
-                            // user.nbCoins += participation.stake
-                            participations.remove(participation)
+                            deleteParticipation(participation)
                             call.respond(HttpStatusCode.NoContent)
                         }
                     } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.ParticipationNotFound)

@@ -45,6 +45,25 @@ object BetsEntity : Table<BetEntity>("bet") {
         }.toMutableList()
     }
 
+    fun getBetsNotFinished(): MutableList<Bet> {
+        val currentTime = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
+        return database.from(BetsEntity)
+            .select()
+            .where { endBet greaterEq currentTime.toInstant() }
+            .map { row ->
+                Bet(
+                    row[id].toString(),
+                    row[theme].toString(),
+                    row[sentenceBet].toString(),
+                    row[endRegistration]!!.atZone(ZoneId.of("Europe/Paris")),
+                    row[endBet]!!.atZone(ZoneId.of("Europe/Paris")),
+                    row[isPrivate] ?: false,
+                    getResponse(fromString(row[id].toString())),
+                    row[createdBy].toString()
+                )
+            }.toMutableList()
+    }
+
     fun createBetsTable(){
         val request="CREATE TABLE IF not exists bet ( id uuid PRIMARY KEY, theme VARCHAR(255), endregistration timestamp,endbet timestamp,sentencebet varchar(500),isprivate boolean, createdby varchar(250))"
         database.Execute(request)

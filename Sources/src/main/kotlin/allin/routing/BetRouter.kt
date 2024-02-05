@@ -2,6 +2,9 @@ package allin.routing
 
 import allin.entities.BetsEntity.addBetEntity
 import allin.entities.BetsEntity.getBets
+import allin.entities.BetsEntity.getBetsNotFinished
+import allin.entities.ParticipationsEntity.getParticipationEntity
+import allin.entities.ParticipationsEntity.getParticipationEntityFromUserId
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
@@ -16,7 +19,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import java.util.*
 
-//val bets = mutableListOf<Bet>()
 val tokenManagerBet = AppConfig.tokenManager
 
 fun Application.BetRouter() {
@@ -42,7 +44,6 @@ fun Application.BetRouter() {
                         bet.response,
                         username
                     )
-                    //bets.add(betWithId)
                     addBetEntity(betWithId)
                     call.respond(HttpStatusCode.Created, betWithId)
                 }
@@ -97,13 +98,15 @@ fun Application.BetRouter() {
 
         authenticate {
             get("/bets/current") {
-                val bets= getBets()
                 hasToken { principal ->
                     verifyUserFromToken(principal) { user, _ ->
-                        val bets = participations
-                            .filter { it.username == user.username }
-                            .mapNotNull { itParticipation -> bets.find { it.id == itParticipation.betId } }
-                        call.respond(HttpStatusCode.OK, bets)
+                        val currentBets = getBetsNotFinished()
+                            .filter { bet ->
+                                val userParticipation = getParticipationEntityFromUserId(user.username, bet.id)
+                                userParticipation.isNotEmpty() || bet.createdBy == user.username
+                            }
+
+                        call.respond(HttpStatusCode.OK, currentBets)
                     }
                 }
             }
