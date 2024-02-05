@@ -5,14 +5,14 @@ import java.sql.ResultSet
 
 fun Database.ExecuteWithResult(request: String): ResultSet? {
     try {
-        if (!request.isNullOrEmpty()) {
-            return database.useTransaction { transaction ->
+        if (request.isNotEmpty()) {
+            return this.useTransaction { transaction ->
                 val connection = transaction.connection
                 val resultSet = connection.prepareStatement(request).executeQuery()
                 resultSet
             }
         }
-    } catch (e: Exception){
+    } catch (e: Exception) {
         println(e.message)
         return null
     }

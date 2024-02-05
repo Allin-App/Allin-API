@@ -37,7 +37,7 @@ fun Application.ParticipationRouter() {
                                 )
                             )
 
-                            userDataSource.modifyUserCoins(username = user.username, amount = participation.stake)
+                            userDataSource.removeCoins(username = user.username, amount = participation.stake)
 
                             call.respond(HttpStatusCode.Created)
                         } else {

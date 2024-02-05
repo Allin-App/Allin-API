@@ -91,13 +91,12 @@ fun Application.UserRouter() {
             }
             get("/users/gift") {
                 hasToken { principal ->
-                    verifyUserFromToken(principal) { userDto, _ ->
-                        if(canHaveDailyGift(userDto.username)){
+                    verifyUserFromToken(userDataSource, principal) { userDto, _ ->
+                        if (userDataSource.canHaveDailyGift(userDto.username)) {
                             val dailyGift = getDailyGift()
-                            addCoinByUsername(userDto.username,dailyGift)
-                            call.respond(HttpStatusCode.OK,dailyGift)
-                        }
-                        else call.respond(HttpStatusCode.MethodNotAllowed,"Le cadeau ne peut pas être récupéré")
+                            userDataSource.addCoins(userDto.username, dailyGift)
+                            call.respond(HttpStatusCode.OK, dailyGift)
+                        } else call.respond(HttpStatusCode.MethodNotAllowed, "Can't get daily gift.")
                     }
                 }
             }

@@ -4,8 +4,11 @@ import allin.data.UserDataSource
 import allin.dto.UserDTO
 import allin.entities.UsersEntity
 import allin.model.User
+import allin.utils.ExecuteWithResult
 import org.ktorm.database.Database
+import org.ktorm.database.use
 import org.ktorm.dsl.*
+import java.time.Instant.now
 import java.util.*
 
 class PostgresUserDataSource(private val database: Database) : UserDataSource {
@@ -34,6 +37,7 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
             set(it.username, user.username)
             set(it.password, user.password)
             set(it.email, user.email)
+            set(it.lastGift, now())
         }
     }
 
@@ -50,10 +54,38 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
         }.totalRecords > 0
     }
 
-    override fun modifyUserCoins(username: String, amount: Int) {
+    override fun addCoins(username: String, amount: Int) {
+        database.update(UsersEntity) {
+            set(UsersEntity.nbCoins, UsersEntity.nbCoins + amount)
+            where { UsersEntity.username eq username }
+        }
+    }
+
+    override fun removeCoins(username: String, amount: Int) {
         database.update(UsersEntity) {
             set(UsersEntity.nbCoins, UsersEntity.nbCoins - amount)
             where { UsersEntity.username eq username }
         }
     }
+
+    override fun canHaveDailyGift(username: String): Boolean {
+        val request =
+            "SELECT CASE WHEN NOW() - lastgift > INTERVAL '1 day' THEN true ELSE false END AS is_lastgift_greater_than_1_day FROM utilisateur WHERE username = '$username';"
+        val resultSet = database.ExecuteWithResult(request)
+
+        resultSet?.use {
+            if (resultSet.next()) {
+                val isDailyGift = resultSet.getBoolean("is_lastgift_greater_than_1_day")
+                if (isDailyGift) {
+                    database.update(UsersEntity) {
+                        set(UsersEntity.lastGift, now())
+                        where { it.username eq username }
+                    }
+                }
+                return isDailyGift
+            }
+        }
+        return false
+    }
+
 }

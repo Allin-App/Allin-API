@@ -30,7 +30,8 @@ class PostgresDataSource : AllInDataSource() {
                 username VARCHAR(255), 
                 password VARCHAR(255),
                 coins double precision,
-                email VARCHAR(255)
+                email VARCHAR(255),
+                lastgift timestamp
             )""".trimIndent()
         )
 

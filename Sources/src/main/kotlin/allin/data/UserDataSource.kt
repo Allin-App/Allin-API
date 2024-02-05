@@ -14,8 +14,10 @@ interface UserDataSource {
     fun deleteUser(username: String): Boolean
 
 
-    fun modifyUserCoins(username: String, amount: Int)
+    fun addCoins(username: String, amount: Int)
 
+    fun removeCoins(username: String, amount: Int)
 
     fun userExists(username: String, email: String): Boolean
+    fun canHaveDailyGift(username: String): Boolean
 }
