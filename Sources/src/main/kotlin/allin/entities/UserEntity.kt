@@ -44,6 +44,11 @@ object UsersEntity : Table<UserEntity>("utilisateur") {
         database.Execute(request)
     }
 
+    fun modifyCoins(user: String, cost : Int){
+        val request = "UPDATE utilisateur SET coins = coins - $cost WHERE username = '$user';"
+        database.Execute(request)
+
+    }
 
     fun getUserByUsernameAndPassword(login: String): Pair<UserDTO?, String?> {
         return database.from(UsersEntity)
