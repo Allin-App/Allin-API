@@ -3,10 +3,7 @@ package allin.routing
 import allin.dataSource
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
-import allin.model.AllInResponse
-import allin.model.ApiMessage
-import allin.model.Bet
-import allin.model.UpdatedBetData
+import allin.model.*
 import allin.utils.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -49,11 +46,25 @@ fun Application.BetRouter() {
             get("/bets/gets") {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        val response = AllInResponse(
-                            value = betDataSource.getAllBets(),
-                            won = emptyList(),
-                            toConfirm = betDataSource.getToConfirm(user.username)
-                        )
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets())
+                    }
+                }
+            }
+        }
+
+        authenticate {
+            get("/bets/toConfirm") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        val response = betDataSource.getToConfirm(user.username).map {
+                            val participations = participationDataSource.getParticipationFromBetId(it.id)
+                            BetDetail(
+                                it,
+                                getBetAnswerDetail(it, participations),
+                                participations.toList(),
+                                participationDataSource.getParticipationFromUserId(user.username, it.id).lastOrNull()
+                            )
+                        }
                         call.respond(HttpStatusCode.Accepted, response)
                     }
                 }

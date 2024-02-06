@@ -38,10 +38,10 @@ class PostgresDataSource : AllInDataSource() {
 
         database.Execute(
             """
-            CREATE TYPE betstatus AS ENUM
+            CREATE TYPE IF not exists betstatus AS ENUM
             ('InProgress', 'Waiting', 'Closing', 'Finished', 'Cancelled');
                 
-            CREATE TYPE bettype AS ENUM
+            CREATE TYPE IF not exists bettype AS ENUM
             ('Match', 'Binary', 'Custom');
                 
             CREATE TABLE IF not exists bet (
