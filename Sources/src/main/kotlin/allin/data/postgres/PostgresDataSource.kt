@@ -38,18 +38,6 @@ class PostgresDataSource : AllInDataSource() {
 
         database.Execute(
             """
-            DO ${'$'}${'$'}
-            BEGIN
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'betstatus') THEN
-                    CREATE TYPE IF betstatus AS ENUM
-                    ('InProgress', 'Waiting', 'Closing', 'Finished', 'Cancelled');
-                END IF;
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'bettype') THEN
-                    CREATE TYPE bettype AS ENUM
-                    ('Match', 'Binary', 'Custom');
-                END IF;
-            END${'$'}${'$'};
-
             CREATE TABLE IF not exists bet (
                 id uuid PRIMARY KEY, 
                 theme VARCHAR(255), 

@@ -4,7 +4,6 @@ import allin.model.BetStatus
 import allin.model.BetType
 import org.ktorm.entity.Entity
 import org.ktorm.schema.*
-import org.ktorm.support.postgresql.pgEnum
 import java.time.ZonedDateTime
 
 
@@ -26,7 +25,7 @@ object BetsEntity : Table<BetEntity>("bet") {
     val endRegistration = timestamp("endregistration")
     val endBet = timestamp("endbet")
     val isPrivate = boolean("isprivate").bindTo { it.isPrivate }
-    val status = pgEnum<BetStatus>("status").bindTo { it.status }
-    val type = pgEnum<BetType>("type").bindTo { it.type }
+    val status = enum<BetStatus>("status").bindTo { it.status }
+    val type = enum<BetType>("type").bindTo { it.type }
     val createdBy = varchar("createdby").bindTo { it.createdBy }
 }
