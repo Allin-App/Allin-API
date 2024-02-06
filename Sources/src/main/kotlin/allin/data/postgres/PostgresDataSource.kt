@@ -56,7 +56,7 @@ class PostgresDataSource : AllInDataSource() {
             """
             CREATE TABLE IF NOT EXISTS betresult (
                 betid uuid PRIMARY KEY REFERENCES bet,
-                result varchar(250),
+                result varchar(250)
             )
             """.trimIndent()
         )
@@ -78,7 +78,7 @@ class PostgresDataSource : AllInDataSource() {
             CREATE TABLE IF NOT EXISTS response (
                 id UUID,
                 response VARCHAR(250),
-                CONSTRAINT pk_response_id PRIMARY KEY (id,response)
+                CONSTRAINT pk_response_id PRIMARY KEY (id, response)
             )
             """.trimIndent()
         )
