@@ -120,7 +120,7 @@ fun Application.BetRouter() {
         }
 
         authenticate {
-            get("/bets/confirm/{id}") {
+            post("/bets/confirm/{id}") {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         val betId = call.parameters["id"] ?: ""
