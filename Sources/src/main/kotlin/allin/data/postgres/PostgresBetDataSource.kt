@@ -1,11 +1,8 @@
 package allin.data.postgres
 
 import allin.data.BetDataSource
-import allin.entities.BetsEntity
-import allin.entities.NO_VALUE
-import allin.entities.ResponsesEntity
-import allin.entities.ResponsesEntity.response
-import allin.entities.YES_VALUE
+import allin.data.postgres.entities.*
+import allin.data.postgres.entities.ResponsesEntity.response
 import allin.model.Bet
 import allin.model.BetStatus
 import allin.model.BetType
@@ -59,6 +56,27 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             .select()
             .where { BetsEntity.endBet greaterEq currentTime.toInstant() }
             .mapToBet()
+    }
+
+    override fun getToConfirm(username: String): List<Bet> {
+        return database.from(BetsEntity)
+            .select()
+            .where {
+                (BetsEntity.createdBy eq username) and
+                        (BetsEntity.status eq BetStatus.CLOSING)
+            }.mapToBet()
+    }
+
+    override fun confirmBet(betId: String, result: String) {
+        database.insert(BetResultsEntity) {
+            set(it.betId, betId)
+            set(it.result, result)
+        }
+
+        database.update(BetsEntity) {
+            where { BetsEntity.id eq UUID.fromString(betId) }
+            set(BetsEntity.status, BetStatus.FINISHED)
+        }
     }
 
     override fun addBet(bet: Bet) {

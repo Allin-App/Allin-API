@@ -2,6 +2,7 @@ package allin.data.mock
 
 import allin.data.BetDataSource
 import allin.model.Bet
+import allin.model.BetResult
 import allin.model.BetStatus
 import allin.model.UpdatedBetData
 import java.time.ZonedDateTime
@@ -39,6 +40,24 @@ class MockBetDataSource : BetDataSource {
         }
     }
 
+    override fun getToConfirm(username: String): List<Bet> =
+        bets.filter { it.createdBy == username && it.status == BetStatus.CLOSING }
+
+    override fun confirmBet(betId: String, result: String) {
+        results.add(
+            BetResult(
+                betId = betId,
+                result = result
+            )
+        )
+        bets.replaceAll {
+            if (it.id == betId) {
+                it.copy(status = BetStatus.FINISHED)
+            } else it
+        }
+    }
+
     private val bets by lazy { mutableListOf<Bet>() }
+    private val results by lazy { mutableListOf<BetResult>() }
 
 }

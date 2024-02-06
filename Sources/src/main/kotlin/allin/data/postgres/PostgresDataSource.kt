@@ -32,7 +32,8 @@ class PostgresDataSource : AllInDataSource() {
                 coins double precision,
                 email VARCHAR(255),
                 lastgift timestamp
-            )""".trimIndent()
+            )
+            """.trimIndent()
         )
 
         database.Execute(
@@ -53,7 +54,17 @@ class PostgresDataSource : AllInDataSource() {
                 createdby varchar(250),
                 status varchar(20),
                 type varchar(20)
-            )""".trimIndent()
+            )
+            """.trimIndent()
+        )
+
+        database.Execute(
+            """
+            CREATE TABLE IF NOT EXISTS betresult (
+                betid uuid PRIMARY KEY REFERENCES bet,
+                result varchar(250),
+            )
+            """.trimIndent()
         )
 
         database.Execute(
@@ -64,7 +75,8 @@ class PostgresDataSource : AllInDataSource() {
                 username varchar(250),
                 answer varchar(250),
                 stake int
-            )""".trimIndent()
+            )
+            """.trimIndent()
         )
 
         database.Execute(
@@ -73,7 +85,8 @@ class PostgresDataSource : AllInDataSource() {
                 id UUID,
                 response VARCHAR(250),
                 CONSTRAINT pk_response_id PRIMARY KEY (id,response)
-            )""".trimIndent()
+            )
+            """.trimIndent()
         )
     }
 

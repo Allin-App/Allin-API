@@ -1,4 +1,4 @@
-package allin.entities
+package allin.data.postgres.entities
 
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Table

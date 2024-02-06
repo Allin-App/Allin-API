@@ -1,7 +1,7 @@
 package allin.data.postgres
 
 import allin.data.ParticipationDataSource
-import allin.entities.ParticipationsEntity
+import allin.data.postgres.entities.ParticipationsEntity
 import allin.model.Participation
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
@@ -30,28 +30,23 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
         }
     }
 
-    override fun getParticipationFromBetId(betid: String): List<Participation> {
-        return database.from(ParticipationsEntity)
+    override fun getParticipationFromBetId(betid: String): List<Participation> =
+        database.from(ParticipationsEntity)
             .select()
             .where { ParticipationsEntity.betId eq UUID.fromString(betid) }
             .mapToParticipation()
-    }
 
-    override fun getParticipationFromUserId(username: String, betid: String): List<Participation> {
-        return database.from(ParticipationsEntity)
+    override fun getParticipationFromUserId(username: String, betid: String): List<Participation> =
+        database.from(ParticipationsEntity)
             .select()
             .where { (ParticipationsEntity.betId eq UUID.fromString(betid)) and (ParticipationsEntity.username eq username) }
             .mapToParticipation()
-    }
 
-    fun getParticipationEntity(): List<Participation> {
-        return database.from(ParticipationsEntity).select().mapToParticipation()
-    }
+    fun getParticipationEntity(): List<Participation> =
+        database.from(ParticipationsEntity).select().mapToParticipation()
 
-    override fun deleteParticipation(id: String): Boolean {
-        return database.delete(ParticipationsEntity) {
+    override fun deleteParticipation(id: String): Boolean =
+        database.delete(ParticipationsEntity) {
             it.id eq UUID.fromString(id)
         } > 0
-    }
-
 }

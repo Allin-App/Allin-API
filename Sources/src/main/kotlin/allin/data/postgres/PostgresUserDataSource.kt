@@ -1,8 +1,8 @@
 package allin.data.postgres
 
 import allin.data.UserDataSource
+import allin.data.postgres.entities.UsersEntity
 import allin.dto.UserDTO
-import allin.entities.UsersEntity
 import allin.model.User
 import allin.utils.ExecuteWithResult
 import org.ktorm.database.Database

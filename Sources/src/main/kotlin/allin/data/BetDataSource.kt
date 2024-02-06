@@ -12,4 +12,6 @@ interface BetDataSource {
     fun removeBet(id: String): Boolean
     fun updateBet(data: UpdatedBetData): Boolean
     fun updateBetStatuses(date: ZonedDateTime)
+    fun getToConfirm(username: String): List<Bet>
+    fun confirmBet(betId: String, result: String)
 }
