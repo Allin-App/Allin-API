@@ -41,11 +41,11 @@ class PostgresDataSource : AllInDataSource() {
             DO ${'$'}${'$'}
             BEGIN
                 IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'betstatus') THEN
-                    CREATE TYPE IF not exists betstatus AS ENUM
+                    CREATE TYPE IF betstatus AS ENUM
                     ('InProgress', 'Waiting', 'Closing', 'Finished', 'Cancelled');
                 END IF;
                 IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'bettype') THEN
-                    CREATE TYPE IF not exists bettype AS ENUM
+                    CREATE TYPE bettype AS ENUM
                     ('Match', 'Binary', 'Custom');
                 END IF;
             END${'$'}${'$'};
