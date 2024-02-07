@@ -214,7 +214,9 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             set(BetsEntity.status, BetStatus.CLOSING)
             where {
                 (date.toInstant() greaterEq BetsEntity.endRegistration) and
-                        (date.toInstant() greaterEq BetsEntity.endBet)
+                        (date.toInstant() greaterEq BetsEntity.endBet) and
+                        (BetsEntity.status notEq BetStatus.FINISHED) and
+                        (BetsEntity.status notEq BetStatus.CANCELLED)
             }
         }
     }
