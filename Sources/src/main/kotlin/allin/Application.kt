@@ -8,6 +8,9 @@ import allin.utils.TokenManager
 import allin.utils.TokenManager.Companion.Claims.USERNAME
 import allin.utils.kronJob
 import com.typesafe.config.ConfigFactory
+import io.github.smiley4.ktorswaggerui.SwaggerUI
+import io.github.smiley4.ktorswaggerui.data.SwaggerUiSort
+import io.github.smiley4.ktorswaggerui.data.SwaggerUiSyntaxHighlight
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -17,6 +20,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import java.time.ZonedDateTime
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
 import kotlin.time.minutes
 
@@ -56,6 +60,28 @@ private fun Application.extracted() {
         }
     }
     install(ContentNegotiation) { json() }
+    install(SwaggerUI){
+        swagger {
+            forwardRoot = false
+            swaggerUrl = "swagger"
+            rootHostPath = "http://127.0.0.1:8080/"
+            authentication = "MySwaggerAuth"
+            onlineSpecValidator()
+            displayOperationId = true
+            showTagFilterInput = true
+            sort = SwaggerUiSort.HTTP_METHOD
+            syntaxHighlight = SwaggerUiSyntaxHighlight.MONOKAI
+        }
+        info {
+            title = "Allin API"
+            version = "latest"
+            description = "Allin API"
+            license {
+                name = "Apache 2.0"
+                url = "https://www.apache.org/licenses/LICENSE-2.0.html"
+            }
+        }
+    }
 
     BasicRouting()
     UserRouter()

@@ -10,7 +10,7 @@ fun kronJob(duration: Duration, action: () -> Unit) =
         withContext(Dispatchers.IO) {
             while (true) {
                 runCatching { action() }
-                delay(duration.toLongMilliseconds())
+                delay(duration.inWholeMilliseconds)
             }
         }
     }

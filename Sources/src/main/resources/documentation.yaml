@@ -1,0 +1,10 @@
+swagger: "2.0"
+info:
+  title: Allin API
+  description: Title
+  version: 4.0.0
+host: www.Allin.fr
+schemes:
+  - https
+paths: "src/main/kotlin/allin"
+
