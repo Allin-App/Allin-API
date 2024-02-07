@@ -5,7 +5,11 @@ import allin.dto.UserDTO
 import allin.model.User
 import java.time.ZonedDateTime
 
-class MockUserDataSource : UserDataSource {
+class MockUserDataSource(mockData: MockDataSource.MockData) : UserDataSource {
+    private val users = mockData.users
+    private val lastGifts = mockData.lastGifts
+
+
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
         users.find { it.username == username }?.let {
             Pair(
@@ -48,13 +52,5 @@ class MockUserDataSource : UserDataSource {
         } ?: true
         lastGifts[username] = ZonedDateTime.now()
         return value
-    }
-
-    private val users by lazy {
-        mutableListOf<User>()
-    }
-
-    private val lastGifts by lazy {
-        mutableMapOf<String, ZonedDateTime>()
     }
 }

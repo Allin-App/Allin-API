@@ -3,7 +3,9 @@ package allin.data.mock
 import allin.data.ParticipationDataSource
 import allin.model.Participation
 
-class MockParticipationDataSource : ParticipationDataSource {
+class MockParticipationDataSource(mockData: MockDataSource.MockData) : ParticipationDataSource {
+    private val participations = mockData.participations
+
     override fun addParticipation(participation: Participation) {
         participations += participations
     }
@@ -16,7 +18,4 @@ class MockParticipationDataSource : ParticipationDataSource {
 
     override fun deleteParticipation(id: String): Boolean =
         participations.removeIf { it.id == id }
-
-    private val participations by lazy { mutableListOf<Participation>() }
-
 }

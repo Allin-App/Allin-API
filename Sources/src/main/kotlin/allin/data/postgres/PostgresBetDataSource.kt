@@ -3,10 +3,7 @@ package allin.data.postgres
 import allin.data.BetDataSource
 import allin.data.postgres.entities.*
 import allin.data.postgres.entities.ResponsesEntity.response
-import allin.model.Bet
-import allin.model.BetStatus
-import allin.model.BetType
-import allin.model.UpdatedBetData
+import allin.model.*
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.time.ZoneId
@@ -40,7 +37,29 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             }
         )
 
+    private fun QueryRowSet.toParticipation() =
+        Participation(
+            id = this[ParticipationsEntity.id]?.toString() ?: "",
+            betId = this[ParticipationsEntity.betId]?.toString() ?: "",
+            username = this[ParticipationsEntity.username] ?: "",
+            answer = this[ParticipationsEntity.answer] ?: "",
+            stake = this[ParticipationsEntity.stake] ?: 0
+        )
+
+    private fun QueryRowSet.toBetResultDetail() =
+        BetResultDetail(
+            betResult = BetResult(
+                betId = this[BetResultsEntity.betId]?.toString() ?: "",
+                result = this[BetResultsEntity.result] ?: ""
+            ),
+            bet = this.toBet(),
+            participation = this.toParticipation(),
+            amount = this[ParticipationsEntity.stake] ?: 0,
+            won = this[ParticipationsEntity.answer] == this[BetResultsEntity.result]
+        )
+
     private fun Query.mapToBet() = this.map { it.toBet() }
+    private fun Query.mapToBetResultDetail() = this.map { it.toBetResultDetail() }
 
     override fun getAllBets(): List<Bet> =
         database.from(BetsEntity).select().mapToBet()
@@ -77,6 +96,73 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             where { BetsEntity.id eq UUID.fromString(betId) }
             set(BetsEntity.status, BetStatus.FINISHED)
         }
+
+        database.from(ParticipationsEntity)
+            .select()
+            .where {
+                (ParticipationsEntity.betId eq UUID.fromString(betId)) and
+                        (ParticipationsEntity.answer eq result)
+            }
+            .forEach { participation ->
+                database.insert(BetResultNotificationsEntity) {
+                    set(it.betId, betId)
+                    set(it.username, participation[ParticipationsEntity.username])
+                }
+            }
+    }
+
+    override fun getWonNotifications(username: String): List<BetResultDetail> {
+        return database.from(BetsEntity)
+            .innerJoin(ParticipationsEntity, on = BetsEntity.id eq ParticipationsEntity.betId)
+            .innerJoin(BetResultsEntity, on = BetsEntity.id eq BetResultsEntity.betId)
+            .innerJoin(BetResultNotificationsEntity, on = BetsEntity.id eq BetResultNotificationsEntity.betId)
+            .select()
+            .where {
+                (BetResultsEntity.result eq ParticipationsEntity.answer) and
+                        (ParticipationsEntity.username eq username)
+            }.let {
+                it.forEach { row ->
+                    row[BetsEntity.id]?.let { betId ->
+                        database.delete(BetResultNotificationsEntity) {
+                            (it.betId eq betId) and (it.username eq username)
+                        }
+                    }
+                }
+                it
+            }.mapToBetResultDetail()
+    }
+
+    override fun getHistory(username: String): List<BetResultDetail> {
+        return database.from(BetsEntity)
+            .innerJoin(ParticipationsEntity, on = BetsEntity.id eq ParticipationsEntity.betId)
+            .innerJoin(BetResultsEntity, on = BetsEntity.id eq BetResultsEntity.betId)
+            .select()
+            .where { ParticipationsEntity.username eq username }.mapToBetResultDetail()
+    }
+
+    override fun getCurrent(username: String): List<BetDetail> {
+        return database.from(BetsEntity)
+            .innerJoin(ParticipationsEntity, on = BetsEntity.id eq ParticipationsEntity.betId)
+            .select()
+            .where {
+                (BetsEntity.status notEq BetStatus.FINISHED) and
+                        (BetsEntity.status notEq BetStatus.CANCELLED) and
+                        (ParticipationsEntity.username eq username)
+            }.map {
+                val participations = it[BetsEntity.id]?.let { betId ->
+                    database.from(ParticipationsEntity)
+                        .select().where { ParticipationsEntity.betId eq betId }.map { it.toParticipation() }
+                } ?: emptyList()
+
+                val bet = it.toBet()
+                BetDetail(
+                    bet = bet,
+                    answers = getBetAnswerDetail(bet, participations),
+                    participations = participations,
+                    userParticipation = it.toParticipation()
+
+                )
+            }
     }
 
     override fun addBet(bet: Bet) {

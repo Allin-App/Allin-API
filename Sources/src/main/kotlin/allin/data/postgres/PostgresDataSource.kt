@@ -58,6 +58,11 @@ class PostgresDataSource : AllInDataSource() {
                 betid uuid PRIMARY KEY REFERENCES bet,
                 result varchar(250)
             )
+            CREATE TABLE IF NOT EXISTS betresultnotification (
+                betid uuid,
+                username varchar(250),
+                CONSTRAINT pk_id_username PRIMARY KEY (betid, username)
+            )
             """.trimIndent()
         )
 

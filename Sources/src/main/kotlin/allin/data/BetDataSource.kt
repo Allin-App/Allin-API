@@ -1,6 +1,8 @@
 package allin.data
 
 import allin.model.Bet
+import allin.model.BetDetail
+import allin.model.BetResultDetail
 import allin.model.UpdatedBetData
 import java.time.ZonedDateTime
 
@@ -14,4 +16,7 @@ interface BetDataSource {
     fun updateBetStatuses(date: ZonedDateTime)
     fun getToConfirm(username: String): List<Bet>
     fun confirmBet(betId: String, result: String)
+    fun getWonNotifications(username: String): List<BetResultDetail>
+    fun getHistory(username: String): List<BetResultDetail>
+    fun getCurrent(username: String): List<BetDetail>
 }

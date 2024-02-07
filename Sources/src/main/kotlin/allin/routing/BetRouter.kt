@@ -52,25 +52,6 @@ fun Application.BetRouter() {
             }
         }
 
-        authenticate {
-            get("/bets/toConfirm") {
-                hasToken { principal ->
-                    verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        val response = betDataSource.getToConfirm(user.username).map {
-                            val participations = participationDataSource.getParticipationFromBetId(it.id)
-                            BetDetail(
-                                it,
-                                getBetAnswerDetail(it, participations),
-                                participations.toList(),
-                                participationDataSource.getParticipationFromUserId(user.username, it.id).lastOrNull()
-                            )
-                        }
-                        call.respond(HttpStatusCode.Accepted, response)
-                    }
-                }
-            }
-        }
-
         route("/bets/get/{id}") {
             get {
                 val id = call.parameters["id"] ?: ""
@@ -103,17 +84,49 @@ fun Application.BetRouter() {
         }
 
         authenticate {
+            get("/bets/toConfirm") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        val response = betDataSource.getToConfirm(user.username).map {
+                            val participations = participationDataSource.getParticipationFromBetId(it.id)
+                            BetDetail(
+                                it,
+                                getBetAnswerDetail(it, participations),
+                                participations.toList(),
+                                participationDataSource.getParticipationFromUserId(user.username, it.id).lastOrNull()
+                            )
+                        }
+                        call.respond(HttpStatusCode.Accepted, response)
+                    }
+                }
+            }
+        }
+
+        authenticate {
+            get("/bets/getWon") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getWonNotifications(user.username))
+                    }
+                }
+            }
+        }
+
+        authenticate {
+            get("/bets/history") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getHistory(user.username))
+                    }
+                }
+            }
+        }
+
+        authenticate {
             get("/bets/current") {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        val currentBets = betDataSource.getBetsNotFinished()
-                            .filter { bet ->
-                                val userParticipation =
-                                    participationDataSource.getParticipationFromUserId(user.username, bet.id)
-                                userParticipation.isNotEmpty()
-                            }
-
-                        call.respond(HttpStatusCode.OK, currentBets)
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getCurrent(user.username))
                     }
                 }
             }
