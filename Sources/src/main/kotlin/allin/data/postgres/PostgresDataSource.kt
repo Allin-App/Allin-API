@@ -32,17 +32,12 @@ class PostgresDataSource : AllInDataSource() {
                 coins double precision,
                 email VARCHAR(255),
                 lastgift timestamp
-            )""".trimIndent()
+            )
+            """.trimIndent()
         )
 
         database.Execute(
             """
-            CREATE TYPE betstatus AS ENUM
-            ('InProgress', 'Waiting', 'Closing', 'Finished', 'Cancelled');
-                
-            CREATE TYPE bettype AS ENUM
-            ('Match', 'Binary', 'Custom');
-                
             CREATE TABLE IF not exists bet (
                 id uuid PRIMARY KEY, 
                 theme VARCHAR(255), 
@@ -53,7 +48,22 @@ class PostgresDataSource : AllInDataSource() {
                 createdby varchar(250),
                 status varchar(20),
                 type varchar(20)
-            )""".trimIndent()
+            )
+            """.trimIndent()
+        )
+
+        database.Execute(
+            """
+            CREATE TABLE IF NOT EXISTS betresult (
+                betid uuid PRIMARY KEY REFERENCES bet,
+                result varchar(250)
+            )
+            CREATE TABLE IF NOT EXISTS betresultnotification (
+                betid uuid,
+                username varchar(250),
+                CONSTRAINT pk_id_username PRIMARY KEY (betid, username)
+            )
+            """.trimIndent()
         )
 
         database.Execute(
@@ -64,7 +74,8 @@ class PostgresDataSource : AllInDataSource() {
                 username varchar(250),
                 answer varchar(250),
                 stake int
-            )""".trimIndent()
+            )
+            """.trimIndent()
         )
 
         database.Execute(
@@ -72,8 +83,9 @@ class PostgresDataSource : AllInDataSource() {
             CREATE TABLE IF NOT EXISTS response (
                 id UUID,
                 response VARCHAR(250),
-                CONSTRAINT pk_response_id PRIMARY KEY (id,response)
-            )""".trimIndent()
+                CONSTRAINT pk_response_id PRIMARY KEY (id, response)
+            )
+            """.trimIndent()
         )
     }
 

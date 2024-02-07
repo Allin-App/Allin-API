@@ -41,7 +41,7 @@ fun Application.ParticipationRouter() {
 
                             call.respond(HttpStatusCode.Created)
                         } else {
-                            call.respond(HttpStatusCode.Forbidden, ApiMessage.NotEnoughCoins)
+                            call.respond(HttpStatusCode.Forbidden, ApiMessage.NOT_ENOUGH_COINS)
                         }
                     }
                 }
@@ -52,7 +52,7 @@ fun Application.ParticipationRouter() {
                     if (participationDataSource.deleteParticipation(participationId)) {
                         call.respond(HttpStatusCode.NoContent)
                     } else {
-                        call.respond(HttpStatusCode.NotFound, ApiMessage.ParticipationNotFound)
+                        call.respond(HttpStatusCode.NotFound, ApiMessage.PARTICIPATION_NOT_FOUND)
                     }
                 }
             }

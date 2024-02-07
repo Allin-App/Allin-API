@@ -28,10 +28,10 @@ fun Application.UserRouter() {
             post {
                 val tempUser = call.receive<UserRequest>()
                 if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
-                    call.respond(HttpStatusCode.Forbidden, ApiMessage.InvalidMail)
+                    call.respond(HttpStatusCode.Forbidden, ApiMessage.INVALID_MAIL)
                 }
                 if (userDataSource.userExists(tempUser.username, tempUser.email)) {
-                    call.respond(HttpStatusCode.Conflict, ApiMessage.UserAlreadyExist)
+                    call.respond(HttpStatusCode.Conflict, ApiMessage.USER_ALREADY_EXISTS)
                 }
 
                 val user = User(
@@ -57,9 +57,9 @@ fun Application.UserRouter() {
                     user.first?.let { userDtoWithToken ->
                         userDtoWithToken.token = tokenManagerUser.generateOrReplaceJWTToken(userDtoWithToken)
                         call.respond(HttpStatusCode.OK, userDtoWithToken)
-                    } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.UserNotFound)
+                    } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.USER_NOT_FOUND)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, ApiMessage.IncorrectLoginPassword)
+                    call.respond(HttpStatusCode.NotFound, ApiMessage.INCORRECT_LOGIN_PASSWORD)
                 }
             }
         }
@@ -75,7 +75,7 @@ fun Application.UserRouter() {
                             }
                             call.respond(HttpStatusCode.Accepted, password)
                         } else {
-                            call.respond(HttpStatusCode.NotFound, "Login and/or password incorrect.")
+                            call.respond(HttpStatusCode.NotFound, ApiMessage.INCORRECT_LOGIN_PASSWORD)
                         }
 
                     }
@@ -96,7 +96,7 @@ fun Application.UserRouter() {
                             val dailyGift = getDailyGift()
                             userDataSource.addCoins(userDto.username, dailyGift)
                             call.respond(HttpStatusCode.OK, dailyGift)
-                        } else call.respond(HttpStatusCode.MethodNotAllowed, "Can't get daily gift.")
+                        } else call.respond(HttpStatusCode.MethodNotAllowed, ApiMessage.NO_GIFT)
                     }
                 }
             }

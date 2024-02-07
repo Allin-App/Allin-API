@@ -3,6 +3,7 @@ package allin.routing
 import allin.dataSource
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
+import allin.model.ApiMessage
 import allin.model.BetDetail
 import allin.model.getBetAnswerDetail
 import io.ktor.http.*
@@ -36,7 +37,7 @@ fun Application.BetDetailRouter() {
                                 )
                             )
                         } else {
-                            call.respond(HttpStatusCode.NotFound, "Bet not found")
+                            call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
                         }
                     }
                 }

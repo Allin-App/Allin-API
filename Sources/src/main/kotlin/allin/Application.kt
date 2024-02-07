@@ -5,6 +5,7 @@ import allin.data.mock.MockDataSource
 import allin.data.postgres.PostgresDataSource
 import allin.routing.*
 import allin.utils.TokenManager
+import allin.utils.TokenManager.Companion.Claims.USERNAME
 import allin.utils.kronJob
 import com.typesafe.config.ConfigFactory
 import io.ktor.serialization.kotlinx.json.*
@@ -48,7 +49,7 @@ private fun Application.extracted() {
             verifier(tokenManager.verifyJWTToken())
             realm = config.property("realm").getString()
             validate { jwtCredential ->
-                if (jwtCredential.payload.getClaim("username").asString().isNotEmpty())
+                if (jwtCredential.payload.getClaim(USERNAME).asString().isNotEmpty())
                     JWTPrincipal(jwtCredential.payload)
                 else null
             }

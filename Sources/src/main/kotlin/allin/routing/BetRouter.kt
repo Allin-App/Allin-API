@@ -3,9 +3,7 @@ package allin.routing
 import allin.dataSource
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
-import allin.model.ApiMessage
-import allin.model.Bet
-import allin.model.UpdatedBetData
+import allin.model.*
 import allin.utils.AppConfig
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -32,7 +30,7 @@ fun Application.BetRouter() {
                         val id = UUID.randomUUID().toString()
                         val username = tokenManagerBet.getUsernameFromToken(principal)
                         betDataSource.getBetById(id)?.let {
-                            call.respond(HttpStatusCode.Conflict, ApiMessage.BetAlreadyExist)
+                            call.respond(HttpStatusCode.Conflict, ApiMessage.BET_ALREADY_EXIST)
                         } ?: run {
                             val betWithId = bet.copy(id = id, createdBy = username)
                             betDataSource.addBet(betWithId)
@@ -44,12 +42,13 @@ fun Application.BetRouter() {
 
             }
         }
-
-        route("/bets/gets") {
-            get {
-                // if(bets.size>0)
-                call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets())
-                // else call.respond(HttpStatusCode.NoContent)
+        authenticate {
+            get("/bets/gets") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets())
+                    }
+                }
             }
         }
 
@@ -58,7 +57,7 @@ fun Application.BetRouter() {
                 val id = call.parameters["id"] ?: ""
                 betDataSource.getBetById(id)?.let { bet ->
                     call.respond(HttpStatusCode.Accepted, bet)
-                } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
+                } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
             }
         }
 
@@ -68,7 +67,7 @@ fun Application.BetRouter() {
                 if (betDataSource.removeBet(id)) {
                     call.respond(HttpStatusCode.Accepted)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
+                    call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
                 }
 
             }
@@ -79,7 +78,46 @@ fun Application.BetRouter() {
                 if (betDataSource.updateBet(updatedBetData)) {
                     call.respond(HttpStatusCode.Accepted)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, ApiMessage.BetNotFound)
+                    call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
+                }
+            }
+        }
+
+        authenticate {
+            get("/bets/toConfirm") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        val response = betDataSource.getToConfirm(user.username).map {
+                            val participations = participationDataSource.getParticipationFromBetId(it.id)
+                            BetDetail(
+                                it,
+                                getBetAnswerDetail(it, participations),
+                                participations.toList(),
+                                participationDataSource.getParticipationFromUserId(user.username, it.id).lastOrNull()
+                            )
+                        }
+                        call.respond(HttpStatusCode.Accepted, response)
+                    }
+                }
+            }
+        }
+
+        authenticate {
+            get("/bets/getWon") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getWonNotifications(user.username))
+                    }
+                }
+            }
+        }
+
+        authenticate {
+            get("/bets/history") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getHistory(user.username))
+                    }
                 }
             }
         }
@@ -88,17 +126,30 @@ fun Application.BetRouter() {
             get("/bets/current") {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        val currentBets = betDataSource.getBetsNotFinished()
-                            .filter { bet ->
-                                val userParticipation =
-                                    participationDataSource.getParticipationFromUserId(user.username, bet.id)
-                                userParticipation.isNotEmpty()
-                            }
-
-                        call.respond(HttpStatusCode.OK, currentBets)
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getCurrent(user.username))
                     }
                 }
             }
         }
+
+        authenticate {
+            post("/bets/confirm/{id}") {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        val betId = call.parameters["id"] ?: ""
+                        val result = call.receive<String>()
+
+                        if (betDataSource.getBetById(betId)?.createdBy == user.username) {
+                            betDataSource.confirmBet(betId, result)
+                            call.respond(HttpStatusCode.OK)
+                        } else {
+                            call.respond(HttpStatusCode.Unauthorized)
+                        }
+
+                    }
+                }
+            }
+        }
+
     }
 }
