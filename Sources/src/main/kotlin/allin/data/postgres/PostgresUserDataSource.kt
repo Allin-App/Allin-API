@@ -70,7 +70,7 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
 
     override fun canHaveDailyGift(username: String): Boolean {
         val request =
-            "SELECT CASE WHEN NOW() - lastgift > INTERVAL '1 day' THEN true ELSE false END AS is_lastgift_greater_than_1_day FROM utilisateur WHERE username = '$username';"
+            "SELECT CASE WHEN DATE(NOW()) > DATE(lastgift) THEN true ELSE false END AS is_lastgift_greater_than_1_day FROM utilisateur WHERE username = '$username';"
         val resultSet = database.ExecuteWithResult(request)
 
         resultSet?.use {
