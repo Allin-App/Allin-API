@@ -28,6 +28,7 @@ import kotlin.time.minutes
 val BET_VERIFY_DELAY = 1.minutes
 
 val data_source = System.getenv()["DATA_SOURCE"]
+val isCodeFirstContainer = System.getenv()["CODEFIRST_CONTAINER"].orEmpty()
 
 private val allInDataSource: AllInDataSource = when (data_source) {
     "mock" -> MockDataSource()
@@ -61,6 +62,14 @@ private fun Application.extracted() {
     }
     install(ContentNegotiation) { json() }
     install(SwaggerUI){
+        swagger {
+            swaggerUrl = "swagger"
+            rootHostPath= isCodeFirstContainer
+            onlineSpecValidator()
+            displayOperationId = true
+            showTagFilterInput = true
+            sort = SwaggerUiSort.HTTP_METHOD
+        }
         info {
             title = "Allin API"
             version = "latest"
