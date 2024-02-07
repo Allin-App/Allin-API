@@ -8,6 +8,7 @@ import java.time.ZonedDateTime
 class MockBetDataSource(mockData: MockDataSource.MockData) : BetDataSource {
     private val bets = mockData.bets
     private val results = mockData.results
+    private val users = mockData.users
     private val participations = mockData.participations
     private val resultNotifications = mockData.resultNotifications
 
@@ -62,8 +63,13 @@ class MockBetDataSource(mockData: MockDataSource.MockData) : BetDataSource {
         }
 
         participations.filter { it.betId == betId && it.answer == result }
-            .forEach {
-                resultNotifications.add(Pair(betId, it.username))
+            .forEach { participation ->
+                users.replaceAll {
+                    if (it.username == participation.username) {
+                        it.copy(nbCoins = it.nbCoins + participation.stake)
+                    } else it
+                }
+                resultNotifications.add(Pair(betId, participation.username))
             }
     }
 
