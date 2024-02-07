@@ -7,7 +7,7 @@ class MockParticipationDataSource(mockData: MockDataSource.MockData) : Participa
     private val participations = mockData.participations
 
     override fun addParticipation(participation: Participation) {
-        participations += participations
+        participations += participation
     }
 
     override fun getParticipationFromBetId(betid: String): List<Participation> =

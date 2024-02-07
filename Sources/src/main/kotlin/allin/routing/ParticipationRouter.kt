@@ -59,7 +59,6 @@ fun Application.ParticipationRouter() {
                             )
 
                             userDataSource.removeCoins(username = user.username, amount = participation.stake)
-
                             call.respond(HttpStatusCode.Created)
                         } else {
                             call.respond(HttpStatusCode.Forbidden, ApiMessage.NOT_ENOUGH_COINS)
