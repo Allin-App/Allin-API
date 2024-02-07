@@ -12,4 +12,5 @@ object ApiMessage {
     const val PARTICIPATION_NOT_FOUND = "Participation not found."
     const val NOT_ENOUGH_COINS = "Not enough coins."
     const val NO_GIFT = "Can't get daily gift."
+    const val USER_CANT_BE_DELETE = "This user can't be delete now !"
 }
