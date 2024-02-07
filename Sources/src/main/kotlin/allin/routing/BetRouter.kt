@@ -92,8 +92,8 @@ fun Application.BetRouter() {
                             BetDetail(
                                 it,
                                 getBetAnswerDetail(it, participations),
-                                participations.toList(),
-                                participationDataSource.getParticipationFromUserId(user.username, it.id).lastOrNull()
+                                participations,
+                                participations.find { it.username == user.username }
                             )
                         }
                         call.respond(HttpStatusCode.Accepted, response)
