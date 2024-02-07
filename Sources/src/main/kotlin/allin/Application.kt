@@ -38,7 +38,6 @@ private val allInDataSource: AllInDataSource = when (data_source) {
 val Application.dataSource: AllInDataSource
     get() = allInDataSource
 
-
 fun main() {
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         extracted()
@@ -65,6 +64,7 @@ private fun Application.extracted() {
         swagger {
             swaggerUrl = "swagger"
             rootHostPath= isCodeFirstContainer
+            swaggerUrl= "$isCodeFirstContainer/swagger"
             onlineSpecValidator()
             displayOperationId = true
             showTagFilterInput = true
