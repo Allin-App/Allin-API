@@ -61,17 +61,6 @@ private fun Application.extracted() {
     }
     install(ContentNegotiation) { json() }
     install(SwaggerUI){
-        swagger {
-            forwardRoot = false
-            swaggerUrl = "swagger"
-            rootHostPath = "http://127.0.0.1:8080/"
-            authentication = "MySwaggerAuth"
-            onlineSpecValidator()
-            displayOperationId = true
-            showTagFilterInput = true
-            sort = SwaggerUiSort.HTTP_METHOD
-            syntaxHighlight = SwaggerUiSyntaxHighlight.MONOKAI
-        }
         info {
             title = "Allin API"
             version = "latest"
