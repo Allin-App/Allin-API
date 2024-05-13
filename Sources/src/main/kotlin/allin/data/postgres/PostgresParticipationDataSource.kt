@@ -5,7 +5,6 @@ import allin.data.postgres.entities.ParticipationsEntity
 import allin.model.Participation
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
-import java.util.*
 
 class PostgresParticipationDataSource(private val database: Database) : ParticipationDataSource {
 
@@ -22,8 +21,8 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
 
     override fun addParticipation(participation: Participation) {
         database.insert(ParticipationsEntity) {
-            set(it.id, UUID.fromString(participation.id))
-            set(it.betId, UUID.fromString(participation.betId))
+            set(it.id, participation.id)
+            set(it.betId, participation.betId)
             set(it.username, participation.username)
             set(it.answer, participation.answer)
             set(it.stake, participation.stake)
@@ -33,13 +32,13 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
     override fun getParticipationFromBetId(betid: String): List<Participation> =
         database.from(ParticipationsEntity)
             .select()
-            .where { ParticipationsEntity.betId eq UUID.fromString(betid) }
+            .where { ParticipationsEntity.betId eq betid }
             .mapToParticipation()
 
     override fun getParticipationFromUserId(username: String, betid: String): List<Participation> =
         database.from(ParticipationsEntity)
             .select()
-            .where { (ParticipationsEntity.betId eq UUID.fromString(betid)) and (ParticipationsEntity.username eq username) }
+            .where { (ParticipationsEntity.betId eq betid) and (ParticipationsEntity.username eq username) }
             .mapToParticipation()
 
     fun getParticipationEntity(): List<Participation> =
@@ -47,6 +46,6 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
 
     override fun deleteParticipation(id: String): Boolean =
         database.delete(ParticipationsEntity) {
-            it.id eq UUID.fromString(id)
+            it.id eq id
         } > 0
 }

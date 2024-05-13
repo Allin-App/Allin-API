@@ -3,7 +3,6 @@ package allin.data.postgres.entities
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Table
 import org.ktorm.schema.int
-import org.ktorm.schema.uuid
 import org.ktorm.schema.varchar
 
 interface ParticipationEntity : Entity<ParticipationEntity> {
@@ -16,8 +15,8 @@ interface ParticipationEntity : Entity<ParticipationEntity> {
 
 
 object ParticipationsEntity : Table<ParticipationEntity>("participation") {
-    val id = uuid("id").primaryKey()
-    val betId = uuid("bet").references(BetsEntity) { it.bet }
+    val id = varchar("id").primaryKey()
+    val betId = varchar("bet").references(BetsEntity) { it.bet }
     val username = varchar("username")
     val answer = varchar("answer")
     val stake = int("stake")

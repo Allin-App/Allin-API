@@ -9,7 +9,6 @@ import org.ktorm.database.Database
 import org.ktorm.database.use
 import org.ktorm.dsl.*
 import java.time.Instant.now
-import java.util.*
 
 class PostgresUserDataSource(private val database: Database) : UserDataSource {
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
@@ -32,7 +31,7 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
 
     override fun addUser(user: User) {
         database.insert(UsersEntity) {
-            set(it.id, UUID.fromString(user.id))
+            set(it.id, user.id)
             set(it.nbCoins, user.nbCoins)
             set(it.username, user.username)
             set(it.password, user.password)

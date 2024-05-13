@@ -8,7 +8,6 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.*
 
 class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
@@ -29,7 +28,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
                 if (type == BetType.CUSTOM) {
                     database.from(ResponsesEntity)
                         .select(response)
-                        .where { ResponsesEntity.id eq UUID.fromString(idBet) }
+                        .where { ResponsesEntity.id eq idBet }
                         .map { it[response].toString() }
                 } else {
                     listOf(YES_VALUE, NO_VALUE)
@@ -66,7 +65,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
     override fun getBetById(id: String): Bet? =
         database.from(BetsEntity).select().where {
-            BetsEntity.id eq UUID.fromString(id)
+            BetsEntity.id eq id
         }.mapToBet().firstOrNull()
 
     override fun getBetsNotFinished(): List<Bet> {
@@ -93,14 +92,14 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
         }
 
         database.update(BetsEntity) {
-            where { BetsEntity.id eq UUID.fromString(betId) }
+            where { BetsEntity.id eq betId }
             set(BetsEntity.status, BetStatus.FINISHED)
         }
 
         database.from(ParticipationsEntity)
             .select()
             .where {
-                (ParticipationsEntity.betId eq UUID.fromString(betId)) and
+                (ParticipationsEntity.betId eq betId) and
                         (ParticipationsEntity.answer eq result)
             }
             .forEach { participation ->
@@ -167,7 +166,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
     override fun addBet(bet: Bet) {
         database.insert(BetsEntity) {
-            set(it.id, UUID.fromString(bet.id))
+            set(it.id, bet.id)
             set(it.endBet, bet.endBet.toInstant())
             set(it.endRegistration, bet.endRegistration.toInstant())
             set(it.sentenceBet, bet.sentenceBet)
@@ -181,7 +180,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
         if (bet.type == BetType.CUSTOM) {
             bet.response.forEach { selected ->
                 database.insert(ResponsesEntity) {
-                    set(it.id, UUID.fromString(bet.id))
+                    set(it.id, bet.id)
                     set(it.response, selected)
                 }
             }
@@ -189,13 +188,13 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
     }
 
     override fun removeBet(id: String): Boolean {
-        return database.delete(BetsEntity) { it.id eq UUID.fromString(id) } > 0
+        return database.delete(BetsEntity) { it.id eq id } > 0
     }
 
     override fun updateBet(data: UpdatedBetData): Boolean {
         return database.update(BetsEntity) {
             set(BetsEntity.isPrivate, data.isPrivate)
-            where { BetsEntity.id eq UUID.fromString(data.id) }
+            where { BetsEntity.id eq data.id }
         } > 0
     }
 

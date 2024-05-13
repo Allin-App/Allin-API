@@ -2,9 +2,7 @@ package allin.data.postgres.entities
 
 import org.ktorm.entity.Entity
 import org.ktorm.schema.Table
-import org.ktorm.schema.uuid
 import org.ktorm.schema.varchar
-import java.util.*
 
 
 interface BetResultEntity : Entity<BetResultEntity> {
@@ -13,16 +11,16 @@ interface BetResultEntity : Entity<BetResultEntity> {
 }
 
 object BetResultsEntity : Table<BetResultEntity>("betresult") {
-    val betId = uuid("betid").primaryKey().references(BetsEntity) { it.bet }
+    val betId = varchar("betid").primaryKey().references(BetsEntity) { it.bet }
     val result = varchar("result").bindTo { it.result }
 }
 
 interface BetResultNotificationEntity : Entity<BetResultNotificationEntity> {
-    val betId: UUID
+    val betId: String
     val username: String
 }
 
 object BetResultNotificationsEntity : Table<BetResultNotificationEntity>("betresult") {
-    val betId = uuid("betid").primaryKey()
+    val betId = varchar("betid").primaryKey()
     val username = varchar("username").primaryKey()
 }

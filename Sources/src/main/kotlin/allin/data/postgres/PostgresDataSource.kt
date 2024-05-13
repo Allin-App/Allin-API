@@ -26,10 +26,10 @@ class PostgresDataSource : AllInDataSource() {
         database.Execute(
             """
             CREATE TABLE IF not exists utilisateur ( 
-                id uuid PRIMARY KEY, 
+                id VARCHAR(255) PRIMARY KEY, 
                 username VARCHAR(255), 
                 password VARCHAR(255),
-                coins double precision,
+                coins int,
                 email VARCHAR(255),
                 lastgift timestamp
             )
@@ -39,7 +39,7 @@ class PostgresDataSource : AllInDataSource() {
         database.Execute(
             """
             CREATE TABLE IF not exists bet (
-                id uuid PRIMARY KEY, 
+                id VARCHAR(255) PRIMARY KEY, 
                 theme VARCHAR(255), 
                 endregistration timestamp,
                 endbet timestamp,
@@ -55,7 +55,7 @@ class PostgresDataSource : AllInDataSource() {
         database.Execute(
             """
             CREATE TABLE IF NOT EXISTS betresult (
-                betid uuid PRIMARY KEY REFERENCES bet,
+                betid VARCHAR(255) PRIMARY KEY REFERENCES bet,
                 result varchar(250)
             )
             """.trimIndent()
@@ -64,7 +64,7 @@ class PostgresDataSource : AllInDataSource() {
         database.Execute(
             """
             CREATE TABLE IF NOT EXISTS betresultnotification (
-                betid uuid,
+                betid VARCHAR(255),
                 username varchar(250),
                 CONSTRAINT pk_id_username PRIMARY KEY (betid, username)
             )
@@ -74,8 +74,8 @@ class PostgresDataSource : AllInDataSource() {
         database.Execute(
             """
             CREATE TABLE IF NOT EXISTS participation (
-                id uuid PRIMARY KEY,
-                bet uuid,
+                id VARCHAR(255) PRIMARY KEY,
+                bet VARCHAR(255),
                 username varchar(250),
                 answer varchar(250),
                 stake int
@@ -86,7 +86,7 @@ class PostgresDataSource : AllInDataSource() {
         database.Execute(
             """
             CREATE TABLE IF NOT EXISTS response (
-                id UUID,
+                id VARCHAR(255),
                 response VARCHAR(250),
                 CONSTRAINT pk_response_id PRIMARY KEY (id, response)
             )

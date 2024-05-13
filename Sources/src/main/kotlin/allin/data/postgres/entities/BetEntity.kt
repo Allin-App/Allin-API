@@ -19,7 +19,7 @@ interface BetEntity : Entity<BetEntity> {
 }
 
 object BetsEntity : Table<BetEntity>("bet") {
-    val id = uuid("id").primaryKey()
+    val id = varchar("id").primaryKey()
     val theme = varchar("theme").bindTo { it.theme }
     val sentenceBet = varchar("sentencebet").bindTo { it.sentenceBet }
     val endRegistration = timestamp("endregistration")
