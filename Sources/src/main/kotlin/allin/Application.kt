@@ -37,7 +37,7 @@ val Application.dataSource: AllInDataSource
     get() = allInDataSource
 
 fun main() {
-    embeddedServer(Netty, port = 10001, host = "0.0.0.0") {
+    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         extracted()
     }.start(wait = true)
 }
