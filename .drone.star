@@ -15,7 +15,6 @@ def main(ctx):
         cd(ctx),
     ]
 
-
 def nullPipeline():
   return {
     "kind": "pipeline",
