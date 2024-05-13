@@ -9,7 +9,7 @@ def main(ctx):
         cd(ctx),
         db(ctx)
     ]
-  else 
+  else :
     return [
         ci(ctx),
         cd(ctx),
