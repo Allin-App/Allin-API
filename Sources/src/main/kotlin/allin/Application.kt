@@ -10,7 +10,6 @@ import allin.utils.kronJob
 import com.typesafe.config.ConfigFactory
 import io.github.smiley4.ktorswaggerui.SwaggerUI
 import io.github.smiley4.ktorswaggerui.data.SwaggerUiSort
-import io.github.smiley4.ktorswaggerui.data.SwaggerUiSyntaxHighlight
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -22,7 +21,6 @@ import io.ktor.server.plugins.contentnegotiation.*
 import java.time.ZonedDateTime
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.ExperimentalTime
-import kotlin.time.minutes
 
 @ExperimentalTime
 val BET_VERIFY_DELAY = 1.minutes
@@ -60,11 +58,11 @@ private fun Application.extracted() {
         }
     }
     install(ContentNegotiation) { json() }
-    install(SwaggerUI){
+    install(SwaggerUI) {
         swagger {
             swaggerUrl = "swagger"
-            rootHostPath= isCodeFirstContainer
-            swaggerUrl= "$isCodeFirstContainer/swagger"
+            rootHostPath = isCodeFirstContainer
+            swaggerUrl = "$isCodeFirstContainer/swagger"
             onlineSpecValidator()
             displayOperationId = true
             showTagFilterInput = true

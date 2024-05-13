@@ -39,7 +39,9 @@ fun Application.UserRouter() {
             response {
                 HttpStatusCode.Created to {
                     description = "User created"
-                    body<User>()
+                    body<User>{
+                        description="The new user"
+                    }
                 }
                 HttpStatusCode.Conflict to {
                     description = "Email or username already taken"
@@ -76,7 +78,7 @@ fun Application.UserRouter() {
         post("/users/login", {
             description = "Allows a user to login"
             request {
-                body<UserRequest> {
+                body<CheckUser> {
                     description = "User information"
                 }
             }
@@ -173,7 +175,7 @@ fun Application.UserRouter() {
                 response {
                     HttpStatusCode.OK to {
                         description = "Daily gift allowed !"
-                        body<Int>() {
+                        body<Int> {
                             description = "Number of coins offered"
                         }
                     }

@@ -53,10 +53,11 @@ fun Application.BetRouter() {
                     val bet = call.receive<Bet>()
                     val id = UUID.randomUUID().toString()
                     val username = tokenManagerBet.getUsernameFromToken(principal)
+                    val user = userDataSource.getUserByUsername(username)
                     betDataSource.getBetById(id)?.let {
                         call.respond(HttpStatusCode.Conflict, ApiMessage.BET_ALREADY_EXIST)
                     } ?: run {
-                        val betWithId = bet.copy(id = id, createdBy = username)
+                        val betWithId = bet.copy(id = id, createdBy = user.first?.id.toString())
                         betDataSource.addBet(betWithId)
                         call.respond(HttpStatusCode.Created, betWithId)
                     }
