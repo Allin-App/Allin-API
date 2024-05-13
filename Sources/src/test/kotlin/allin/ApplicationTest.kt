@@ -1,5 +1,4 @@
 package allin
 
 class ApplicationTest {
-    
 }
