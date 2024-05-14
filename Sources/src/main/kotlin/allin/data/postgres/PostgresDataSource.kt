@@ -1,9 +1,6 @@
 package allin.data.postgres
 
-import allin.data.AllInDataSource
-import allin.data.BetDataSource
-import allin.data.ParticipationDataSource
-import allin.data.UserDataSource
+import allin.data.*
 import allin.ext.execute
 import org.ktorm.database.Database
 
@@ -95,9 +92,20 @@ class PostgresDataSource : AllInDataSource() {
             )
             """.trimIndent()
         )
+
+        database.execute(
+            """
+                CREATE TABLE IF NOT EXISTS friend(
+                    sender VARCHAR(255),
+                    receiver VARCHAR(255),
+                    CONSTRAINT pk_friend PRIMARY KEY (sender,receiver)
+               )
+            """.trimIndent()
+        )
     }
 
     override val userDataSource: UserDataSource by lazy { PostgresUserDataSource(database) }
     override val betDataSource: BetDataSource by lazy { PostgresBetDataSource(database) }
     override val participationDataSource: ParticipationDataSource by lazy { PostgresParticipationDataSource(database) }
+    override val friendDataSource: FriendDataSource by lazy { PostgresFriendDataSource(database) }
 }
