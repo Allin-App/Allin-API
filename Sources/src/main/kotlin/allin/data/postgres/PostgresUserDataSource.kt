@@ -3,8 +3,8 @@ package allin.data.postgres
 import allin.data.UserDataSource
 import allin.data.postgres.entities.UsersEntity
 import allin.dto.UserDTO
+import allin.ext.executeWithResult
 import allin.model.User
-import allin.utils.ExecuteWithResult
 import org.ktorm.database.Database
 import org.ktorm.database.use
 import org.ktorm.dsl.*
@@ -70,7 +70,7 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
     override fun canHaveDailyGift(username: String): Boolean {
         val request =
             "SELECT CASE WHEN DATE(NOW()) > DATE(lastgift) THEN true ELSE false END AS is_lastgift_greater_than_1_day FROM utilisateur WHERE username = '$username';"
-        val resultSet = database.ExecuteWithResult(request)
+        val resultSet = database.executeWithResult(request)
 
         resultSet?.use {
             if (resultSet.next()) {

@@ -1,9 +1,9 @@
-package allin.utils
+package allin.ext
 
 import org.ktorm.database.Database
 import java.sql.ResultSet
 
-fun Database.ExecuteWithResult(request: String): ResultSet? {
+fun Database.executeWithResult(request: String): ResultSet? {
     try {
         if (request.isNotEmpty()) {
             return this.useTransaction { transaction ->
@@ -19,7 +19,7 @@ fun Database.ExecuteWithResult(request: String): ResultSet? {
     return null
 }
 
-fun Database.Execute(request: String) {
+fun Database.execute(request: String) {
     if (request.isNotEmpty())
         this.useTransaction {
             val connection = it.connection

@@ -4,7 +4,7 @@ import allin.data.ParticipationDataSource
 import allin.model.Participation
 
 class MockParticipationDataSource(mockData: MockDataSource.MockData) : ParticipationDataSource {
-    private val participations = mockData.participations
+    private val participations by lazy { mockData.participations }
 
     override fun addParticipation(participation: Participation) {
         participations += participation

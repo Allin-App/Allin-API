@@ -200,7 +200,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
     override fun updateBetStatuses(date: ZonedDateTime) {
         database.update(BetsEntity) {
-            set(BetsEntity.status, BetStatus.WAITING)
+            set(BetsEntity.status, BetStatus.IN_PROGRESS)
             where {
                 (date.toInstant() greaterEq BetsEntity.endRegistration) and
                         (date.toInstant() less BetsEntity.endBet) and

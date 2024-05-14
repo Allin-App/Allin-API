@@ -7,7 +7,6 @@ import allin.model.*
 import allin.utils.AppConfig
 import io.github.smiley4.ktorswaggerui.dsl.get
 import io.github.smiley4.ktorswaggerui.dsl.post
-import io.github.smiley4.ktorswaggerui.dsl.route
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -15,13 +14,11 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.swagger.annotations.Api
 import java.util.*
 
 val tokenManagerBet = AppConfig.tokenManager
 
-
-fun Application.BetRouter() {
+fun Application.betRouter() {
     val userDataSource = this.dataSource.userDataSource
     val betDataSource = this.dataSource.betDataSource
     val participationDataSource = this.dataSource.participationDataSource

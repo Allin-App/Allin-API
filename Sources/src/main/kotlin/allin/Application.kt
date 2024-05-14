@@ -33,6 +33,7 @@ private val allInDataSource: AllInDataSource = when (data_source) {
     "postgres" -> PostgresDataSource()
     else -> MockDataSource()
 }
+
 val Application.dataSource: AllInDataSource
     get() = allInDataSource
 
@@ -79,11 +80,11 @@ private fun Application.extracted() {
         }
     }
 
-    BasicRouting()
-    UserRouter()
-    BetRouter()
-    ParticipationRouter()
-    BetDetailRouter()
+    basicRouter()
+    userRouter()
+    betRouter()
+    participationRouter()
+    betDetailRouter()
 
     kronJob(BET_VERIFY_DELAY) {
         dataSource.betDataSource.updateBetStatuses(ZonedDateTime.now())

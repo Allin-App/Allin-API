@@ -12,6 +12,10 @@ import java.time.ZonedDateTime
 
 class MockDataSource : AllInDataSource() {
 
+    init {
+        println("APP STARTING ON MOCK DATA SOURCE")
+    }
+
     class MockData {
         val bets by lazy { mutableListOf<Bet>() }
         val results by lazy { mutableListOf<BetResult>() }
@@ -23,7 +27,7 @@ class MockDataSource : AllInDataSource() {
 
     private val mockData by lazy { MockData() }
 
-    override val userDataSource: UserDataSource = MockUserDataSource(mockData)
-    override val betDataSource: BetDataSource = MockBetDataSource(mockData)
-    override val participationDataSource: ParticipationDataSource = MockParticipationDataSource(mockData)
+    override val userDataSource: UserDataSource by lazy { MockUserDataSource(mockData) }
+    override val betDataSource: BetDataSource by lazy { MockBetDataSource(mockData) }
+    override val participationDataSource: ParticipationDataSource by lazy { MockParticipationDataSource(mockData) }
 }

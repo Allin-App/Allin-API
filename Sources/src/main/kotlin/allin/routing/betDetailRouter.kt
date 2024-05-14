@@ -16,7 +16,7 @@ import io.ktor.server.routing.*
 import java.util.*
 
 
-fun Application.BetDetailRouter() {
+fun Application.betDetailRouter() {
     val userDataSource = this.dataSource.userDataSource
     val betDataSource = this.dataSource.betDataSource
     val participationDataSource = this.dataSource.participationDataSource

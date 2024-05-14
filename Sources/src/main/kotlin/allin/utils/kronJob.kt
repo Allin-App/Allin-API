@@ -2,9 +2,8 @@ package allin.utils
 
 import kotlinx.coroutines.*
 import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
 
-@OptIn(DelicateCoroutinesApi::class, ExperimentalTime::class)
+@OptIn(DelicateCoroutinesApi::class)
 fun kronJob(duration: Duration, action: () -> Unit) =
     GlobalScope.launch {
         withContext(Dispatchers.IO) {

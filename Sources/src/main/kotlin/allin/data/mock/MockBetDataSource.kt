@@ -6,11 +6,11 @@ import allin.model.BetStatus.*
 import java.time.ZonedDateTime
 
 class MockBetDataSource(mockData: MockDataSource.MockData) : BetDataSource {
-    private val bets = mockData.bets
-    private val results = mockData.results
-    private val users = mockData.users
-    private val participations = mockData.participations
-    private val resultNotifications = mockData.resultNotifications
+    private val bets by lazy { mockData.bets }
+    private val results by lazy { mockData.results }
+    private val users by lazy { mockData.users }
+    private val participations by lazy { mockData.participations }
+    private val resultNotifications by lazy { mockData.resultNotifications }
 
     override fun getAllBets(): List<Bet> = bets
     override fun getBetById(id: String): Bet? =
@@ -39,7 +39,7 @@ class MockBetDataSource(mockData: MockDataSource.MockData) : BetDataSource {
                     if (date >= bet.endBet) {
                         bets[idx] = bet.copy(status = CLOSING)
                     } else {
-                        bets[idx] = bet.copy(status = WAITING)
+                        bets[idx] = bet.copy(status = IN_PROGRESS)
                     }
                 }
             }

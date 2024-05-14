@@ -18,7 +18,7 @@ import io.ktor.server.routing.*
 import java.util.*
 
 
-fun Application.ParticipationRouter() {
+fun Application.participationRouter() {
 
     val userDataSource = this.dataSource.userDataSource
     val participationDataSource = this.dataSource.participationDataSource

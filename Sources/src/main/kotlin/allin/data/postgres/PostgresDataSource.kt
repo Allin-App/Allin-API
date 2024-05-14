@@ -4,7 +4,7 @@ import allin.data.AllInDataSource
 import allin.data.BetDataSource
 import allin.data.ParticipationDataSource
 import allin.data.UserDataSource
-import allin.utils.Execute
+import allin.ext.execute
 import org.ktorm.database.Database
 
 class PostgresDataSource : AllInDataSource() {
@@ -16,14 +16,17 @@ class PostgresDataSource : AllInDataSource() {
         val dbUser = System.getenv()["POSTGRES_USER"]
         val dbPassword = System.getenv()["POSTGRES_PASSWORD"]
         val dbHost = System.getenv()["POSTGRES_HOST"]
+        val url = "jdbc:postgresql://$dbHost/$dbDatabase"
+
+        println("APP STARTING ON POSTGRESQL DATA SOURCE $url")
 
         database = Database.connect(
-            url = "jdbc:postgresql://$dbHost/$dbDatabase",
+            url = url,
             user = dbUser,
             password = dbPassword
         )
 
-        database.Execute(
+        database.execute(
             """
             CREATE TABLE IF not exists utilisateur ( 
                 id VARCHAR(255) PRIMARY KEY, 
@@ -36,7 +39,7 @@ class PostgresDataSource : AllInDataSource() {
             """.trimIndent()
         )
 
-        database.Execute(
+        database.execute(
             """
             CREATE TABLE IF not exists bet (
                 id VARCHAR(255) PRIMARY KEY, 
@@ -52,7 +55,7 @@ class PostgresDataSource : AllInDataSource() {
             """.trimIndent()
         )
 
-        database.Execute(
+        database.execute(
             """
             CREATE TABLE IF NOT EXISTS betresult (
                 betid VARCHAR(255) PRIMARY KEY REFERENCES bet,
@@ -61,7 +64,7 @@ class PostgresDataSource : AllInDataSource() {
             """.trimIndent()
         )
 
-        database.Execute(
+        database.execute(
             """
             CREATE TABLE IF NOT EXISTS betresultnotification (
                 betid VARCHAR(255),
@@ -71,7 +74,7 @@ class PostgresDataSource : AllInDataSource() {
             """.trimIndent()
         )
 
-        database.Execute(
+        database.execute(
             """
             CREATE TABLE IF NOT EXISTS participation (
                 id VARCHAR(255) PRIMARY KEY,
@@ -83,7 +86,7 @@ class PostgresDataSource : AllInDataSource() {
             """.trimIndent()
         )
 
-        database.Execute(
+        database.execute(
             """
             CREATE TABLE IF NOT EXISTS response (
                 id VARCHAR(255),
@@ -94,7 +97,7 @@ class PostgresDataSource : AllInDataSource() {
         )
     }
 
-    override val userDataSource: UserDataSource = PostgresUserDataSource(database)
-    override val betDataSource: BetDataSource = PostgresBetDataSource(database)
-    override val participationDataSource: ParticipationDataSource = PostgresParticipationDataSource(database)
+    override val userDataSource: UserDataSource by lazy { PostgresUserDataSource(database) }
+    override val betDataSource: BetDataSource by lazy { PostgresBetDataSource(database) }
+    override val participationDataSource: ParticipationDataSource by lazy { PostgresParticipationDataSource(database) }
 }

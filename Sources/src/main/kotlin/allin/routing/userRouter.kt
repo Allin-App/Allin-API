@@ -15,7 +15,6 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.swagger.annotations.Api
 import java.util.*
 
 val RegexCheckerUser = AppConfig.regexChecker
@@ -24,7 +23,7 @@ val tokenManagerUser = AppConfig.tokenManager
 const val DEFAULT_COINS = 500
 
 
-fun Application.UserRouter() {
+fun Application.userRouter() {
 
     val userDataSource = this.dataSource.userDataSource
 
@@ -39,8 +38,8 @@ fun Application.UserRouter() {
             response {
                 HttpStatusCode.Created to {
                     description = "User created"
-                    body<User>{
-                        description="The new user"
+                    body<User> {
+                        description = "The new user"
                     }
                 }
                 HttpStatusCode.Conflict to {
@@ -189,7 +188,7 @@ fun Application.UserRouter() {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { userDto, _ ->
                         if (userDataSource.canHaveDailyGift(userDto.username)) {
-                            val dailyGift = getDailyGift()
+                            val dailyGift = (DAILY_GIFT_MIN..DAILY_GIFT_MAX).random()
                             userDataSource.addCoins(userDto.username, dailyGift)
                             call.respond(HttpStatusCode.OK, dailyGift)
                         } else call.respond(HttpStatusCode.MethodNotAllowed, ApiMessage.NO_GIFT)
