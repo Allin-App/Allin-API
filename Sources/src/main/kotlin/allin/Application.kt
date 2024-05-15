@@ -38,7 +38,7 @@ val Application.dataSource: AllInDataSource
     get() = allInDataSource
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+    embeddedServer(Netty, port = 10001, host = "0.0.0.0") {
         extracted()
     }.start(wait = true)
 }
@@ -85,6 +85,7 @@ private fun Application.extracted() {
     betRouter()
     participationRouter()
     betDetailRouter()
+    friendRouter()
 
     kronJob(BET_VERIFY_DELAY) {
         dataSource.betDataSource.updateBetStatuses(ZonedDateTime.now())
