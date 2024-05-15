@@ -13,6 +13,29 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
     override fun getAllBets(filters: List<BetFilter>): List<Bet> =
         database.bets
+            .filter { bet ->
+                val public = if (filters.contains(BetFilter.PUBLIC)) {
+                    !bet.isPrivate
+                } else bet.id eq ""
+
+                val invitation = if (filters.contains(BetFilter.INVITATION)) {
+                    bet.isPrivate
+                } else bet.id eq ""
+
+                val finished = if (filters.contains(BetFilter.FINISHED)) {
+                    bet.status inList listOf(BetStatus.FINISHED, BetStatus.CANCELLED)
+                } else bet.id eq ""
+
+                val inProgress = if (filters.contains(BetFilter.IN_PROGRESS)) {
+                    bet.status inList listOf(
+                        BetStatus.IN_PROGRESS,
+                        BetStatus.WAITING,
+                        BetStatus.CLOSING
+                    )
+                } else bet.id eq ""
+
+                (public or invitation) and (finished or inProgress)
+            }
             .mapNotNull { bet ->
                 val finished = if (filters.contains(BetFilter.FINISHED)) {
                     bet.status in listOf(BetStatus.FINISHED, BetStatus.CANCELLED)
@@ -27,7 +50,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
                     bet.status in listOf(BetStatus.IN_PROGRESS, BetStatus.WAITING, BetStatus.CLOSING)
                 } else false
 
-                if (invitation || public || finished || inProgress) {
+                if ((invitation || public) && (finished || inProgress)) {
                     bet.toBet(database)
                 } else null
             }
@@ -39,7 +62,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
         database.bets.find { it.id eq id }?.toBetDetail(database, username)
 
     override fun getBetsNotFinished(): List<Bet> {
-        val currentTime = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
+        val currentTime = ZonedDateTime.now(ZoneId.of("+02:00"))
         return database.bets
             .filter { it.endBet greaterEq currentTime.toInstant() }
             .map { it.toBet(database) }
