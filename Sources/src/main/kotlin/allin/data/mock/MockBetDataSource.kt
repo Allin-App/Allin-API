@@ -15,7 +15,26 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
     private val betInfos get() = mockData.betInfos
     private val answerInfos get() = mockData.answerInfos
 
-    override fun getAllBets(): List<Bet> = bets
+    override fun getAllBets(filters: List<BetFilter>): List<Bet> {
+        return bets.filter { bet ->
+            val finished = if (filters.contains(BetFilter.FINISHED)) {
+                bet.status in listOf(FINISHED, CANCELLED)
+            } else false
+            val public = if (filters.contains(BetFilter.PUBLIC)) {
+                !bet.isPrivate
+            } else false
+            val invitation = if (filters.contains(BetFilter.INVITATION)) {
+                bet.isPrivate
+            } else false
+            val inProgress = if (filters.contains(BetFilter.IN_PROGRESS)) {
+                bet.status in listOf(IN_PROGRESS, WAITING, CLOSING)
+            } else false
+
+            invitation || public || finished || inProgress
+
+        }
+    }
+
     override fun getBetById(id: String): Bet? =
         bets.find { it.id == id }
 

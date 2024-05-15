@@ -11,8 +11,26 @@ import java.time.ZonedDateTime
 
 class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
-    override fun getAllBets(): List<Bet> =
-        database.bets.map { it.toBet(database) }
+    override fun getAllBets(filters: List<BetFilter>): List<Bet> =
+        database.bets
+            .mapNotNull { bet ->
+                val finished = if (filters.contains(BetFilter.FINISHED)) {
+                    bet.status in listOf(BetStatus.FINISHED, BetStatus.CANCELLED)
+                } else false
+                val public = if (filters.contains(BetFilter.PUBLIC)) {
+                    !bet.isPrivate
+                } else false
+                val invitation = if (filters.contains(BetFilter.INVITATION)) {
+                    bet.isPrivate
+                } else false
+                val inProgress = if (filters.contains(BetFilter.IN_PROGRESS)) {
+                    bet.status in listOf(BetStatus.IN_PROGRESS, BetStatus.WAITING, BetStatus.CLOSING)
+                } else false
+
+                if (invitation || public || finished || inProgress) {
+                    bet.toBet(database)
+                } else null
+            }
 
     override fun getBetById(id: String): Bet? =
         database.bets.find { it.id eq id }?.toBet(database)

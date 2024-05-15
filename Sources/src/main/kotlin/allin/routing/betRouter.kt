@@ -77,7 +77,8 @@ fun Application.betRouter() {
             }) {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { _, _ ->
-                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets())
+                        val filters = call.receive<List<BetFilter>>()
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets(filters))
                     }
                 }
             }
