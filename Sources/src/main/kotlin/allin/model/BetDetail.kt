@@ -19,16 +19,21 @@ data class BetDetail(
     val userParticipation: Participation? // La participation du User current
 )
 
-fun getBetAnswerDetail(bet: Bet, participations: List<Participation>): List<BetAnswerDetail> {
+fun getBetAnswerDetail(
+    bet: Bet,
+    participations: List<Participation>,
+    infos: List<BetAnswerInfo>
+): List<BetAnswerDetail> {
     return bet.response.map { response ->
         val responseParticipations = participations.filter { it.answer == response }
+        val answerInfo = infos.find { it.response == response }
+
         BetAnswerDetail(
             response = response,
-            totalStakes = responseParticipations.sumOf { it.stake },
+            totalStakes = answerInfo?.totalStakes ?: 0,
             totalParticipants = responseParticipations.size,
             highestStake = responseParticipations.maxOfOrNull { it.stake } ?: 0,
-            odds = if (participations.isEmpty()) 1f else responseParticipations.size / participations.size.toFloat()
+            odds = answerInfo?.odds ?: 1f
         )
     }
-
 }

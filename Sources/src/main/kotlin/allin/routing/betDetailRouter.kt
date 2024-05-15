@@ -5,7 +5,6 @@ import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
 import allin.model.BetDetail
-import allin.model.getBetAnswerDetail
 import io.github.smiley4.ktorswaggerui.dsl.get
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -19,7 +18,6 @@ import java.util.*
 fun Application.betDetailRouter() {
     val userDataSource = this.dataSource.userDataSource
     val betDataSource = this.dataSource.betDataSource
-    val participationDataSource = this.dataSource.participationDataSource
 
     routing {
         authenticate {
@@ -43,17 +41,11 @@ fun Application.betDetailRouter() {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         val id = call.parameters["id"].toString()
-                        val participations = participationDataSource.getParticipationFromBetId(id)
-                        val selectedBet = betDataSource.getBetById(id)
-                        if (selectedBet != null) {
+                        val result = betDataSource.getBetDetailById(id, user.username)
+                        if (result != null) {
                             call.respond(
                                 HttpStatusCode.Accepted,
-                                BetDetail(
-                                    selectedBet,
-                                    getBetAnswerDetail(selectedBet, participations),
-                                    participations.toList(),
-                                    participationDataSource.getParticipationFromUserId(user.username, id).lastOrNull()
-                                )
+                                result
                             )
                         } else {
                             call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)

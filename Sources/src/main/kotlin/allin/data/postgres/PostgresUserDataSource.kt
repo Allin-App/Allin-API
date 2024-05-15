@@ -1,70 +1,60 @@
 package allin.data.postgres
 
 import allin.data.UserDataSource
+import allin.data.postgres.entities.UserEntity
 import allin.data.postgres.entities.UsersEntity
+import allin.data.postgres.entities.users
 import allin.dto.UserDTO
 import allin.ext.executeWithResult
 import allin.model.User
 import org.ktorm.database.Database
 import org.ktorm.database.use
 import org.ktorm.dsl.*
+import org.ktorm.entity.add
+import org.ktorm.entity.filter
+import org.ktorm.entity.find
+import org.ktorm.entity.removeIf
 import java.time.Instant.now
 
 class PostgresUserDataSource(private val database: Database) : UserDataSource {
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
-        database.from(UsersEntity)
-            .select()
-            .where { UsersEntity.username eq username }
-            .map { row ->
-                Pair(
-                    UserDTO(
-                        row[UsersEntity.id].toString(),
-                        row[UsersEntity.username].toString(),
-                        row[UsersEntity.email].toString(),
-                        row[UsersEntity.nbCoins] ?: 0,
-                        null
-                    ),
-                    row[UsersEntity.password].toString()
-                )
-            }
-            .firstOrNull() ?: Pair(null, null)
+        database.users
+            .find { it.username eq username }
+            ?.let { it.toUserDTO() to it.password }
+            ?: (null to null)
 
     override fun addUser(user: User) {
-        database.insert(UsersEntity) {
-            set(it.id, user.id)
-            set(it.nbCoins, user.nbCoins)
-            set(it.username, user.username)
-            set(it.password, user.password)
-            set(it.email, user.email)
-            set(it.lastGift, now())
-        }
+        database.users.add(
+            UserEntity {
+                this.id = user.id
+                this.nbCoins = user.nbCoins
+                this.username = user.username
+                this.password = user.password
+                this.email = user.email
+                this.lastGift = now()
+            }
+        )
     }
 
-    override fun deleteUser(username: String): Boolean {
-        val deletedCount = database.delete(UsersEntity) {
-            it.username eq username
-        }
-        return deletedCount > 0
-    }
+    override fun deleteUser(username: String): Boolean =
+        database.users.removeIf { it.username eq username } > 0
 
     override fun userExists(username: String, email: String): Boolean {
-        return database.from(UsersEntity).select(UsersEntity.username, UsersEntity.email).where {
-            (UsersEntity.username eq username) and (UsersEntity.email eq email)
+        return database.users.filter {
+            (it.username eq username) and (it.email eq email)
         }.totalRecords > 0
     }
 
     override fun addCoins(username: String, amount: Int) {
-        database.update(UsersEntity) {
-            set(UsersEntity.nbCoins, UsersEntity.nbCoins + amount)
-            where { UsersEntity.username eq username }
-        }
+        database.users
+            .find { it.username eq username }
+            ?.set(UsersEntity.nbCoins.name, UsersEntity.nbCoins + amount)
     }
 
     override fun removeCoins(username: String, amount: Int) {
-        database.update(UsersEntity) {
-            set(UsersEntity.nbCoins, UsersEntity.nbCoins - amount)
-            where { UsersEntity.username eq username }
-        }
+        database.users
+            .find { it.username eq username }
+            ?.set(UsersEntity.nbCoins.name, UsersEntity.nbCoins - amount)
     }
 
     override fun canHaveDailyGift(username: String): Boolean {

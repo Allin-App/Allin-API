@@ -5,9 +5,9 @@ import allin.dto.UserDTO
 import allin.model.User
 import java.time.ZonedDateTime
 
-class MockUserDataSource(mockData: MockDataSource.MockData) : UserDataSource {
-    private val users by lazy { mockData.users }
-    private val lastGifts by lazy { mockData.lastGifts }
+class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDataSource {
+    private val users get() = mockData.users
+    private val lastGifts get() = mockData.lastGifts
 
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
         users.find { it.username == username }?.let {
