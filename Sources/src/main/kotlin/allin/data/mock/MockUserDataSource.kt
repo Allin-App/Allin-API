@@ -3,6 +3,8 @@ package allin.data.mock
 import allin.data.UserDataSource
 import allin.dto.UserDTO
 import allin.model.User
+import org.ktorm.dsl.eq
+import org.ktorm.dsl.or
 import java.time.ZonedDateTime
 
 class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDataSource {
@@ -10,7 +12,7 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
     private val lastGifts get() = mockData.lastGifts
 
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
-        users.find { it.username == username }?.let {
+        users.find { (it.username == username) or (it.email == username) }?.let {
             Pair(
                 UserDTO(
                     id = it.id,
@@ -28,7 +30,7 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
     }
 
     override fun deleteUser(username: String): Boolean =
-        users.removeIf { it.username == username }
+        users.removeIf { (it.username == username) or (it.email == username) }
 
     override fun addCoins(username: String, amount: Int) {
         users.find { it.username == username }?.let {
@@ -42,8 +44,11 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
         }
     }
 
-    override fun userExists(username: String, email: String): Boolean =
-        users.any { it.username == username && it.email == email }
+    override fun userExists(username: String) =
+        users.any { it.username == username }
+
+    override fun emailExists(email: String) =
+        users.any { it.email == email }
 
     override fun canHaveDailyGift(username: String): Boolean {
         val value = lastGifts[username]?.let {

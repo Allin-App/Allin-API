@@ -19,7 +19,7 @@ import java.time.Instant.now
 class PostgresUserDataSource(private val database: Database) : UserDataSource {
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
         database.users
-            .find { it.username eq username }
+            .find { (it.username eq username) or (it.email eq username) }
             ?.let { it.toUserDTO() to it.password }
             ?: (null to null)
 
@@ -37,13 +37,7 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
     }
 
     override fun deleteUser(username: String): Boolean =
-        database.users.removeIf { it.username eq username } > 0
-
-    override fun userExists(username: String, email: String): Boolean {
-        return database.users.filter {
-            (it.username eq username) and (it.email eq email)
-        }.totalRecords > 0
-    }
+        database.users.removeIf { (it.username eq username) or (it.email eq username) } > 0
 
     override fun addCoins(username: String, amount: Int) {
         database.users
@@ -56,6 +50,16 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
             .find { it.username eq username }
             ?.set(UsersEntity.nbCoins.name, UsersEntity.nbCoins - amount)
     }
+
+    override fun userExists(username: String) =
+        database.users.filter {
+            (it.username eq username)
+        }.totalRecords > 0
+
+    override fun emailExists(email: String) =
+        database.users.filter {
+            (it.email eq email)
+        }.totalRecords > 0
 
     override fun canHaveDailyGift(username: String): Boolean {
         val request =
