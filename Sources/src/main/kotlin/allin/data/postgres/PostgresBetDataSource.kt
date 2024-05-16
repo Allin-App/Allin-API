@@ -11,49 +11,41 @@ import java.time.ZonedDateTime
 
 class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
-    override fun getAllBets(filters: List<BetFilter>): List<Bet> =
-        database.bets
-            .filter { bet ->
-                val public = if (filters.contains(BetFilter.PUBLIC)) {
-                    !bet.isPrivate
-                } else bet.id eq ""
+    override fun getAllBets(filters: List<BetFilter>): List<Bet> {
+        return when {
+            filters.isEmpty() -> database.bets.map { it.toBet(database) }
 
-                val invitation = if (filters.contains(BetFilter.INVITATION)) {
-                    bet.isPrivate
-                } else bet.id eq ""
+            filters.size == 1 -> {
+                val filter = filters.first()
 
-                val finished = if (filters.contains(BetFilter.FINISHED)) {
-                    bet.status inList listOf(BetStatus.FINISHED, BetStatus.CANCELLED)
-                } else bet.id eq ""
+                when (filter) {
+                    BetFilter.PUBLIC -> database.bets.filter { !it.isPrivate }
+                    BetFilter.INVITATION -> database.bets.filter { it.isPrivate }
+                    BetFilter.FINISHED -> database.bets.filter { it.status eq BetStatus.FINISHED }
+                    BetFilter.IN_PROGRESS -> database.bets.filter {
+                        it.status inList listOf(BetStatus.IN_PROGRESS, BetStatus.WAITING, BetStatus.CLOSING)
+                    }
+                }.map { it.toBet(database) }
+            }
 
-                val inProgress = if (filters.contains(BetFilter.IN_PROGRESS)) {
-                    bet.status inList listOf(
+            else -> {
+                database.bets.filter { bet ->
+                    val public = (BetFilter.PUBLIC in filters) and !bet.isPrivate
+                    val invitation = (BetFilter.INVITATION in filters) and bet.isPrivate
+                    val finished =
+                        (BetFilter.FINISHED in filters) and ((bet.status eq BetStatus.FINISHED) or (bet.status eq BetStatus.CANCELLED))
+                    val inProgress = (BetFilter.IN_PROGRESS in filters) and (bet.status inList listOf(
                         BetStatus.IN_PROGRESS,
                         BetStatus.WAITING,
                         BetStatus.CLOSING
-                    )
-                } else bet.id eq ""
+                    ))
 
-                (public or invitation) and (finished or inProgress)
+                    (public or invitation) and (finished or inProgress)
+                }.map { it.toBet(database) }
             }
-            .mapNotNull { bet ->
-                val finished = if (filters.contains(BetFilter.FINISHED)) {
-                    bet.status in listOf(BetStatus.FINISHED, BetStatus.CANCELLED)
-                } else false
-                val public = if (filters.contains(BetFilter.PUBLIC)) {
-                    !bet.isPrivate
-                } else false
-                val invitation = if (filters.contains(BetFilter.INVITATION)) {
-                    bet.isPrivate
-                } else false
-                val inProgress = if (filters.contains(BetFilter.IN_PROGRESS)) {
-                    bet.status in listOf(BetStatus.IN_PROGRESS, BetStatus.WAITING, BetStatus.CLOSING)
-                } else false
+        }
+    }
 
-                if ((invitation || public) && (finished || inProgress)) {
-                    bet.toBet(database)
-                } else null
-            }
 
     override fun getBetById(id: String): Bet? =
         database.bets.find { it.id eq id }?.toBet(database)

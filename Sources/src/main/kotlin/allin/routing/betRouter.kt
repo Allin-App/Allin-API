@@ -80,8 +80,11 @@ fun Application.betRouter() {
             }) {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { _, _ ->
-                        val request = call.receive<BetFiltersRequest>()
-                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets(request.filters))
+                        val filtersRequest =
+                            kotlin.runCatching { call.receiveNullable<BetFiltersRequest>() }.getOrNull()
+                        val filters =
+                            filtersRequest?.filters ?: emptyList() // Use provided filters or empty list if null
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets(filters))
                     }
                 }
             }
