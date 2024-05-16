@@ -2,7 +2,10 @@ package allin.routing
 
 import allin.dataSource
 import allin.ext.hasToken
+import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
+import allin.model.Bet
+import io.github.smiley4.ktorswaggerui.dsl.get
 import io.github.smiley4.ktorswaggerui.dsl.post
 import io.ktor.http.*
 
@@ -21,8 +24,30 @@ fun Application.friendRouter() {
 
     routing {
         authenticate {
+            get("/friends/gets", {
+                description = "Allows you to recover all friends of a JWT Token"
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                }
+                response {
+                    HttpStatusCode.Accepted to {
+                        description = "The list of friends is available"
+                        body<List<Bet>> {
+                            description = "List of friends"
+                        }
+                    }
+                }
+            }) {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { _, _ ->
+                        val username = tokenManagerBet.getUsernameFromToken(principal)
+                        val user = userDataSource.getUserByUsername(username).first
+                        call.respond(HttpStatusCode.Accepted, friendDataSource.getFriendFromUserId(user?.id.toString()))
+                    }
+                }
 
-        post("/friend/add", {
+            }
+        post("/friends/add", {
             description = "Allows a user to add a friend"
             request {
                 headerParameter<JWTPrincipal>("JWT token of the logged user")
@@ -53,7 +78,11 @@ fun Application.friendRouter() {
 
                 if (user == null || userFriend == null) {
                     call.respond(HttpStatusCode.Conflict, ApiMessage.USER_NOT_FOUND)
-                } else {
+                }
+                else if (userFriend == user) {
+                    call.respond(HttpStatusCode.Conflict,ApiMessage.FRIENDS_REQUEST_HIMSELF)
+                }
+                else {
                     val friendlist = friendDataSource.getFriendFromUserId(user.id)
                     if (friendlist.contains(userFriend.id)) {
                         call.respond(HttpStatusCode.Conflict,ApiMessage.FRIENDS_ALREADY_EXISTS)
@@ -65,7 +94,7 @@ fun Application.friendRouter() {
             }
 
         }
-            post("/friend/delete", {
+            post("/friends/delete", {
                 description = "Allows a user to delete a friend"
                 request {
                     headerParameter<JWTPrincipal>("JWT token of the logged user")

@@ -1,22 +1,28 @@
 package allin.data.mock
 
 import allin.data.FriendDataSource
+import allin.model.Friend
 
-class MockFriendDataSource(mockData: MockDataSource.MockData) : FriendDataSource {
+class MockFriendDataSource(private val mockData: MockDataSource.MockData) : FriendDataSource {
+
+    private val friends get() = mockData.friends
+
     override fun addFriend(sender: String, receiver: String) {
-        TODO("Not yet implemented")
+        mockData.friends.add(Friend(sender, receiver))
     }
 
-    override fun getFriendFromUserId(id: String): List<String> {
-        TODO("Not yet implemented")
-    }
+    override fun getFriendFromUserId(id: String) =
+        friends.map { Friend(sender = it.sender, receiver = it.receiver) }
+            .filter { it.sender == id }
+            .map { it.receiver }
 
-    override fun deleteFriend(senderId: String, receiverId: String): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun deleteFriend(senderId: String, receiverId: String) =
+        friends.removeIf { (it.sender == senderId) && (it.receiver == receiverId) }
 
-    override fun isFriend(firstUser: String, secondUser: String): Boolean {
-        TODO("Not yet implemented")
-    }
 
+    override fun isFriend(firstUser: String, secondUser: String) =
+        friends
+            .filter { (it.sender == firstUser) and (it.receiver == secondUser) }
+            .map { Friend(sender = it.sender, receiver = it.receiver) }
+            .isNotEmpty()
 }

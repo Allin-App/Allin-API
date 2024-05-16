@@ -19,6 +19,7 @@ class MockDataSource : AllInDataSource() {
         val users by lazy { mutableListOf<User>() }
         val lastGifts by lazy { mutableMapOf<String, ZonedDateTime>() }
         val participations by lazy { mutableListOf<Participation>() }
+        val friends by lazy { mutableListOf<Friend>() }
     }
 
     private val mockData by lazy { MockData() }

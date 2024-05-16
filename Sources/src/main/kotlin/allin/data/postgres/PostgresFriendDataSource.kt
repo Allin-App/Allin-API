@@ -21,17 +21,15 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
         )
     }
 
-    override fun getFriendFromUserId(id: String): List<String> {
-        val friendList = database.friends.map { it.toFriend() }
-        val friendPairs = friendList.map { it.sender to it.receiver }.toSet()
-        return friendList
+    override fun getFriendFromUserId(id: String) =
+        database.friends.map { it.toFriend() }
             .filter { it.sender == id }
             .map { it.receiver }
-    }
+
 
     override fun deleteFriend(senderId: String, receiverId: String): Boolean {
-        database.friends.removeIf { it.sender eq senderId }
-        return database.friends.removeIf { it.sender eq senderId } > 0
+        database.friends.removeIf { (it.sender eq senderId) and (it.receiver eq receiverId) }
+        return database.friends.removeIf { (it.sender eq senderId) and (it.receiver eq receiverId) } > 0
     }
 
     override fun isFriend(firstUser: String, secondUser: String) =
