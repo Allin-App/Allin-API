@@ -16,23 +16,39 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
     private val answerInfos get() = mockData.answerInfos
 
     override fun getAllBets(filters: List<BetFilter>): List<Bet> {
-        return bets.filter { bet ->
-            val public = filters.contains(BetFilter.PUBLIC) &&
-                    !bet.isPrivate
+        return when {
+            filters.isEmpty() -> bets
 
-            val invitation = filters.contains(BetFilter.INVITATION) &&
-                    bet.isPrivate
+            filters.size == 1 -> {
+                val filter = filters[0]
 
-            val finished = filters.contains(BetFilter.FINISHED) &&
-                    bet.status in listOf(FINISHED, CANCELLED)
+                when (filter) {
+                    BetFilter.PUBLIC -> bets.filter { !it.isPrivate }
+                    BetFilter.INVITATION -> bets.filter { it.isPrivate }
+                    BetFilter.FINISHED -> bets.filter { it.status == FINISHED }
+                    BetFilter.IN_PROGRESS -> bets.filter {
+                        it.status in listOf(IN_PROGRESS, WAITING, CLOSING)
+                    }
+                }.map { it }
+            }
 
-            val inProgress = filters.contains(BetFilter.IN_PROGRESS) &&
-                    bet.status in listOf(IN_PROGRESS, WAITING, CLOSING)
+            else -> {
+                bets.filter { bet ->
+                    val public = (BetFilter.PUBLIC in filters) && !bet.isPrivate
+                    val invitation = (BetFilter.INVITATION in filters) && bet.isPrivate
+                    val finished =
+                        (BetFilter.FINISHED in filters) and ((bet.status == FINISHED) or (bet.status == CANCELLED))
+                    val inProgress = (BetFilter.IN_PROGRESS in filters) and (bet.status in listOf(
+                        IN_PROGRESS,
+                        WAITING,
+                        CLOSING
+                    ))
 
-
-            (public || invitation) && (finished || inProgress)
-
+                    (public || invitation) && (finished or inProgress)
+                }.map { it }
+            }
         }
+
     }
 
     override fun getBetById(id: String): Bet? =
