@@ -86,6 +86,7 @@ private fun Application.extracted() {
     participationRouter()
     betDetailRouter()
 
+    
     kronJob(BET_VERIFY_DELAY) {
         dataSource.betDataSource.updateBetStatuses(ZonedDateTime.now())
     }
