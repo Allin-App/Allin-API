@@ -90,5 +90,4 @@ Lien de l'API sur codefirst : [API All In](https://codefirst.iut.uca.fr/containe
 <div align = center>
 
 © AllDev - API
-
 </div>
