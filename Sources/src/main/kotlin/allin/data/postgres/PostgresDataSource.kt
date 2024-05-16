@@ -25,7 +25,7 @@ class PostgresDataSource : AllInDataSource() {
 
         database.execute(
             """
-            CREATE TABLE IF not exists utilisateur ( 
+            CREATE TABLE IF not exists users ( 
                 id VARCHAR(255) PRIMARY KEY, 
                 username VARCHAR(255), 
                 password VARCHAR(255),
@@ -43,6 +43,7 @@ class PostgresDataSource : AllInDataSource() {
                 theme VARCHAR(255), 
                 endregistration timestamp,
                 endbet timestamp,
+                zoneid varchar(500),
                 sentencebet varchar(500),
                 isprivate boolean, 
                 createdby varchar(250),
@@ -86,9 +87,30 @@ class PostgresDataSource : AllInDataSource() {
         database.execute(
             """
             CREATE TABLE IF NOT EXISTS response (
-                id VARCHAR(255),
+                betId VARCHAR(255),
                 response VARCHAR(250),
-                CONSTRAINT pk_response_id PRIMARY KEY (id, response)
+                CONSTRAINT pk_response_id PRIMARY KEY (betId, response)
+            )
+            """.trimIndent()
+        )
+
+        database.execute(
+            """
+            CREATE TABLE IF not exists betInfo ( 
+                id VARCHAR(255) PRIMARY KEY, 
+                totalStakes int
+            )
+            """.trimIndent()
+        )
+
+        database.execute(
+            """
+            CREATE TABLE IF not exists betAnswerInfo ( 
+                betId VARCHAR(255), 
+                response VARCHAR(255), 
+                totalStakes int,
+                odds float,
+                CONSTRAINT pk_bet_answer_info_id PRIMARY KEY (betId, response)
             )
             """.trimIndent()
         )

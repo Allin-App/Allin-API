@@ -21,7 +21,6 @@ val tokenManagerBet = AppConfig.tokenManager
 fun Application.betRouter() {
     val userDataSource = this.dataSource.userDataSource
     val betDataSource = this.dataSource.betDataSource
-    val participationDataSource = this.dataSource.participationDataSource
 
     routing {
         authenticate {
@@ -36,7 +35,7 @@ fun Application.betRouter() {
                 response {
                     HttpStatusCode.Created to {
                         description = "the bet has been added"
-                        body<Bet>() {
+                        body<Bet> {
                             description = "Bet with assigned id"
                         }
                     }
@@ -54,7 +53,7 @@ fun Application.betRouter() {
                     betDataSource.getBetById(id)?.let {
                         call.respond(HttpStatusCode.Conflict, ApiMessage.BET_ALREADY_EXIST)
                     } ?: run {
-                        val betWithId = bet.copy(id = id, createdBy = user.first?.id.toString())
+                        val betWithId = bet.copy(id = id, createdBy = user.first?.username.toString())
                         betDataSource.addBet(betWithId)
                         call.respond(HttpStatusCode.Created, betWithId)
                     }
@@ -70,7 +69,7 @@ fun Application.betRouter() {
                 response {
                     HttpStatusCode.Accepted to {
                         description = "The list of bets is available"
-                        body<List<Bet>>() {
+                        body<List<Bet>> {
                             description = "List of all bet in the selected source"
                         }
                     }
@@ -167,7 +166,7 @@ fun Application.betRouter() {
                 response {
                     HttpStatusCode.Accepted to {
                         description = "The list of bets that can be validated is available"
-                        body<List<BetDetail>>() {
+                        body<List<BetDetail>> {
                             description = "list of bets that can be validated"
                         }
                     }
@@ -175,15 +174,7 @@ fun Application.betRouter() {
             }) {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        val response = betDataSource.getToConfirm(user.username).map {
-                            val participations = participationDataSource.getParticipationFromBetId(it.id)
-                            BetDetail(
-                                it,
-                                getBetAnswerDetail(it, participations),
-                                participations,
-                                participations.find { it.username == user.username }
-                            )
-                        }
+                        val response = betDataSource.getToConfirm(user.username)
                         call.respond(HttpStatusCode.Accepted, response)
                     }
                 }
@@ -199,7 +190,7 @@ fun Application.betRouter() {
                 response {
                     HttpStatusCode.Accepted to {
                         description = "The list of won bets is available"
-                        body<List<BetResultDetail>>() {
+                        body<List<BetResultDetail>> {
                             description = "List of won bets"
                         }
                     }
@@ -222,7 +213,7 @@ fun Application.betRouter() {
                 response {
                     HttpStatusCode.Accepted to {
                         description = "Bet history is available"
-                        body<List<BetResultDetail>>() {
+                        body<List<BetResultDetail>> {
                             description = "Betting history list"
                         }
                     }

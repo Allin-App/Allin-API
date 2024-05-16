@@ -52,7 +52,7 @@ fun Application.participationRouter() {
                                 Participation(
                                     id = UUID.randomUUID().toString(),
                                     betId = participation.betId,
-                                    username = user.id,
+                                    username = user.username,
                                     answer = participation.answer,
                                     stake = participation.stake
                                 )

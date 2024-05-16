@@ -20,7 +20,7 @@ suspend fun PipelineContext<*, ApplicationCall>.verifyUserFromToken(
     content: suspend (user: UserDTO, password: String) -> Unit
 ) {
     val username = principal.payload.getClaim(USERNAME).asString()
-    val userPassword = userDataSource.getUserByUsername(username)
-    userPassword.first?.let { content(it, userPassword.second ?: "") }
+    val user = userDataSource.getUserByUsername(username)
+    user.first?.let { content(it, user.second ?: "") }
         ?: call.respond(HttpStatusCode.NotFound, ApiMessage.TOKEN_USER_NOT_FOUND)
 }

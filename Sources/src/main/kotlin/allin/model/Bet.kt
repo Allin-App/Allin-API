@@ -5,6 +5,9 @@ import allin.serializer.ZonedDateTimeSerializer
 import kotlinx.serialization.Serializable
 import java.time.ZonedDateTime
 
+const val YES_VALUE = "Yes"
+const val NO_VALUE = "No"
+
 @Serializable
 data class Bet(
     val id: String = "",

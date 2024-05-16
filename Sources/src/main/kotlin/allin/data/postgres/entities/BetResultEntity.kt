@@ -1,13 +1,37 @@
 package allin.data.postgres.entities
 
+import allin.model.BetResult
+import allin.model.BetResultDetail
+import org.ktorm.database.Database
 import org.ktorm.entity.Entity
+import org.ktorm.entity.sequenceOf
 import org.ktorm.schema.Table
 import org.ktorm.schema.varchar
 
 
 interface BetResultEntity : Entity<BetResultEntity> {
-    val bet: BetEntity
-    val result: String
+    companion object : Entity.Factory<BetResultEntity>()
+
+    var bet: BetEntity
+    var result: String
+
+    fun toBetResult() =
+        BetResult(
+            betId = bet.id,
+            result = result
+        )
+
+    fun toBetResultDetail(
+        database: Database,
+        participationEntity: ParticipationEntity
+    ) =
+        BetResultDetail(
+            betResult = this.toBetResult(),
+            bet = bet.toBet(database),
+            participation = participationEntity.toParticipation(),
+            amount = participationEntity.stake,
+            won = participationEntity.answer == result
+        )
 }
 
 object BetResultsEntity : Table<BetResultEntity>("betresult") {
@@ -15,12 +39,4 @@ object BetResultsEntity : Table<BetResultEntity>("betresult") {
     val result = varchar("result").bindTo { it.result }
 }
 
-interface BetResultNotificationEntity : Entity<BetResultNotificationEntity> {
-    val betId: String
-    val username: String
-}
-
-object BetResultNotificationsEntity : Table<BetResultNotificationEntity>("betresult") {
-    val betId = varchar("betid").primaryKey()
-    val username = varchar("username").primaryKey()
-}
+val Database.betResults get() = this.sequenceOf(BetResultsEntity)
