@@ -1,9 +1,6 @@
 package allin.data.mock
 
-import allin.data.AllInDataSource
-import allin.data.BetDataSource
-import allin.data.ParticipationDataSource
-import allin.data.UserDataSource
+import allin.data.*
 import allin.model.*
 import java.time.ZonedDateTime
 
@@ -29,4 +26,5 @@ class MockDataSource : AllInDataSource() {
     override val userDataSource: UserDataSource by lazy { MockUserDataSource(mockData) }
     override val betDataSource: BetDataSource by lazy { MockBetDataSource(mockData) }
     override val participationDataSource: ParticipationDataSource by lazy { MockParticipationDataSource(mockData) }
+    override val friendDataSource: FriendDataSource by lazy { MockFriendDataSource(mockData) }
 }

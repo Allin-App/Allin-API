@@ -13,4 +13,7 @@ object ApiMessage {
     const val NOT_ENOUGH_COINS = "Not enough coins."
     const val NO_GIFT = "Can't get daily gift."
     const val USER_CANT_BE_DELETE = "This user can't be delete now !"
+    const val FRIENDS_ALREADY_EXISTS = "User already exists in your Friends List."
+    const val FRIENDS_DOESNT_EXISTS = "User already exists in your Friends List."
+
 }
