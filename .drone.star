@@ -2,7 +2,7 @@ def main(ctx):
   commit_message = ctx.build.message.lower()
   if "readme.md" in commit_message or "[no_ci]" in commit_message:
     return nullPipeline()
-    
+  
   if "[db]" in commit_message:
     return [
         ci(ctx),
