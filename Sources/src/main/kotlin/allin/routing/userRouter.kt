@@ -56,24 +56,25 @@ fun Application.userRouter() {
             if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
                 call.respond(HttpStatusCode.Forbidden, ApiMessage.INVALID_MAIL)
             }
-            if (userDataSource.userExists(tempUser.username)) {
+            else if (userDataSource.userExists(tempUser.username)) {
                 call.respond(HttpStatusCode.Conflict, ApiMessage.USER_ALREADY_EXISTS)
             }
-            if(userDataSource.emailExists(tempUser.email)){
+            else if (userDataSource.emailExists(tempUser.email)) {
                 call.respond(HttpStatusCode.Conflict, ApiMessage.MAIL_ALREADY_EXISTS)
+            } else {
+                val user = User(
+                    id = UUID.randomUUID().toString(),
+                    username = tempUser.username,
+                    email = tempUser.email,
+                    password = tempUser.password,
+                    nbCoins = DEFAULT_COINS,
+                    token = null
+                )
+                CryptManagerUser.passwordCrypt(user)
+                user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
+                userDataSource.addUser(user)
+                call.respond(HttpStatusCode.Created, user)
             }
-            val user = User(
-                id = UUID.randomUUID().toString(),
-                username = tempUser.username,
-                email = tempUser.email,
-                password = tempUser.password,
-                nbCoins = DEFAULT_COINS,
-                token = null
-            )
-            CryptManagerUser.passwordCrypt(user)
-            user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
-            userDataSource.addUser(user)
-            call.respond(HttpStatusCode.Created, user)
         }
 
         post("/users/login", {
