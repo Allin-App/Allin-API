@@ -11,8 +11,41 @@ import java.time.ZonedDateTime
 
 class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
-    override fun getAllBets(): List<Bet> =
-        database.bets.map { it.toBet(database) }
+    override fun getAllBets(filters: List<BetFilter>): List<Bet> {
+        return when {
+            filters.isEmpty() -> database.bets.map { it.toBet(database) }
+
+            filters.size == 1 -> {
+                val filter = filters.first()
+
+                when (filter) {
+                    BetFilter.PUBLIC -> database.bets.filter { !it.isPrivate }
+                    BetFilter.INVITATION -> database.bets.filter { it.isPrivate }
+                    BetFilter.FINISHED -> database.bets.filter { it.status eq BetStatus.FINISHED }
+                    BetFilter.IN_PROGRESS -> database.bets.filter {
+                        it.status inList listOf(BetStatus.IN_PROGRESS, BetStatus.WAITING, BetStatus.CLOSING)
+                    }
+                }.map { it.toBet(database) }
+            }
+
+            else -> {
+                database.bets.filter { bet ->
+                    val public = (BetFilter.PUBLIC in filters) and !bet.isPrivate
+                    val invitation = (BetFilter.INVITATION in filters) and bet.isPrivate
+                    val finished =
+                        (BetFilter.FINISHED in filters) and ((bet.status eq BetStatus.FINISHED) or (bet.status eq BetStatus.CANCELLED))
+                    val inProgress = (BetFilter.IN_PROGRESS in filters) and (bet.status inList listOf(
+                        BetStatus.IN_PROGRESS,
+                        BetStatus.WAITING,
+                        BetStatus.CLOSING
+                    ))
+
+                    (public or invitation) and (finished or inProgress)
+                }.map { it.toBet(database) }
+            }
+        }
+    }
+
 
     override fun getBetById(id: String): Bet? =
         database.bets.find { it.id eq id }?.toBet(database)
@@ -21,7 +54,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
         database.bets.find { it.id eq id }?.toBetDetail(database, username)
 
     override fun getBetsNotFinished(): List<Bet> {
-        val currentTime = ZonedDateTime.now(ZoneId.of("Europe/Paris"))
+        val currentTime = ZonedDateTime.now(ZoneId.of("+02:00"))
         return database.bets
             .filter { it.endBet greaterEq currentTime.toInstant() }
             .map { it.toBet(database) }
