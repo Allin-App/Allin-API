@@ -83,7 +83,6 @@ Le controller BET gère toutes les opérations liées aux paris. Il permet de r�
 # Déploiement
 
 Le déploiement est réalisé sur Code First via les services **Drone** et **Runner** ! :rocket:
-
 Lien de l'API sur codefirst : [API All In](https://codefirst.iut.uca.fr/containers/AllDev-api)
 
 
