@@ -53,7 +53,7 @@ fun Application.betRouter() {
                     betDataSource.getBetById(id)?.let {
                         call.respond(HttpStatusCode.Conflict, ApiMessage.BET_ALREADY_EXIST)
                     } ?: run {
-                        val betWithId = bet.copy(id = id, createdBy = user.first?.username.toString())
+                        val betWithId = bet.copy(id = id, createdBy = user.first?.id.toString())
                         betDataSource.addBet(betWithId)
                         call.respond(HttpStatusCode.Created, betWithId)
                     }
@@ -78,6 +78,33 @@ fun Application.betRouter() {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { _, _ ->
                         call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets())
+                    }
+                }
+            }
+        }
+
+        authenticate {
+            get("/bets/popular", {
+                description = "Allows you to recover the most popular public bets"
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                }
+                response {
+                    HttpStatusCode.Accepted to {
+                        description = "The most popular public bet is available"
+                        body<Bet> {
+                            description = "The most popular public bet"
+                        }
+                    }
+                }
+            }) {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { _, _ ->
+                        val bet = betDataSource.getMostPopularBet()
+                        if (bet != null) {
+                            call.respond(HttpStatusCode.Accepted, bet)
+                        }
+                        call.respond(HttpStatusCode.NotFound,"Aucun bet n'a pu être récupérer")
                     }
                 }
             }

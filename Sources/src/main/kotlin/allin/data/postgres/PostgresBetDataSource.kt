@@ -110,6 +110,14 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             }
     }
 
+    override fun getMostPopularBet(): Bet? {
+        val max=database.bets.filter { (it.isPrivate eq false) and (it.status eq BetStatus.WAITING) }.maxBy { it.popularityscore }
+        if(max!=null){
+            return database.bets.filter { (it.popularityscore eq max) and (it.isPrivate eq false) and (it.status eq BetStatus.WAITING) }.map { it.toBet(database) }.first()
+        }
+        return null
+    }
+
     override fun addBet(bet: Bet) {
         database.bets.add(
             BetEntity {
@@ -172,4 +180,5 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             }
         }
     }
+
 }

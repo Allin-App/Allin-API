@@ -48,7 +48,8 @@ class PostgresDataSource : AllInDataSource() {
                 isprivate boolean, 
                 createdby varchar(250),
                 status varchar(20),
-                type varchar(20)
+                type varchar(20),
+                popularityscore numeric
             )
             """.trimIndent()
         )
@@ -124,6 +125,35 @@ class PostgresDataSource : AllInDataSource() {
                )
             """.trimIndent()
         )
+
+        database.execute("""
+                CREATE OR REPLACE FUNCTION update_popularity_score()
+                RETURNS TRIGGER AS ${'$'}${'$'}
+                DECLARE
+                    participant_count INT;
+                    total_stakes INT;
+                BEGIN
+                    -- Calculate participant count and total stakes for the bet
+                    SELECT COUNT(*), COALESCE(SUM(stake), 0) INTO participant_count, total_stakes
+                    FROM participation
+                    WHERE bet = NEW.bet;
+                
+                    -- Update the popularityscore in the bet table
+                    UPDATE bet
+                    SET popularityscore = (participant_count * participant_count + total_stakes)
+                    WHERE id = NEW.bet;
+                
+                    RETURN NEW;
+                END;
+                ${'$'}${'$'} LANGUAGE plpgsql;
+
+                DROP TRIGGER IF EXISTS update_popularity_score ON participation;
+                
+                CREATE TRIGGER update_popularity_score
+                AFTER INSERT OR UPDATE ON participation
+                FOR EACH ROW
+                EXECUTE FUNCTION update_popularity_score();
+        """.trimIndent())
     }
 
     override val userDataSource: UserDataSource by lazy { PostgresUserDataSource(database) }

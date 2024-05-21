@@ -164,4 +164,8 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
             userParticipation = participation
         )
     }
+
+    override fun getMostPopularBet(): Bet? {
+        TODO("Not yet implemented")
+    }
 }
