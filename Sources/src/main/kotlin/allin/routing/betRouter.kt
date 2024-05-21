@@ -61,10 +61,13 @@ fun Application.betRouter() {
             }
         }
         authenticate {
-            get("/bets/gets", {
+            post("/bets/gets", {
                 description = "Allows you to recover all bets"
                 request {
                     headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    body<List<BetFilter>> {
+                        description = "List of filters"
+                    }
                 }
                 response {
                     HttpStatusCode.Accepted to {
@@ -77,7 +80,11 @@ fun Application.betRouter() {
             }) {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { _, _ ->
-                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets())
+                        val filtersRequest =
+                            kotlin.runCatching { call.receiveNullable<BetFiltersRequest>() }.getOrNull()
+                        val filters =
+                            filtersRequest?.filters ?: emptyList() // Use provided filters or empty list if null
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets(filters))
                     }
                 }
             }

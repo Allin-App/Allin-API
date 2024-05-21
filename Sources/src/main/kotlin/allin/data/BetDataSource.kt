@@ -1,13 +1,10 @@
 package allin.data
 
-import allin.model.Bet
-import allin.model.BetDetail
-import allin.model.BetResultDetail
-import allin.model.UpdatedBetData
+import allin.model.*
 import java.time.ZonedDateTime
 
 interface BetDataSource {
-    fun getAllBets(): List<Bet>
+    fun getAllBets(filters: List<BetFilter>): List<Bet>
     fun getBetById(id: String): Bet?
     fun getBetDetailById(id: String, username: String): BetDetail?
     fun getBetsNotFinished(): List<Bet>

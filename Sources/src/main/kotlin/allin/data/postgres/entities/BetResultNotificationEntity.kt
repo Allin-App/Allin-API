@@ -14,8 +14,8 @@ interface BetResultNotificationEntity : Entity<BetResultNotificationEntity> {
 }
 
 object BetResultNotificationsEntity : Table<BetResultNotificationEntity>("betresultnotification") {
-    val betId = varchar("betid").primaryKey()
-    val username = varchar("username").primaryKey()
+    val betId = varchar("betid").primaryKey().bindTo { it.betId }
+    val username = varchar("username").primaryKey().bindTo { it.username }
 }
 
 val Database.betResultNotifications get() = this.sequenceOf(BetResultNotificationsEntity)
