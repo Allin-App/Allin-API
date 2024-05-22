@@ -22,6 +22,7 @@ fun Application.participationRouter() {
 
     val userDataSource = this.dataSource.userDataSource
     val participationDataSource = this.dataSource.participationDataSource
+    val betDataSource = this.dataSource.betDataSource
 
     routing {
         authenticate {
@@ -59,6 +60,7 @@ fun Application.participationRouter() {
                             )
 
                             userDataSource.removeCoins(username = user.username, amount = participation.stake)
+                            betDataSource.updatePopularityScore(participation.betId)
                             call.respond(HttpStatusCode.Created)
                         } else {
                             call.respond(HttpStatusCode.Forbidden, ApiMessage.NOT_ENOUGH_COINS)

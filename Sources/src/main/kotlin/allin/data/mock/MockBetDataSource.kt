@@ -168,4 +168,8 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
     override fun getMostPopularBet(): Bet? {
         TODO("Not yet implemented")
     }
+
+    override fun updatePopularityScore(betId: String) {
+        TODO("Not yet implemented")
+    }
 }

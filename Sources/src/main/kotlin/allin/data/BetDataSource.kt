@@ -21,4 +21,5 @@ interface BetDataSource {
     fun getHistory(username: String): List<BetResultDetail>
     fun getCurrent(username: String): List<BetDetail>
     fun getMostPopularBet(): Bet?
+    fun updatePopularityScore(betId: String)
 }

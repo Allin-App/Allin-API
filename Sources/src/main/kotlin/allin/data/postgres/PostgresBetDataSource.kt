@@ -124,6 +124,21 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
         return null
     }
 
+    override fun updatePopularityScore(betId: String) {
+        val bet = database.bets.filter { it.id eq betId }.firstOrNull()
+        if (bet == null) {
+            return
+        }
+        val participations = database.participations.filter { it.betId eq betId }
+        val stakes = participations.map { it.stake }
+        val score = (participations.count() * participations.count()) + stakes.sum()
+        database.update(BetsEntity) {
+            set(it.popularityscore, score)
+            where { it.id eq betId }
+        }
+    }
+
+
     override fun addBet(bet: Bet) {
         database.bets.add(
             BetEntity {
