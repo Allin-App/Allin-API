@@ -58,6 +58,7 @@ private fun Application.extracted() {
             }
         }
     }
+
     install(ContentNegotiation) { json() }
     install(SwaggerUI) {
         swagger {
