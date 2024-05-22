@@ -141,6 +141,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
                 this.createdBy = bet.createdBy
                 this.status = bet.status
                 this.type = bet.type
+                this.popularityscore = 0
             }
         )
 

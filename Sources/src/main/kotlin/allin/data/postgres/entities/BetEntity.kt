@@ -41,7 +41,8 @@ interface BetEntity : Entity<BetEntity> {
             } else {
                 database.responses.filter { it.betId eq id }.map { it.response }
             },
-            createdBy = createdBy
+            createdBy = createdBy,
+            popularityscore = popularityscore,
         )
 
     fun toBetDetail(database: Database, username: String): BetDetail {
