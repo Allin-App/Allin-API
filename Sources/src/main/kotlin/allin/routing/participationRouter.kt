@@ -48,6 +48,11 @@ fun Application.participationRouter() {
                 hasToken { principal ->
                     val participation = call.receive<ParticipationRequest>()
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
+
+                        if(betDataSource.getBetById(participation.betId)== null){
+                            call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
+                        }
+
                         if (user.nbCoins >= participation.stake) {
                             participationDataSource.addParticipation(
                                 Participation(

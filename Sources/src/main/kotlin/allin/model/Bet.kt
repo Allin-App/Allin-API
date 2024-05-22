@@ -19,7 +19,8 @@ data class Bet(
     @Serializable(ZonedDateTimeSerializer::class) var endBet: ZonedDateTime,
     var isPrivate: Boolean,
     var response: List<String>,
-    val createdBy: String = ""
+    val createdBy: String = "",
+    var popularityscore: Int
 )
 
 @Serializable
