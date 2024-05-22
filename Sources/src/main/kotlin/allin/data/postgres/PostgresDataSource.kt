@@ -48,7 +48,8 @@ class PostgresDataSource : AllInDataSource() {
                 isprivate boolean, 
                 createdby varchar(250),
                 status varchar(20),
-                type varchar(20)
+                type varchar(20),
+                popularityscore numeric
             )
             """.trimIndent()
         )

@@ -1,8 +1,15 @@
 package allin.data.mock
 
 import allin.data.BetDataSource
+import allin.data.postgres.entities.BetsEntity
+import allin.data.postgres.entities.bets
+import allin.data.postgres.entities.participations
 import allin.model.*
 import allin.model.BetStatus.*
+import org.ktorm.dsl.and
+import org.ktorm.dsl.eq
+import org.ktorm.dsl.update
+import org.ktorm.entity.*
 import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
@@ -199,4 +206,15 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
             userParticipation = participation
         )
     }
+
+    override fun getMostPopularBet() =
+        mockData.bets.filter { !it.isPrivate && it.status == WAITING }.maxBy { it.popularityscore }
+
+    override fun updatePopularityScore(betId: String) {
+        val bet = mockData.bets.firstOrNull { it.id == betId } ?: return
+        val participations = mockData.participations.filter { it.betId == betId }
+        val score = participations.size * participations.size + participations.sumOf { it.stake }
+        bet.popularityscore = score
+    }
+
 }

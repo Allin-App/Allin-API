@@ -5,6 +5,7 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.eq
 import org.ktorm.entity.*
 import org.ktorm.schema.*
+import org.postgresql.util.ByteConverter.numeric
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -23,6 +24,7 @@ interface BetEntity : Entity<BetEntity> {
     var status: BetStatus
     var type: BetType
     var createdBy: String
+    var popularityscore: Int
 
     fun toBet(database: Database) =
         Bet(
@@ -39,7 +41,8 @@ interface BetEntity : Entity<BetEntity> {
             } else {
                 database.responses.filter { it.betId eq id }.map { it.response }
             },
-            createdBy = createdBy
+            createdBy = createdBy,
+            popularityscore = popularityscore,
         )
 
     fun toBetDetail(database: Database, username: String): BetDetail {
@@ -60,6 +63,7 @@ interface BetEntity : Entity<BetEntity> {
 
         )
     }
+
 }
 
 object BetsEntity : Table<BetEntity>("bet") {
@@ -73,6 +77,7 @@ object BetsEntity : Table<BetEntity>("bet") {
     val status = enum<BetStatus>("status").bindTo { it.status }
     val type = enum<BetType>("type").bindTo { it.type }
     val createdBy = varchar("createdby").bindTo { it.createdBy }
+    val popularityscore = int("popularityscore").bindTo { it.popularityscore }
 }
 
 val Database.bets get() = this.sequenceOf(BetsEntity)

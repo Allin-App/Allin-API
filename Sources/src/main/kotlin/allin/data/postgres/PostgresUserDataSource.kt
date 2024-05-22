@@ -40,15 +40,17 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
         database.users.removeIf { (it.username eq username) or (it.email eq username) } > 0
 
     override fun addCoins(username: String, amount: Int) {
-        database.users
-            .find { it.username eq username }
-            ?.set(UsersEntity.nbCoins.name, UsersEntity.nbCoins + amount)
+        database.update(UsersEntity) {
+            set(it.nbCoins, it.nbCoins + amount)
+            where { it.username eq username }
+        }
     }
 
     override fun removeCoins(username: String, amount: Int) {
-        database.users
-            .find { it.username eq username }
-            ?.set(UsersEntity.nbCoins.name, UsersEntity.nbCoins - amount)
+        database.update(UsersEntity) {
+            set(it.nbCoins, it.nbCoins - amount)
+            where { it.username eq username }
+        }
     }
 
     override fun userExists(username: String) =
