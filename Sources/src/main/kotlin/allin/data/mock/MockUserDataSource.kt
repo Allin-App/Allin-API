@@ -3,8 +3,6 @@ package allin.data.mock
 import allin.data.UserDataSource
 import allin.dto.UserDTO
 import allin.model.User
-import org.ktorm.dsl.eq
-import org.ktorm.dsl.or
 import java.time.ZonedDateTime
 
 class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDataSource {
@@ -13,16 +11,7 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
 
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
         users.find { (it.username == username) or (it.email == username) }?.let {
-            Pair(
-                UserDTO(
-                    id = it.id,
-                    username = it.username,
-                    email = it.email,
-                    nbCoins = it.nbCoins,
-                    token = it.token
-                ),
-                it.password
-            )
+            it.toDto() to it.password
         } ?: Pair(null, null)
 
     override fun addUser(user: User) {

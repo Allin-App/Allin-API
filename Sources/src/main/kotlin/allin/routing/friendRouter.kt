@@ -1,14 +1,13 @@
 package allin.routing
 
 import allin.dataSource
+import allin.dto.UserDTO
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
-import allin.model.Bet
 import io.github.smiley4.ktorswaggerui.dsl.get
 import io.github.smiley4.ktorswaggerui.dsl.post
 import io.ktor.http.*
-
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
@@ -32,7 +31,7 @@ fun Application.friendRouter() {
                 response {
                     HttpStatusCode.Accepted to {
                         description = "The list of friends is available"
-                        body<List<Bet>> {
+                        body<List<UserDTO>> {
                             description = "List of friends"
                         }
                     }
@@ -47,53 +46,54 @@ fun Application.friendRouter() {
                 }
 
             }
-        post("/friends/add", {
-            description = "Allows a user to add a friend"
-            request {
-                headerParameter<JWTPrincipal>("JWT token of the logged user")
-                body<String> {
-                    description = "User to add in the friends list"
-                }
-            }
-            response {
-                HttpStatusCode.Created to {
-                    description = "the friend has been added"
-                    body<String>() {
-                        description = "Friend with assigned id"
+            post("/friends/add", {
+                description = "Allows a user to add a friend"
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    body<String> {
+                        description = "User to add in the friends list"
                     }
                 }
-                HttpStatusCode.Conflict to {
-                    description = "Friend already exist in the friends list"
-                    body(ApiMessage.FRIENDS_ALREADY_EXISTS)
+                response {
+                    HttpStatusCode.Created to {
+                        description = "the friend has been added"
+                        body<String> {
+                            description = "Friend with assigned id"
+                        }
+                    }
+                    HttpStatusCode.Conflict to {
+                        description = "Friend already exist in the friends list"
+                        body(ApiMessage.FRIENDS_ALREADY_EXISTS)
+                    }
                 }
-            }
-        }) {
-            hasToken { principal ->
-                val requestMap = call.receive<Map<String, String>>()
-                val usernameFriend = requestMap["username"] ?: return@hasToken call.respond(HttpStatusCode.BadRequest, "Username is missing")
-                val username = tokenManagerBet.getUsernameFromToken(principal)
+            }) {
+                hasToken { principal ->
+                    val requestMap = call.receive<Map<String, String>>()
+                    val usernameFriend = requestMap["username"] ?: return@hasToken call.respond(
+                        HttpStatusCode.BadRequest,
+                        "Username is missing"
+                    )
+                    val username = tokenManagerBet.getUsernameFromToken(principal)
 
-                val user = userDataSource.getUserByUsername(username).first
-                val userFriend = userDataSource.getUserByUsername(usernameFriend).first
+                    val user = userDataSource.getUserByUsername(username).first
+                    val userFriend = userDataSource.getUserByUsername(usernameFriend).first
 
-                if (user == null || userFriend == null) {
-                    call.respond(HttpStatusCode.Conflict, ApiMessage.USER_NOT_FOUND)
-                }
-                else if (userFriend == user) {
-                    call.respond(HttpStatusCode.Conflict,ApiMessage.FRIENDS_REQUEST_HIMSELF)
-                }
-                else {
-                    val friendlist = friendDataSource.getFriendFromUserId(user.id)
-                    if (friendlist.contains(userFriend.id)) {
-                        call.respond(HttpStatusCode.Conflict,ApiMessage.FRIENDS_ALREADY_EXISTS)
+                    if (user == null || userFriend == null) {
+                        call.respond(HttpStatusCode.Conflict, ApiMessage.USER_NOT_FOUND)
+                    } else if (userFriend == user) {
+                        call.respond(HttpStatusCode.Conflict, ApiMessage.FRIENDS_REQUEST_HIMSELF)
                     } else {
-                        friendDataSource.addFriend(user.id, userFriend.id)
-                        call.respond(HttpStatusCode.Created, usernameFriend)
+                        val friendlist = friendDataSource.getFriendFromUserId(user.id)
+                        if (friendlist.map { it.id }.contains(userFriend.id)) {
+                            call.respond(HttpStatusCode.Conflict, ApiMessage.FRIENDS_ALREADY_EXISTS)
+                        } else {
+                            friendDataSource.addFriend(user.id, userFriend.id)
+                            call.respond(HttpStatusCode.Created, usernameFriend)
+                        }
                     }
                 }
-            }
 
-        }
+            }
             post("/friends/delete", {
                 description = "Allows a user to delete a friend"
                 request {
@@ -105,7 +105,7 @@ fun Application.friendRouter() {
                 response {
                     HttpStatusCode.Created to {
                         description = "the friend has been delete"
-                        body<String>() {
+                        body<String> {
                             description = "Friend with assigned id"
                         }
                     }
@@ -117,7 +117,10 @@ fun Application.friendRouter() {
             }) {
                 hasToken { principal ->
                     val requestMap = call.receive<Map<String, String>>()
-                    val usernameFriend = requestMap["username"] ?: return@hasToken call.respond(HttpStatusCode.BadRequest, "Username is missing")
+                    val usernameFriend = requestMap["username"] ?: return@hasToken call.respond(
+                        HttpStatusCode.BadRequest,
+                        "Username is missing"
+                    )
                     val username = tokenManagerBet.getUsernameFromToken(principal)
 
                     val user = userDataSource.getUserByUsername(username).first
@@ -127,8 +130,8 @@ fun Application.friendRouter() {
                         call.respond(HttpStatusCode.Conflict, ApiMessage.USER_NOT_FOUND)
                     } else {
                         val friendlist = friendDataSource.getFriendFromUserId(user.id)
-                        if (!friendlist.contains(userFriend.id)) {
-                            call.respond(HttpStatusCode.Conflict,ApiMessage.FRIENDS_DOESNT_EXISTS)
+                        if (!friendlist.map { it.id }.contains(userFriend.id)) {
+                            call.respond(HttpStatusCode.Conflict, ApiMessage.FRIENDS_DOESNT_EXISTS)
                         } else {
                             friendDataSource.deleteFriend(user.id, userFriend.id)
                             call.respond(HttpStatusCode.Created, usernameFriend)
