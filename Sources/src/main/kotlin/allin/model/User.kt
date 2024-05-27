@@ -16,13 +16,14 @@ data class User(
     var nbCoins: Int = DEFAULT_COIN_AMOUNT,
     var token: String? = null
 ) {
-    fun toDto() =
+    fun toDto(friendStatus: FriendStatus? = null) =
         UserDTO(
             id = id,
             username = username,
             email = email,
             nbCoins = nbCoins,
-            token = token
+            token = token,
+            friendStatus = friendStatus
         )
 }
 

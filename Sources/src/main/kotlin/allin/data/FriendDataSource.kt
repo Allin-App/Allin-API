@@ -7,4 +7,5 @@ interface FriendDataSource {
     fun getFriendFromUserId(id: String): List<UserDTO>
     fun deleteFriend(senderId: String, receiverId: String): Boolean
     fun isFriend(firstUser: String, secondUser: String): Boolean
+    fun filterUsersByUsername(fromUserId: String, search: String): List<UserDTO>
 }

@@ -92,7 +92,6 @@ fun Application.friendRouter() {
                         }
                     }
                 }
-
             }
             post("/friends/delete", {
                 description = "Allows a user to delete a friend"
@@ -139,6 +138,33 @@ fun Application.friendRouter() {
                     }
                 }
 
+            }
+
+            get("/friends/search/{search}", {
+                description = "Search for users based on username"
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    pathParameter<String>("Search string")
+                }
+                response {
+                    HttpStatusCode.OK to {
+                        body<List<UserDTO>> {
+                            description = "Filtered users."
+                        }
+                    }
+                }
+
+            }) {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { userDto, _ ->
+                        val users = friendDataSource.filterUsersByUsername(
+                            fromUserId = userDto.id,
+                            search = call.parameters["search"] ?: ""
+                        )
+
+                        call.respond(HttpStatusCode.OK, users)
+                    }
+                }
             }
 
         }

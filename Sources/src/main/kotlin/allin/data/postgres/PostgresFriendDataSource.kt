@@ -3,10 +3,14 @@ package allin.data.postgres
 import allin.data.FriendDataSource
 import allin.data.postgres.entities.FriendEntity
 import allin.data.postgres.entities.friends
+import allin.data.postgres.entities.getFriendStatus
 import allin.data.postgres.entities.users
+import allin.dto.UserDTO
+import allin.model.FriendStatus
 import org.ktorm.database.Database
 import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
+import org.ktorm.dsl.like
 import org.ktorm.entity.*
 
 class PostgresFriendDataSource(private val database: Database) : FriendDataSource {
@@ -25,7 +29,7 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
             .mapNotNull {
                 database.users.find { usr ->
                     usr.id eq it.receiver
-                }?.toUserDTO()
+                }?.toUserDTO(friendStatus = FriendStatus.FRIEND)
             }
 
 
@@ -39,4 +43,14 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
             .filter { (it.sender eq firstUser) and (it.receiver eq secondUser) }
             .map { it.toFriend() }
             .isNotEmpty()
+
+    override fun filterUsersByUsername(fromUserId: String, search: String): List<UserDTO> =
+        database.users.filter {
+            it.username like "%$search%"
+        }
+            .map { user ->
+                user.toUserDTO(
+                    friendStatus = database.getFriendStatus(fromUserId, user.id)
+                )
+            }
 }
