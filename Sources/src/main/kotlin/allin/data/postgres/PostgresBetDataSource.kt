@@ -8,6 +8,8 @@ import org.ktorm.dsl.*
 import org.ktorm.entity.*
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import kotlin.math.roundToInt
 
 class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
@@ -60,12 +62,12 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             .map { it.toBet(database) }
     }
 
-    override fun getToConfirm(id: String): List<BetDetail> {
+    override fun getToConfirm(username: String): List<BetDetail> {
         return database.bets
             .filter {
-                (it.createdBy eq id) and (BetsEntity.status eq BetStatus.CLOSING)
+                (it.createdBy eq username) and (BetsEntity.status eq BetStatus.CLOSING)
             }
-            .map { it.toBetDetail(database, id) }
+            .map { it.toBetDetail(database, username) }
     }
 
     override fun confirmBet(betId: String, result: String) {
@@ -81,16 +83,26 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             )
         }
 
+        val resultAnswerInfo = database.betAnswerInfos
+            .find { (it.betId eq betId) and (it.response eq result) }
+            ?.toBetAnswerInfo()
+
         database.participations.filter {
             (ParticipationsEntity.betId eq betId) and
                     (ParticipationsEntity.answer eq result)
-        }.forEach {
+        }.forEach { participation ->
             database.betResultNotifications.add(
                 BetResultNotificationEntity {
                     this.betId = betId
-                    this.username = it.username
+                    this.username = participation.username
                 }
             )
+
+            val amount = (participation.stake * (resultAnswerInfo?.odds ?: 1f)).roundToInt()
+            database.update(UsersEntity) { usr ->
+                set(usr.nbCoins, usr.nbCoins + amount)
+                where { usr.username eq participation.username }
+            }
         }
     }
 
@@ -203,25 +215,35 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
     }
 
     override fun updateBetStatuses(date: ZonedDateTime) {
-        database.update(BetsEntity) {
-            set(BetsEntity.status, BetStatus.WAITING)
-            where {
+        database.bets
+            .filter {
                 (date.toInstant() greaterEq BetsEntity.endRegistration) and
-                        (date.toInstant() less BetsEntity.endBet) and
                         (BetsEntity.status notEq BetStatus.FINISHED) and
                         (BetsEntity.status notEq BetStatus.CANCELLED)
-            }
-        }
+            }.let {
+                it.filter { date.toInstant() less BetsEntity.endBet }.forEach { bet ->
+                    bet.status = BetStatus.WAITING
+                    bet.flushChanges()
+                }
 
-        database.update(BetsEntity) {
-            set(BetsEntity.status, BetStatus.CLOSING)
-            where {
-                (date.toInstant() greaterEq BetsEntity.endRegistration) and
-                        (date.toInstant() greaterEq BetsEntity.endBet) and
-                        (BetsEntity.status notEq BetStatus.FINISHED) and
-                        (BetsEntity.status notEq BetStatus.CANCELLED)
+                it.filter { date.toInstant() greaterEq BetsEntity.endBet }.forEach { bet ->
+                    if (date.toInstant() >= bet.endBet.plus(7, ChronoUnit.DAYS)) {
+                        database.participations
+                            .filter { it.betId eq bet.id }
+                            .forEach { participation ->
+                                database.users.find { it.username eq participation.username }?.let { user ->
+                                    user.nbCoins += participation.stake
+                                    user.flushChanges()
+                                }
+                            }
+                        bet.status = BetStatus.CANCELLED
+                        bet.flushChanges()
+                    } else {
+                        bet.status = BetStatus.CLOSING
+                        bet.flushChanges()
+                    }
+                }
             }
-        }
     }
 
 }
