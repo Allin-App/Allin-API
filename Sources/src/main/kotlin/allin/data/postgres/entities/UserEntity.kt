@@ -1,6 +1,7 @@
 package allin.data.postgres.entities
 
 import allin.dto.UserDTO
+import allin.model.FriendStatus
 import org.ktorm.database.Database
 import org.ktorm.entity.Entity
 import org.ktorm.entity.sequenceOf
@@ -20,13 +21,14 @@ interface UserEntity : Entity<UserEntity> {
     var nbCoins: Int
     var lastGift: Instant
 
-    fun toUserDTO() =
+    fun toUserDTO(friendStatus: FriendStatus? = null) =
         UserDTO(
             id = id,
             username = username,
             email = email,
             nbCoins = nbCoins,
-            token = null
+            token = null,
+            friendStatus = friendStatus
         )
 }
 

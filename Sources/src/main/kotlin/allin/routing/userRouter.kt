@@ -55,11 +55,9 @@ fun Application.userRouter() {
             val tempUser = call.receive<UserRequest>()
             if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
                 call.respond(HttpStatusCode.Forbidden, ApiMessage.INVALID_MAIL)
-            }
-            else if (userDataSource.userExists(tempUser.username)) {
+            } else if (userDataSource.userExists(tempUser.username)) {
                 call.respond(HttpStatusCode.Conflict, ApiMessage.USER_ALREADY_EXISTS)
-            }
-            else if (userDataSource.emailExists(tempUser.email)) {
+            } else if (userDataSource.emailExists(tempUser.email)) {
                 call.respond(HttpStatusCode.Conflict, ApiMessage.MAIL_ALREADY_EXISTS)
             } else {
                 val user = User(

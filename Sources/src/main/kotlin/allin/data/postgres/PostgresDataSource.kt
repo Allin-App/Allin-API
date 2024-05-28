@@ -3,6 +3,7 @@ package allin.data.postgres
 import allin.data.*
 import allin.ext.execute
 import org.ktorm.database.Database
+import org.ktorm.support.postgresql.PostgreSqlDialect
 
 class PostgresDataSource : AllInDataSource() {
 
@@ -20,7 +21,8 @@ class PostgresDataSource : AllInDataSource() {
         database = Database.connect(
             url = url,
             user = dbUser,
-            password = dbPassword
+            password = dbPassword,
+            dialect = PostgreSqlDialect()
         )
 
         database.execute(

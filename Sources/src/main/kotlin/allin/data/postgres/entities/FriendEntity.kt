@@ -18,7 +18,6 @@ interface FriendEntity : Entity<FriendEntity> {
             sender = sender,
             receiver = receiver,
         )
-
 }
 
 object FriendsEntity : Table<FriendEntity>("friend") {
