@@ -5,7 +5,6 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.eq
 import org.ktorm.entity.*
 import org.ktorm.schema.*
-import org.postgresql.util.ByteConverter.numeric
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime

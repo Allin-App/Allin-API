@@ -60,12 +60,12 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             .map { it.toBet(database) }
     }
 
-    override fun getToConfirm(username: String): List<BetDetail> {
+    override fun getToConfirm(id: String): List<BetDetail> {
         return database.bets
             .filter {
-                (it.createdBy eq username) and (BetsEntity.status eq BetStatus.CLOSING)
+                (it.createdBy eq id) and (BetsEntity.status eq BetStatus.CLOSING)
             }
-            .map { it.toBetDetail(database, username) }
+            .map { it.toBetDetail(database, id) }
     }
 
     override fun confirmBet(betId: String, result: String) {
@@ -144,11 +144,11 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
     }
 
     override fun getMostPopularBet(): Bet? {
-        val max=database.bets.filter { (it.isPrivate eq false) and (it.status eq BetStatus.WAITING) }.maxBy { it.popularityscore }
-        if(max!=null){
-            return database.bets.filter { (it.popularityscore eq max) and (it.isPrivate eq false) and (it.status eq BetStatus.WAITING) }.map { it.toBet(database) }.first()
-        }
-        return null
+        return database.bets
+            .filter { (it.isPrivate eq false) and (it.status eq BetStatus.IN_PROGRESS) }
+            .sortedByDescending { it.popularityscore }
+            .firstOrNull()
+            ?.toBet(database)
     }
 
     override fun updatePopularityScore(betId: String) {
@@ -204,7 +204,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
     override fun updateBetStatuses(date: ZonedDateTime) {
         database.update(BetsEntity) {
-            set(BetsEntity.status, BetStatus.IN_PROGRESS)
+            set(BetsEntity.status, BetStatus.WAITING)
             where {
                 (date.toInstant() greaterEq BetsEntity.endRegistration) and
                         (date.toInstant() less BetsEntity.endBet) and

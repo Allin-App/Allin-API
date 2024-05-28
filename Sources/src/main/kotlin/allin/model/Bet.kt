@@ -1,6 +1,6 @@
 package allin.model
 
-import allin.model.BetStatus.WAITING
+import allin.model.BetStatus.IN_PROGRESS
 import allin.serializer.ZonedDateTimeSerializer
 import kotlinx.serialization.Serializable
 import java.time.ZonedDateTime
@@ -13,7 +13,7 @@ data class Bet(
     val id: String = "",
     val theme: String,
     val sentenceBet: String,
-    val status: BetStatus = WAITING,
+    val status: BetStatus = IN_PROGRESS,
     val type: BetType,
     @Serializable(ZonedDateTimeSerializer::class) val endRegistration: ZonedDateTime,
     @Serializable(ZonedDateTimeSerializer::class) var endBet: ZonedDateTime,

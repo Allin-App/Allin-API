@@ -53,7 +53,7 @@ fun Application.betRouter() {
                     betDataSource.getBetById(id)?.let {
                         call.respond(HttpStatusCode.Conflict, ApiMessage.BET_ALREADY_EXIST)
                     } ?: run {
-                        val betWithId = bet.copy(id = id, createdBy = user.first?.id.toString())
+                        val betWithId = bet.copy(id = id, createdBy = user.first?.username.toString())
                         betDataSource.addBet(betWithId)
                         call.respond(HttpStatusCode.Created, betWithId)
                     }
@@ -111,7 +111,7 @@ fun Application.betRouter() {
                         if (bet != null) {
                             call.respond(HttpStatusCode.Accepted, bet)
                         }
-                        call.respond(HttpStatusCode.NotFound,"Aucun bet n'a pu être récupérer")
+                        call.respond(HttpStatusCode.NotFound, "Aucun bet n'a pu être récupérer")
                     }
                 }
             }

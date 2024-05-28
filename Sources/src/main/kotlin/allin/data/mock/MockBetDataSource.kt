@@ -1,15 +1,8 @@
 package allin.data.mock
 
 import allin.data.BetDataSource
-import allin.data.postgres.entities.BetsEntity
-import allin.data.postgres.entities.bets
-import allin.data.postgres.entities.participations
 import allin.model.*
 import allin.model.BetStatus.*
-import org.ktorm.dsl.and
-import org.ktorm.dsl.eq
-import org.ktorm.dsl.update
-import org.ktorm.entity.*
 import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
@@ -99,7 +92,7 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
                     if (date >= bet.endBet) {
                         bets[idx] = bet.copy(status = CLOSING)
                     } else {
-                        bets[idx] = bet.copy(status = IN_PROGRESS)
+                        bets[idx] = bet.copy(status = WAITING)
                     }
                 }
             }
