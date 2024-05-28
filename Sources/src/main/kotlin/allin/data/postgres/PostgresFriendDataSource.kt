@@ -5,12 +5,12 @@ import allin.data.postgres.entities.FriendEntity
 import allin.data.postgres.entities.friends
 import allin.data.postgres.entities.users
 import allin.dto.UserDTO
+import allin.ext.levenshtein
 import allin.ext.toLowerCase
 import allin.model.FriendStatus
 import org.ktorm.database.Database
 import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
-import org.ktorm.dsl.like
 import org.ktorm.dsl.notEq
 import org.ktorm.entity.*
 
@@ -48,6 +48,8 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
 
     override fun filterUsersByUsername(fromUserId: String, search: String): List<UserDTO> =
         database.users
-            .filter { (it.username.toLowerCase() like "%$search%") and (it.id notEq fromUserId) }
+            .filter { it.id notEq fromUserId }
+            .sortedBy { it.username.toLowerCase().levenshtein(search.lowercase()) }
+            .take(10)
             .map { user -> user.toUserDTO(friendStatus = getFriendStatus(fromUserId, user.id)) }
 }

@@ -3,6 +3,7 @@ package allin.ext
 import org.ktorm.database.Database
 import org.ktorm.expression.FunctionExpression
 import org.ktorm.schema.ColumnDeclaring
+import org.ktorm.schema.IntSqlType
 import org.ktorm.schema.VarcharSqlType
 import java.sql.ResultSet
 
@@ -46,3 +47,14 @@ fun ColumnDeclaring<String>.toUpperCase(): FunctionExpression<String> {
         sqlType = VarcharSqlType
     )
 }
+
+fun ColumnDeclaring<String>.levenshtein(target: ColumnDeclaring<String>): FunctionExpression<Int> {
+    return FunctionExpression(
+        functionName = "levenshtein",
+        arguments = listOf(this.asExpression(), target.asExpression()),
+        sqlType = IntSqlType
+    )
+}
+
+fun ColumnDeclaring<String>.levenshtein(target: String): FunctionExpression<Int> =
+    levenshtein(wrapArgument(target))

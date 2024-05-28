@@ -27,6 +27,12 @@ class PostgresDataSource : AllInDataSource() {
 
         database.execute(
             """
+                CREATE EXTENSION IF not exists fuzzystrmatch;
+            """.trimIndent()
+        )
+
+        database.execute(
+            """
             CREATE TABLE IF not exists users ( 
                 id VARCHAR(255) PRIMARY KEY, 
                 username VARCHAR(255), 
