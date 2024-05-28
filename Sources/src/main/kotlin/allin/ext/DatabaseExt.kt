@@ -1,6 +1,9 @@
 package allin.ext
 
 import org.ktorm.database.Database
+import org.ktorm.expression.FunctionExpression
+import org.ktorm.schema.ColumnDeclaring
+import org.ktorm.schema.VarcharSqlType
 import java.sql.ResultSet
 
 fun Database.executeWithResult(request: String): ResultSet? {
@@ -26,4 +29,20 @@ fun Database.execute(request: String) {
             connection.prepareStatement(request).execute()
             connection.commit()
         }
+}
+
+fun ColumnDeclaring<String>.toLowerCase(): FunctionExpression<String> {
+    return FunctionExpression(
+        functionName = "LOWER",
+        arguments = listOf(this.asExpression()),
+        sqlType = VarcharSqlType
+    )
+}
+
+fun ColumnDeclaring<String>.toUpperCase(): FunctionExpression<String> {
+    return FunctionExpression(
+        functionName = "UPPER",
+        arguments = listOf(this.asExpression()),
+        sqlType = VarcharSqlType
+    )
 }
