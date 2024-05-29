@@ -53,8 +53,10 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
 
 
     override fun deleteFriend(senderId: String, receiverId: String): Boolean {
-        database.friends.removeIf { (it.sender eq receiverId) and (it.receiver eq senderId) }
-        return database.friends.removeIf { (it.sender eq senderId) and (it.receiver eq receiverId) } > 0
+        val result = database.friends.removeIf { (it.sender eq receiverId) and (it.receiver eq senderId) } +
+                database.friends.removeIf { (it.sender eq senderId) and (it.receiver eq receiverId) }
+
+        return result > 0
     }
 
     override fun isFriend(firstUser: String, secondUser: String) =

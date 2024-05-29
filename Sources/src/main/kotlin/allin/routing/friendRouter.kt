@@ -154,12 +154,10 @@ fun Application.friendRouter() {
                     if (user == null || userFriend == null) {
                         call.respond(HttpStatusCode.Conflict, ApiMessage.USER_NOT_FOUND)
                     } else {
-                        val friendlist = friendDataSource.getFriendFromUserId(user.id)
-                        if (!friendlist.map { it.id }.contains(userFriend.id)) {
-                            call.respond(HttpStatusCode.Conflict, ApiMessage.FRIENDS_DOESNT_EXISTS)
-                        } else {
-                            friendDataSource.deleteFriend(user.id, userFriend.id)
+                        if (friendDataSource.deleteFriend(user.id, userFriend.id)) {
                             call.respond(HttpStatusCode.Created, usernameFriend)
+                        } else {
+                            call.respond(HttpStatusCode.Conflict, ApiMessage.FRIENDS_DOESNT_EXISTS)
                         }
                     }
                 }
