@@ -46,6 +46,32 @@ fun Application.friendRouter() {
                 }
 
             }
+            get("/friends/requests", {
+                description = "Allows you to recover all friend requests of a JWT Token"
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                }
+                response {
+                    HttpStatusCode.Accepted to {
+                        description = "The list of friend requests is available"
+                        body<List<UserDTO>> {
+                            description = "List of friend requests"
+                        }
+                    }
+                }
+            }) {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { _, _ ->
+                        val username = tokenManagerBet.getUsernameFromToken(principal)
+                        val user = userDataSource.getUserByUsername(username).first
+                        call.respond(
+                            HttpStatusCode.Accepted,
+                            friendDataSource.getFriendRequestsFromUserId(user?.id.toString())
+                        )
+                    }
+                }
+
+            }
             post("/friends/add", {
                 description = "Allows a user to add a friend"
                 request {

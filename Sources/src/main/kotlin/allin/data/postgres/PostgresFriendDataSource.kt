@@ -37,6 +37,20 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
                 )
             }
 
+    override fun getFriendRequestsFromUserId(id: String): List<UserDTO> {
+        return database.friends
+            .filter { it.receiver eq id }
+            .mapNotNull {
+                if (isFriend(firstUser = id, secondUser = it.sender)) {
+                    null
+                } else {
+                    database.users.find { usr ->
+                        usr.id eq it.sender
+                    }?.toUserDTO(friendStatus = FriendStatus.NOT_FRIEND)
+                }
+            }
+    }
+
 
     override fun deleteFriend(senderId: String, receiverId: String): Boolean {
         database.friends.removeIf { (it.sender eq receiverId) and (it.receiver eq senderId) }
