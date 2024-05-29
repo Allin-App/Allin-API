@@ -26,6 +26,15 @@ class MockFriendDataSource(private val mockData: MockDataSource.MockData) : Frie
                     )
             }
 
+    override fun getFriendRequestsFromUserId(id: String): List<UserDTO> {
+        return friends
+            .filter { (it.receiver == id) && !isFriend(id, it.sender) }
+            .mapNotNull {
+                users.find { usr -> usr.id == it.sender }
+                    ?.toDto(friendStatus = FriendStatus.NOT_FRIEND)
+            }
+    }
+
     override fun deleteFriend(senderId: String, receiverId: String) =
         friends.removeIf { (it.sender == senderId) && (it.receiver == receiverId) }
 

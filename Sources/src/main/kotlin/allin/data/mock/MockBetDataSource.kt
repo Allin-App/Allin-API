@@ -90,7 +90,21 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
             if (bet.status != CANCELLED && bet.status != FINISHED) {
                 if (date >= bet.endRegistration) {
                     if (date >= bet.endBet) {
-                        bets[idx] = bet.copy(status = CLOSING)
+                        if (date.plusWeeks(1) >= bet.endBet) {
+                            bets[idx] = bet.copy(status = CANCELLED)
+
+                            participations
+                                .filter { it.betId == bets[idx].id }
+                                .forEach { p ->
+                                    users.replaceAll {
+                                        if (it.username == p.username) {
+                                            it.copy(nbCoins = it.nbCoins + p.stake)
+                                        } else it
+                                    }
+                                }
+                        } else {
+                            bets[idx] = bet.copy(status = CLOSING)
+                        }
                     } else {
                         bets[idx] = bet.copy(status = WAITING)
                     }
@@ -115,12 +129,14 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
                 it.copy(status = FINISHED)
             } else it
         }
-
+        val resultAnswerInfo = answerInfos.find { it.betId == betId && it.response == result }
         participations.filter { it.betId == betId && it.answer == result }
             .forEach { participation ->
+
+                val amount = (participation.stake * (resultAnswerInfo?.odds ?: 1f)).roundToInt()
                 users.replaceAll {
                     if (it.username == participation.username) {
-                        it.copy(nbCoins = it.nbCoins + participation.stake)
+                        it.copy(nbCoins = it.nbCoins + amount)
                     } else it
                 }
                 resultNotifications.add(Pair(betId, participation.username))

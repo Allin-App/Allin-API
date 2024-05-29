@@ -3,10 +3,14 @@ package allin.data.postgres.entities
 import allin.model.BetResult
 import allin.model.BetResultDetail
 import org.ktorm.database.Database
+import org.ktorm.dsl.and
+import org.ktorm.dsl.eq
 import org.ktorm.entity.Entity
+import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
 import org.ktorm.schema.Table
 import org.ktorm.schema.varchar
+import kotlin.math.roundToInt
 
 
 interface BetResultEntity : Entity<BetResultEntity> {
@@ -24,14 +28,19 @@ interface BetResultEntity : Entity<BetResultEntity> {
     fun toBetResultDetail(
         database: Database,
         participationEntity: ParticipationEntity
-    ) =
-        BetResultDetail(
+    ): BetResultDetail {
+        val answerInfo = database.betAnswerInfos.find {
+            (it.betId eq bet.id) and (it.response eq participationEntity.answer)
+        }?.toBetAnswerInfo()
+
+        return BetResultDetail(
             betResult = this.toBetResult(),
             bet = bet.toBet(database),
             participation = participationEntity.toParticipation(),
-            amount = participationEntity.stake,
+            amount = (participationEntity.stake * (answerInfo?.odds ?: 1f)).roundToInt(),
             won = participationEntity.answer == result
         )
+    }
 }
 
 object BetResultsEntity : Table<BetResultEntity>("betresult") {
