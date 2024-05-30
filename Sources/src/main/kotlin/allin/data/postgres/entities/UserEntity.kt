@@ -40,7 +40,7 @@ interface UserEntity : Entity<UserEntity> {
         if (!imageManagerUser.imageAvailable(urlfile)) {
             imageManagerUser.saveImage(urlfile, imageByte)
         }
-        return "${AppConfig.urlManager.getURL()}${urlfile}"
+        return "${AppConfig.urlManager.getURL()}/users/${urlfile}"
     }
 }
 

@@ -250,7 +250,7 @@ fun Application.userRouter() {
                         if (imageByteArray != null && imageByteArray.isNotEmpty()) {
                             userDataSource.removeImage(user.id)
                             userDataSource.addImage(user.id, imageByteArray)
-                            call.respond(HttpStatusCode.OK, "${urlManager.getURL()}/users/${urlfile}")
+                            call.respond(HttpStatusCode.OK, "${urlManager.getURL()}users/${urlfile}")
                         }
                         call.respond(HttpStatusCode.Conflict)
                     }
