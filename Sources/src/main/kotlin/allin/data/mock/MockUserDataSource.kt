@@ -3,8 +3,6 @@ package allin.data.mock
 import allin.data.UserDataSource
 import allin.dto.UserDTO
 import allin.model.User
-import org.ktorm.dsl.eq
-import org.ktorm.dsl.or
 import java.time.ZonedDateTime
 
 class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDataSource {
@@ -57,4 +55,17 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
         lastGifts[username] = ZonedDateTime.now()
         return value
     }
+
+    override fun addImage(userid: String, image: ByteArray) {
+        TODO("Not yet implemented")
+    }
+
+    override fun removeImage(userid: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getImage(userid: String): ByteArray? {
+        TODO("Not yet implemented")
+    }
+
 }

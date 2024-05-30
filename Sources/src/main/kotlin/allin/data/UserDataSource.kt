@@ -12,4 +12,7 @@ interface UserDataSource {
     fun userExists(username: String): Boolean
     fun emailExists(email: String): Boolean
     fun canHaveDailyGift(username: String): Boolean
+    fun addImage(userid: String, image: ByteArray)
+    fun removeImage(userid: String)
+    fun getImage(userid: String): ByteArray?
 }

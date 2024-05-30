@@ -4,6 +4,9 @@ import allin.dataSource
 import allin.dto.UserDTO
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
+import allin.hostIP
+import allin.hostPort
+import allin.isCodeFirstContainer
 import allin.model.*
 import allin.utils.AppConfig
 import io.github.smiley4.ktorswaggerui.dsl.get
@@ -15,6 +18,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.io.File
 import java.util.*
 
 val RegexCheckerUser = AppConfig.regexChecker
@@ -104,6 +108,23 @@ fun Application.userRouter() {
                 } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.USER_NOT_FOUND)
             } else {
                 call.respond(HttpStatusCode.NotFound, ApiMessage.INCORRECT_LOGIN_PASSWORD)
+            }
+        }
+
+        get("/users/images/{fileName}") {
+            val fileName = call.parameters["fileName"]
+            val file = File("images/$fileName.png")
+            if (file.exists()) {
+                call.respondFile(file)
+            } else {
+                val imageBytes = userDataSource.getImage(fileName.toString())
+                if (imageBytes != null) {
+                    file.parentFile.mkdirs()
+                    file.writeBytes(imageBytes)
+                    call.respondFile(file)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, "File not found")
+                }
             }
         }
 
@@ -198,6 +219,47 @@ fun Application.userRouter() {
                     }
                 }
             }
+
+            post("/users/image", {
+                description = "Allow you to add a profil image"
+
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    body<CheckUser> {
+                        description = "User information"
+                    }
+                }
+                response {
+                    HttpStatusCode.Accepted to {
+                        description = "Image added"
+                    }
+                    HttpStatusCode.NotFound to {
+                        description = "User not found"
+                        body(ApiMessage.INCORRECT_LOGIN_PASSWORD)
+                    }
+                }
+
+            }) {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user , _ ->
+
+                        val base64Image = call.receiveText()
+                        val imageBytes = Base64.getDecoder().decode(base64Image)
+
+                        val urlfile = "images/${user.id}"
+                        val file = File("${urlfile}.png")
+                        file.parentFile.mkdirs()
+                        file.writeBytes(imageBytes)
+                        userDataSource.removeImage(user.id)
+                        userDataSource.addImage(user.id,imageBytes)
+                        if(isCodeFirstContainer.isEmpty()){
+                            call.respond(HttpStatusCode.OK, "http://${hostIP}:${hostPort}/users/${urlfile}")
+                        }
+                        else call.respond(HttpStatusCode.OK, "${isCodeFirstContainer}/${urlfile}")
+                    }
+                }
+            }
+
         }
     }
 }

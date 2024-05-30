@@ -1,9 +1,7 @@
 package allin.data.postgres
 
 import allin.data.UserDataSource
-import allin.data.postgres.entities.UserEntity
-import allin.data.postgres.entities.UsersEntity
-import allin.data.postgres.entities.users
+import allin.data.postgres.entities.*
 import allin.dto.UserDTO
 import allin.ext.executeWithResult
 import allin.model.User
@@ -82,5 +80,19 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
         }
         return false
     }
+
+    override fun addImage(userid: String, image: ByteArray) {
+        database.usersimage.add(UserImageEntity {
+            id = userid
+            this.image = image
+        })
+    }
+
+    override fun removeImage(userid: String) {
+        database.usersimage.removeIf { it.id eq userid }
+    }
+
+    override fun getImage(userid: String): ByteArray? =
+        database.usersimage.find { it.id eq userid }?.image
 
 }

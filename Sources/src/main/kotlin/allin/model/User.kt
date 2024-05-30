@@ -28,3 +28,9 @@ data class CheckUser(
     val login: String,
     val password: String
 )
+
+@Serializable
+data class UserImage(
+    val id: String,
+    val image: ByteArray,
+)
