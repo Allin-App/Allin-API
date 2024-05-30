@@ -36,7 +36,7 @@ interface UserEntity : Entity<UserEntity> {
 
     fun getImage(userId: String, database: Database): String? {
         val imageByte = database.usersimage.find { it.id eq id }?.image ?: return null
-        val urlfile = "image/$userId"
+        val urlfile = "images/$userId"
         if (!imageManagerUser.imageAvailable(urlfile)) {
             imageManagerUser.saveImage(urlfile, imageByte)
         }
