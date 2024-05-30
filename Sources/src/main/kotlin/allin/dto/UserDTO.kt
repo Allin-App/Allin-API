@@ -8,5 +8,6 @@ data class UserDTO(
     val username: String,
     val email: String,
     val nbCoins: Int,
-    var token: String?
+    var token: String?,
+    val image: String?
 )

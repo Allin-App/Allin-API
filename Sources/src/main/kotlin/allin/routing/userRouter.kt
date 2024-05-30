@@ -24,6 +24,8 @@ import java.util.*
 val RegexCheckerUser = AppConfig.regexChecker
 val CryptManagerUser = AppConfig.cryptManager
 val tokenManagerUser = AppConfig.tokenManager
+val imageManagerUser = AppConfig.imageManager
+
 const val DEFAULT_COINS = 500
 
 
@@ -59,11 +61,9 @@ fun Application.userRouter() {
             val tempUser = call.receive<UserRequest>()
             if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
                 call.respond(HttpStatusCode.Forbidden, ApiMessage.INVALID_MAIL)
-            }
-            else if (userDataSource.userExists(tempUser.username)) {
+            } else if (userDataSource.userExists(tempUser.username)) {
                 call.respond(HttpStatusCode.Conflict, ApiMessage.USER_ALREADY_EXISTS)
-            }
-            else if (userDataSource.emailExists(tempUser.email)) {
+            } else if (userDataSource.emailExists(tempUser.email)) {
                 call.respond(HttpStatusCode.Conflict, ApiMessage.MAIL_ALREADY_EXISTS)
             } else {
                 val user = User(
@@ -113,14 +113,16 @@ fun Application.userRouter() {
 
         get("/users/images/{fileName}") {
             val fileName = call.parameters["fileName"]
-            val file = File("images/$fileName.png")
+
+            val urlfile = "images/$fileName"
+
+            val file = File("$urlfile.png")
             if (file.exists()) {
                 call.respondFile(file)
             } else {
                 val imageBytes = userDataSource.getImage(fileName.toString())
                 if (imageBytes != null) {
-                    file.parentFile.mkdirs()
-                    file.writeBytes(imageBytes)
+                    imageManagerUser.saveImage(urlfile, imageBytes.toString())
                     call.respondFile(file)
                 } else {
                     call.respond(HttpStatusCode.NotFound, "File not found")
@@ -241,21 +243,19 @@ fun Application.userRouter() {
 
             }) {
                 hasToken { principal ->
-                    verifyUserFromToken(userDataSource, principal) { user , _ ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
 
                         val base64Image = call.receiveText()
-                        val imageBytes = Base64.getDecoder().decode(base64Image)
 
                         val urlfile = "images/${user.id}"
-                        val file = File("${urlfile}.png")
-                        file.parentFile.mkdirs()
-                        file.writeBytes(imageBytes)
-                        userDataSource.removeImage(user.id)
-                        userDataSource.addImage(user.id,imageBytes)
-                        if(isCodeFirstContainer.isEmpty()){
-                            call.respond(HttpStatusCode.OK, "http://${hostIP}:${hostPort}/users/${urlfile}")
+                        val imageByteArray = imageManagerUser.saveImage(urlfile, base64Image)
+                        if (imageByteArray != null && imageByteArray.isNotEmpty()) {
+                            userDataSource.removeImage(user.id)
+                            userDataSource.addImage(user.id, imageByteArray)
+                            if (isCodeFirstContainer.isEmpty()) {
+                                call.respond(HttpStatusCode.OK, "http://${hostIP}:${hostPort}/users/${urlfile}")
+                            } else call.respond(HttpStatusCode.OK, "${isCodeFirstContainer}/${urlfile}")
                         }
-                        else call.respond(HttpStatusCode.OK, "${isCodeFirstContainer}/${urlfile}")
                     }
                 }
             }

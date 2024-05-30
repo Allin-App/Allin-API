@@ -128,7 +128,7 @@ class PostgresDataSource : AllInDataSource() {
 
         database.execute(
             """
-                CREATE TABLE IF NOT EXISTS public.userimage
+                CREATE TABLE IF NOT EXISTS userimage
                 (
                     user_id VARCHAR(255) PRIMARY KEY,
                     image bytea

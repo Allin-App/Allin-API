@@ -1,8 +1,12 @@
 package allin.data.postgres.entities
 
 import allin.dto.UserDTO
+import allin.routing.imageManagerUser
+import allin.utils.AppConfig
 import org.ktorm.database.Database
+import org.ktorm.dsl.eq
 import org.ktorm.entity.Entity
+import org.ktorm.entity.find
 import org.ktorm.entity.sequenceOf
 import org.ktorm.schema.Table
 import org.ktorm.schema.int
@@ -20,14 +24,24 @@ interface UserEntity : Entity<UserEntity> {
     var nbCoins: Int
     var lastGift: Instant
 
-    fun toUserDTO() =
+    fun toUserDTO(database: Database) =
         UserDTO(
             id = id,
             username = username,
             email = email,
             nbCoins = nbCoins,
-            token = null
+            token = null,
+            image = getImage(id, database)
         )
+
+    fun getImage(userId: String, database: Database): String? {
+        val imageByte = database.usersimage.find { it.id eq id }?.image ?: return null
+        val urlfile = "image/$userId"
+        if (!imageManagerUser.imageAvailable(urlfile)) {
+            imageManagerUser.saveImage(urlfile, imageByte)
+        }
+        return "${AppConfig.urlManager.getURL()}${urlfile}"
+    }
 }
 
 object UsersEntity : Table<UserEntity>("users") {

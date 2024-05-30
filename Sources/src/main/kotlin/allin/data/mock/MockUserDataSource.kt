@@ -17,7 +17,8 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
                     username = it.username,
                     email = it.email,
                     nbCoins = it.nbCoins,
-                    token = it.token
+                    token = it.token,
+                    image = null
                 ),
                 it.password
             )
