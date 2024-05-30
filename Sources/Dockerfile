@@ -8,5 +8,6 @@ EXPOSE 8080
 
 RUN mkdir /app
 
+
 COPY --from=build /home/maven/src/target/*-with-dependencies.jar /app/ktor-docker-sample.jar
 ENTRYPOINT ["java", "-jar", "/app/ktor-docker-sample.jar"]
