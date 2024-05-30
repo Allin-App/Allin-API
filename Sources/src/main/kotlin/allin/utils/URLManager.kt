@@ -8,6 +8,6 @@ class URLManager {
     fun getURL(): String {
         return if (isCodeFirstContainer.isEmpty()) {
             "http://$hostIP:$hostPort/"
-        } else isCodeFirstContainer
+        } else "http://codefirst.iut.uca.fr${isCodeFirstContainer}"
     }
 }
