@@ -4,9 +4,6 @@ import allin.dataSource
 import allin.dto.UserDTO
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
-import allin.hostIP
-import allin.hostPort
-import allin.isCodeFirstContainer
 import allin.model.*
 import allin.utils.AppConfig
 import io.github.smiley4.ktorswaggerui.dsl.get
@@ -25,6 +22,7 @@ val RegexCheckerUser = AppConfig.regexChecker
 val CryptManagerUser = AppConfig.cryptManager
 val tokenManagerUser = AppConfig.tokenManager
 val imageManagerUser = AppConfig.imageManager
+val urlManager = AppConfig.urlManager
 
 const val DEFAULT_COINS = 500
 
@@ -252,10 +250,9 @@ fun Application.userRouter() {
                         if (imageByteArray != null && imageByteArray.isNotEmpty()) {
                             userDataSource.removeImage(user.id)
                             userDataSource.addImage(user.id, imageByteArray)
-                            if (isCodeFirstContainer.isEmpty()) {
-                                call.respond(HttpStatusCode.OK, "http://${hostIP}:${hostPort}/users/${urlfile}")
-                            } else call.respond(HttpStatusCode.OK, "${isCodeFirstContainer}/${urlfile}")
+                            call.respond(HttpStatusCode.OK, "${urlManager.getURL()}/users/${urlfile}")
                         }
+                        call.respond(HttpStatusCode.Conflict)
                     }
                 }
             }
