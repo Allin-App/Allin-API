@@ -70,7 +70,10 @@ fun Application.userRouter() {
                     email = tempUser.email,
                     password = tempUser.password,
                     nbCoins = DEFAULT_COINS,
-                    token = null
+                    token = null,
+                    bestWin = 0,
+                    nbFriends = 0,
+                    nbBets = 0,
                 )
                 CryptManagerUser.passwordCrypt(user)
                 user.token = tokenManagerUser.generateOrReplaceJWTToken(user)

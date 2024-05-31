@@ -24,18 +24,22 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
         )
     }
 
-    override fun getFriendFromUserId(id: String) =
-        database.friends.map { it.toFriend() }
+    override fun getFriendFromUserId(id: String): List<UserDTO> {
+        return database.friends.map { it.toFriend() }
             .filter { it.sender == id }
-            .mapNotNull {
-                database.users.find { usr ->
-                    usr.id eq it.receiver
-                }?.toUserDTO(
-                    friendStatus = if (isFriend(it.receiver, id)) {
+            .mapNotNull { friend ->
+                val receiverUser = database.users.find { usr ->
+                    usr.id eq friend.receiver
+                }
+                receiverUser?.toUserDTO(
+                    database,
+                    friendStatus = if (isFriend(friend.receiver, id)) {
                         FriendStatus.FRIEND
                     } else FriendStatus.REQUESTED
                 )
             }
+    }
+
 
     override fun getFriendRequestsFromUserId(id: String): List<UserDTO> {
         return database.friends
@@ -46,7 +50,7 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
                 } else {
                     database.users.find { usr ->
                         usr.id eq it.sender
-                    }?.toUserDTO(friendStatus = FriendStatus.NOT_FRIEND)
+                    }?.toUserDTO(database,friendStatus = FriendStatus.NOT_FRIEND)
                 }
             }
     }
@@ -67,5 +71,5 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
             .filter { it.id notEq fromUserId }
             .sortedBy { it.username.toLowerCase().levenshtein(search.lowercase()) }
             .take(10)
-            .map { user -> user.toUserDTO(friendStatus = getFriendStatus(fromUserId, user.id)) }
+            .map { user -> user.toUserDTO(database,friendStatus = getFriendStatus(fromUserId, user.id)) }
 }

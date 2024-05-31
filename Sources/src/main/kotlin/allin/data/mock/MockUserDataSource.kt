@@ -21,7 +21,8 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
                     image = null,
                     nbBets = MockBetDataSource(mockData).getHistory(it.username).count(),
                     nbFriends = MockFriendDataSource(mockData).getFriendFromUserId(it.id).count(),
-                    bestWin = MockParticipationDataSource(mockData).getBestWinFromUserid(it.id)
+                    bestWin = MockParticipationDataSource(mockData).getBestWinFromUserid(it.id),
+                    friendStatus = null,
                 ),
                 it.password
             )

@@ -1,5 +1,6 @@
 package allin.dto
 
+import allin.model.FriendStatus
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,5 +13,6 @@ data class UserDTO(
     val image: String?,
     var nbBets: Int,
     var nbFriends: Int,
-    var bestWin: Int
+    var bestWin: Int,
+    var friendStatus: FriendStatus?,
 )

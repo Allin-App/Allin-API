@@ -4,6 +4,7 @@ import allin.data.postgres.PostgresBetDataSource
 import allin.data.postgres.PostgresFriendDataSource
 import allin.data.postgres.PostgresParticipationDataSource
 import allin.dto.UserDTO
+import allin.model.FriendStatus
 import allin.routing.imageManagerUser
 import allin.utils.AppConfig
 import org.ktorm.database.Database
@@ -27,7 +28,7 @@ interface UserEntity : Entity<UserEntity> {
     var nbCoins: Int
     var lastGift: Instant
 
-    fun toUserDTO(database: Database) =
+    fun toUserDTO(database: Database, friendStatus: FriendStatus? = null) =
         UserDTO(
             id = id,
             username = username,
@@ -38,6 +39,7 @@ interface UserEntity : Entity<UserEntity> {
             nbBets = PostgresBetDataSource(database).getHistory(username).count(),
             nbFriends = PostgresFriendDataSource(database).getFriendFromUserId(id).count(),
             bestWin = PostgresParticipationDataSource(database).getBestWinFromUserid(id)?: 0,
+            friendStatus = friendStatus
         )
 
     fun getImage(userId: String, database: Database): String? {
