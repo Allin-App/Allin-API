@@ -13,7 +13,8 @@ data class User(
     val email: String,
     var password: String,
     var nbCoins: Int = DEFAULT_COIN_AMOUNT,
-    var token: String? = null
+    var token: String? = null,
+    var image: String? = null,
 )
 
 @Serializable

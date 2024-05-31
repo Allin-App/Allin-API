@@ -9,5 +9,8 @@ data class UserDTO(
     val email: String,
     val nbCoins: Int,
     var token: String?,
-    val image: String?
+    val image: String?,
+    var nbBets: Int,
+    var nbFriends: Int,
+    var bestWin: Int
 )

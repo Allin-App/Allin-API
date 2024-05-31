@@ -1,5 +1,8 @@
 package allin.data.postgres.entities
 
+import allin.data.postgres.PostgresBetDataSource
+import allin.data.postgres.PostgresFriendDataSource
+import allin.data.postgres.PostgresParticipationDataSource
 import allin.dto.UserDTO
 import allin.routing.imageManagerUser
 import allin.utils.AppConfig
@@ -31,7 +34,10 @@ interface UserEntity : Entity<UserEntity> {
             email = email,
             nbCoins = nbCoins,
             token = null,
-            image = getImage(id, database)
+            image = getImage(id, database),
+            nbBets = PostgresBetDataSource(database).getHistory(username).count(),
+            nbFriends = PostgresFriendDataSource(database).getFriendFromUserId(id).count(),
+            bestWin = PostgresParticipationDataSource(database).getBestWinFromUserid(id)?: 0,
         )
 
     fun getImage(userId: String, database: Database): String? {

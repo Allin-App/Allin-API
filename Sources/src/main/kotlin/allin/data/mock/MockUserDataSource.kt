@@ -18,7 +18,10 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
                     email = it.email,
                     nbCoins = it.nbCoins,
                     token = it.token,
-                    image = null
+                    image = null,
+                    nbBets = MockBetDataSource(mockData).getHistory(it.username).count(),
+                    nbFriends = MockFriendDataSource(mockData).getFriendFromUserId(it.id).count(),
+                    bestWin = MockParticipationDataSource(mockData).getBestWinFromUserid(it.id)
                 ),
                 it.password
             )
@@ -58,15 +61,21 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
     }
 
     override fun addImage(userid: String, image: ByteArray) {
-        TODO("Not yet implemented")
+        val user = users.find { it.id == userid }
+        if (user != null) {
+            user.image = image.toString()
+        }
     }
 
     override fun removeImage(userid: String) {
-        TODO("Not yet implemented")
+        val user = users.find { it.id == userid }
+        if (user != null) {
+            user.image = null
+        }
     }
 
     override fun getImage(userid: String): String? {
-        TODO("Not yet implemented")
+        return users.find { it.id == userid }?.image
     }
 
 }
