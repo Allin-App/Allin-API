@@ -4,8 +4,10 @@ import java.io.File
 import java.util.*
 
 class ImageManager {
+
     fun saveImage(urlfile: String, base64Image: String): ByteArray? {
-        val imageBytes = Base64.getDecoder().decode(base64Image)
+        val cleanedBase64Image = cleanBase64(base64Image)
+        val imageBytes = Base64.getDecoder().decode(cleanedBase64Image)
         val file = File("${urlfile}.png")
         file.parentFile.mkdirs()
         file.writeBytes(imageBytes)
@@ -19,4 +21,6 @@ class ImageManager {
     }
 
     fun imageAvailable(urlfile: String) = File(urlfile).exists()
+
+    fun cleanBase64(base64Image: String) = base64Image.replace("\n", "").replace("\r", "")
 }

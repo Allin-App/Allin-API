@@ -111,16 +111,14 @@ fun Application.userRouter() {
 
         get("/users/images/{fileName}") {
             val fileName = call.parameters["fileName"]
-
             val urlfile = "images/$fileName"
-
             val file = File("$urlfile.png")
             if (file.exists()) {
                 call.respondFile(file)
             } else {
                 val imageBytes = userDataSource.getImage(fileName.toString())
                 if (imageBytes != null) {
-                    imageManagerUser.saveImage(urlfile, imageBytes.toString())
+                    imageManagerUser.saveImage(urlfile, imageBytes)
                     call.respondFile(file)
                 } else {
                     call.respond(HttpStatusCode.NotFound, "File not found")

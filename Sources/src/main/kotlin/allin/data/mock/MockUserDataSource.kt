@@ -65,7 +65,7 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
         TODO("Not yet implemented")
     }
 
-    override fun getImage(userid: String): ByteArray? {
+    override fun getImage(userid: String): String? {
         TODO("Not yet implemented")
     }
 

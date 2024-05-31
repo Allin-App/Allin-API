@@ -55,7 +55,6 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
                 }.map { it }
             }
         }
-
     }
 
     override fun getBetById(id: String): Bet? =

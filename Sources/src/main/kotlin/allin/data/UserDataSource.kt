@@ -14,5 +14,5 @@ interface UserDataSource {
     fun canHaveDailyGift(username: String): Boolean
     fun addImage(userid: String, image: ByteArray)
     fun removeImage(userid: String)
-    fun getImage(userid: String): ByteArray?
+    fun getImage(userid: String): String?
 }

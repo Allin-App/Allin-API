@@ -92,7 +92,18 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
         database.usersimage.removeIf { it.id eq userid }
     }
 
-    override fun getImage(userid: String): ByteArray? =
-        database.usersimage.find { it.id eq userid }?.image
+    /*override fun getImage(userid: String): ByteArray? =
+        database.usersimage.find { it.id eq userid }?.image*/
 
+    override fun getImage(userid: String): String? {
+            val resultSet = database.executeWithResult("SELECT encode(image, 'base64') AS image FROM userimage WHERE user_id = '${userid}'")?: return null
+
+            if (resultSet.next()) {
+                val base64Image: String? = resultSet.getString("image")
+                if (base64Image != null) {
+                    return base64Image
+                }
+            }
+        return null
+    }
 }
