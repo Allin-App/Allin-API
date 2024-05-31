@@ -6,6 +6,7 @@ import allin.ext.verifyUserFromToken
 import allin.model.ApiMessage
 import allin.model.Participation
 import allin.model.ParticipationRequest
+import allin.utils.AppConfig
 import io.github.smiley4.ktorswaggerui.dsl.delete
 import io.github.smiley4.ktorswaggerui.dsl.post
 import io.ktor.http.*
@@ -23,6 +24,7 @@ fun Application.participationRouter() {
     val userDataSource = this.dataSource.userDataSource
     val participationDataSource = this.dataSource.participationDataSource
     val betDataSource = this.dataSource.betDataSource
+    val logManager = AppConfig.logManager
 
     routing {
         authenticate {
@@ -45,11 +47,13 @@ fun Application.participationRouter() {
                 }
 
             }) {
+                logManager.log("Routing","POST /participations/add")
                 hasToken { principal ->
                     val participation = call.receive<ParticipationRequest>()
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
 
                         if(betDataSource.getBetById(participation.betId)== null){
+                            logManager.log("Routing","${ApiMessage.BET_NOT_FOUND} /participations/add")
                             call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
                         }
 
@@ -66,8 +70,10 @@ fun Application.participationRouter() {
 
                             userDataSource.removeCoins(username = user.username, amount = participation.stake)
                             betDataSource.updatePopularityScore(participation.betId)
+                            logManager.log("Routing","CREATED /participations/add")
                             call.respond(HttpStatusCode.Created)
                         } else {
+                            logManager.log("Routing","${ApiMessage.NOT_ENOUGH_COINS} /participations/add")
                             call.respond(HttpStatusCode.Forbidden, ApiMessage.NOT_ENOUGH_COINS)
                         }
                     }
@@ -91,11 +97,14 @@ fun Application.participationRouter() {
                     }
                 }
             }) {
+                logManager.log("Routing","DELETE /participations/delete")
                 hasToken {
                     val participationId = call.receive<String>()
                     if (participationDataSource.deleteParticipation(participationId)) {
+                        logManager.log("Routing","ACCEPTED /participations/delete")
                         call.respond(HttpStatusCode.NoContent)
                     } else {
+                        logManager.log("Routing","${ApiMessage.PARTICIPATION_NOT_FOUND} /participations/delete")
                         call.respond(HttpStatusCode.NotFound, ApiMessage.PARTICIPATION_NOT_FOUND)
                     }
                 }

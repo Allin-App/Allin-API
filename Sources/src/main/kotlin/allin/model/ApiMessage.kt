@@ -17,4 +17,5 @@ object ApiMessage {
     const val FRIENDS_ALREADY_EXISTS = "User already exists in your Friends List."
     const val FRIENDS_DOESNT_EXISTS = "User doesn't exists in your Friends List."
     const val FRIENDS_REQUEST_HIMSELF = "The receiver can't be the sender."
+    const val FILE_NOT_FOUND = "File not found."
 }

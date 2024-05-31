@@ -10,4 +10,5 @@ object AppConfig {
     val cryptManager = CryptManager()
     val imageManager = ImageManager()
     val urlManager = URLManager()
+    val logManager = LogManager()
 }

@@ -30,6 +30,7 @@ const val DEFAULT_COINS = 500
 fun Application.userRouter() {
 
     val userDataSource = this.dataSource.userDataSource
+    val logManager = AppConfig.logManager
 
     routing {
         post("/users/register", {
@@ -56,12 +57,16 @@ fun Application.userRouter() {
                 }
             }
         }) {
+            logManager.log("Routing","POST /users/register")
             val tempUser = call.receive<UserRequest>()
             if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
+                logManager.log("Routing","${ApiMessage.INVALID_MAIL} /users/register")
                 call.respond(HttpStatusCode.Forbidden, ApiMessage.INVALID_MAIL)
             } else if (userDataSource.userExists(tempUser.username)) {
+                logManager.log("Routing","${ApiMessage.USER_ALREADY_EXISTS} /users/register")
                 call.respond(HttpStatusCode.Conflict, ApiMessage.USER_ALREADY_EXISTS)
             } else if (userDataSource.emailExists(tempUser.email)) {
+                logManager.log("Routing","${ApiMessage.MAIL_ALREADY_EXISTS} /users/register")
                 call.respond(HttpStatusCode.Conflict, ApiMessage.MAIL_ALREADY_EXISTS)
             } else {
                 val user = User(
@@ -78,6 +83,7 @@ fun Application.userRouter() {
                 CryptManagerUser.passwordCrypt(user)
                 user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
                 userDataSource.addUser(user)
+                logManager.log("Routing","ACCEPTED /users/register\t${user}")
                 call.respond(HttpStatusCode.Created, user)
             }
         }
@@ -100,19 +106,25 @@ fun Application.userRouter() {
                 }
             }
         }) {
+            logManager.log("Routing","POST /users/login")
             val checkUser = call.receive<CheckUser>()
             val user = userDataSource.getUserByUsername(checkUser.login)
             if (CryptManagerUser.passwordDecrypt(user.second ?: "", checkUser.password)) {
                 user.first?.let { userDtoWithToken ->
                     userDtoWithToken.token = tokenManagerUser.generateOrReplaceJWTToken(userDtoWithToken)
+                    logManager.log("Routing","ACCEPTED /users/login\t${userDtoWithToken}")
                     call.respond(HttpStatusCode.OK, userDtoWithToken)
-                } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.USER_NOT_FOUND)
+                } ?:
+                logManager.log("Routing","${ApiMessage.USER_NOT_FOUND} /users/login")
+                call.respond(HttpStatusCode.NotFound, ApiMessage.USER_NOT_FOUND)
             } else {
+                logManager.log("Routing","${ApiMessage.INCORRECT_LOGIN_PASSWORD} /users/login")
                 call.respond(HttpStatusCode.NotFound, ApiMessage.INCORRECT_LOGIN_PASSWORD)
             }
         }
 
         get("/users/images/{fileName}") {
+            logManager.log("Routing","GET /users/images/{fileName}")
             val fileName = call.parameters["fileName"]
             val urlfile = "images/$fileName"
             val file = File("$urlfile.png")
@@ -122,9 +134,11 @@ fun Application.userRouter() {
                 val imageBytes = userDataSource.getImage(fileName.toString())
                 if (imageBytes != null) {
                     imageManagerUser.saveImage(urlfile, imageBytes)
+                    logManager.log("Routing","ACCEPTED /users/images/{fileName}")
                     call.respondFile(file)
                 } else {
-                    call.respond(HttpStatusCode.NotFound, "File not found")
+                    logManager.log("Routing","${ApiMessage.FILE_NOT_FOUND} /users/images/{fileName}")
+                    call.respond(HttpStatusCode.NotFound, ApiMessage.FILE_NOT_FOUND)
                 }
             }
         }
@@ -156,15 +170,19 @@ fun Application.userRouter() {
                 }
 
             }) {
+                logManager.log("Routing","POST /users/delete")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { _, password ->
                         val checkUser = call.receive<CheckUser>()
                         if (CryptManagerUser.passwordDecrypt(password, checkUser.password)) {
                             if (!userDataSource.deleteUser(checkUser.login)) {
+                                logManager.log("Routing","${ApiMessage.USER_CANT_BE_DELETE} /users/delete")
                                 call.respond(HttpStatusCode.InternalServerError, ApiMessage.USER_CANT_BE_DELETE)
                             }
+                            logManager.log("Routing","ACCEPTED /users/delete")
                             call.respond(HttpStatusCode.Accepted, password)
                         } else {
+                            logManager.log("Routing","${ApiMessage.INCORRECT_LOGIN_PASSWORD} /users/delete")
                             call.respond(HttpStatusCode.NotFound, ApiMessage.INCORRECT_LOGIN_PASSWORD)
                         }
 
@@ -185,8 +203,10 @@ fun Application.userRouter() {
                     }
                 }
             }) {
+                logManager.log("Routing","GET /users/token")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { userDto, _ ->
+                        logManager.log("Routing","ACCEPTED /users/token\t${userDto}")
                         call.respond(HttpStatusCode.OK, userDto)
                     }
                 }
@@ -210,18 +230,21 @@ fun Application.userRouter() {
                 }
 
             }) {
+                logManager.log("Routing","GET /users/gift")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { userDto, _ ->
                         if (userDataSource.canHaveDailyGift(userDto.username)) {
                             val dailyGift = (DAILY_GIFT_MIN..DAILY_GIFT_MAX).random()
                             userDataSource.addCoins(userDto.username, dailyGift)
+                            logManager.log("Routing","ACCEPTED /users/gift\t${dailyGift}")
                             call.respond(HttpStatusCode.OK, dailyGift)
+                            logManager.log("Routing","${ApiMessage.NO_GIFT} /users/gift")
                         } else call.respond(HttpStatusCode.MethodNotAllowed, ApiMessage.NO_GIFT)
                     }
                 }
             }
 
-            post("/users/image", {
+            post("/users/images", {
                 description = "Allow you to add a profil image"
 
                 request {
@@ -241,6 +264,8 @@ fun Application.userRouter() {
                 }
 
             }) {
+                logManager.log("Routing","POST /users/images")
+
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
 
@@ -251,9 +276,11 @@ fun Application.userRouter() {
                         if (imageByteArray != null && imageByteArray.isNotEmpty()) {
                             userDataSource.removeImage(user.id)
                             userDataSource.addImage(user.id, imageByteArray)
+                            logManager.log("Routing","ACCEPTED /users/images")
                             call.respond(HttpStatusCode.OK, "${urlManager.getURL()}users/${urlfile}")
                         }
-                        call.respond(HttpStatusCode.Conflict)
+                        logManager.log("Routing","${ApiMessage.FILE_NOT_FOUND} /users/images")
+                        call.respond(HttpStatusCode.Conflict,ApiMessage.FILE_NOT_FOUND)
                     }
                 }
             }
