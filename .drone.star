@@ -59,54 +59,67 @@ def ci(ctx):
   return CI
 
 def cd(ctx):
-  CD = {
-    "kind": "pipeline",
-    "name": "CD",
-    "steps": [
-      {
-        "name": "hadolint",
-        "image": "hadolint/hadolint:latest-alpine",
-        "commands": [
-            "hadolint Sources/Dockerfile"
+    CD = {
+        "kind": "pipeline",
+        "name": "CD",
+        "volumes": [
+            {
+                "name": "images",
+                "temp": {}
+            }
+        ],
+        "steps": [
+            {
+                "name": "hadolint",
+                "image": "hadolint/hadolint:latest-alpine",
+                "commands": [
+                    "hadolint Sources/Dockerfile"
+                ]
+            },
+            {
+                "name": "docker-image",
+                "image": "plugins/docker",
+                "settings": {
+                    "dockerfile": "Sources/Dockerfile",
+                    "context": "Sources",
+                    "registry": "hub.codefirst.iut.uca.fr",
+                    "repo": "hub.codefirst.iut.uca.fr/lucas.evard/api",
+                    "username": {"from_secret": "SECRET_REGISTRY_USERNAME"},
+                    "password": {"from_secret": "SECRET_REGISTRY_PASSWORD"}
+                }
+            },
+            {
+                "name": "deploy-container",
+                "image": "hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest",
+                "environment": {
+                    "CODEFIRST_CLIENTDRONE_ENV_DATA_SOURCE": "postgres",
+                    "CODEFIRST_CLIENTDRONE_ENV_CODEFIRST_CONTAINER": {"from_secret": "CODEFIRST_CONTAINER"},
+                    "CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DB": {"from_secret": "db_database"},
+                    "CODEFIRST_CLIENTDRONE_ENV_POSTGRES_USER": {"from_secret": "db_user"},
+                    "CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD": {"from_secret": "db_password"},
+                    "CODEFIRST_CLIENTDRONE_ENV_POSTGRES_HOST": {"from_secret": "db_host"},
+                    "CODEFIRST_CLIENTDRONE_ENV_SALT": {"from_secret": "SALT"},
+                    "ADMINS": "lucasevard,emrekartal,arthurvalin,lucasdelanier",
+                    "IMAGENAME": "hub.codefirst.iut.uca.fr/lucas.evard/api:latest",
+                    "CONTAINERNAME": "api",
+                    "COMMAND": "create",
+                    "OVERWRITE": "true",
+                },
+                "depends_on": [
+                    "docker-image"
+                ],
+                "volumes": [
+                    {
+                        "name": "images",
+                        "path": "/uploads"
+                    }
+                ]
+            }
         ]
-      },
-      {
-        "name": "docker-image",
-        "image": "plugins/docker",
-        "settings": {
-          "dockerfile": "Sources/Dockerfile",
-          "context": "Sources",
-          "registry": "hub.codefirst.iut.uca.fr",
-          "repo": "hub.codefirst.iut.uca.fr/lucas.evard/api",
-          "username": {"from_secret": "SECRET_REGISTRY_USERNAME"},
-          "password": {"from_secret": "SECRET_REGISTRY_PASSWORD"}
-        }
-      },
-      {
-        "name": "deploy-container",
-        "image": "hub.codefirst.iut.uca.fr/thomas.bellembois/codefirst-dockerproxy-clientdrone:latest",
-        "environment": {
-          "CODEFIRST_CLIENTDRONE_ENV_DATA_SOURCE": "postgres",
-          "CODEFIRST_CLIENTDRONE_ENV_CODEFIRST_CONTAINER": {"from_secret": "CODEFIRST_CONTAINER"},
-          "CODEFIRST_CLIENTDRONE_ENV_POSTGRES_DB": {"from_secret": "db_database"},
-          "CODEFIRST_CLIENTDRONE_ENV_POSTGRES_USER": {"from_secret": "db_user"},
-          "CODEFIRST_CLIENTDRONE_ENV_POSTGRES_PASSWORD": {"from_secret": "db_password"},
-          "CODEFIRST_CLIENTDRONE_ENV_POSTGRES_HOST": {"from_secret": "db_host"},
-          "CODEFIRST_CLIENTDRONE_ENV_SALT": {"from_secret": "SALT"},
-          "ADMINS": "lucasevard,emrekartal,arthurvalin,lucasdelanier",
-          "IMAGENAME": "hub.codefirst.iut.uca.fr/lucas.evard/api:latest",
-          "CONTAINERNAME": "api",
-          "COMMAND": "create",
-          "OVERWRITE": "true",
-        },
-        "depends_on": [
-          "docker-image"
-        ]
-      }
-    ]
-  }
+    }
 
-  return CD
+    return CD
+
     
 def db(ctx):
   DB = {

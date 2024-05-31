@@ -1,6 +1,5 @@
 package allin.model
 
-import allin.dto.UserDTO
 import kotlinx.serialization.Serializable
 
 const val DEFAULT_COIN_AMOUNT = 500
@@ -14,18 +13,9 @@ data class User(
     val email: String,
     var password: String,
     var nbCoins: Int = DEFAULT_COIN_AMOUNT,
-    var token: String? = null
-) {
-    fun toDto(friendStatus: FriendStatus? = null) =
-        UserDTO(
-            id = id,
-            username = username,
-            email = email,
-            nbCoins = nbCoins,
-            token = token,
-            friendStatus = friendStatus
-        )
-}
+    var token: String? = null,
+    var image: String? = null,
+)
 
 @Serializable
 data class UserRequest(
@@ -38,4 +28,10 @@ data class UserRequest(
 data class CheckUser(
     val login: String,
     val password: String
+)
+
+@Serializable
+data class UserImage(
+    val id: String,
+    val image: ByteArray,
 )

@@ -27,6 +27,8 @@ val BET_VERIFY_DELAY = 1.minutes
 
 val data_source = System.getenv()["DATA_SOURCE"]
 val isCodeFirstContainer = System.getenv()["CODEFIRST_CONTAINER"].orEmpty()
+val hostIP = "0.0.0.0"
+val hostPort = 8080
 
 private val allInDataSource: AllInDataSource = when (data_source) {
     "mock" -> MockDataSource()
@@ -38,7 +40,7 @@ val Application.dataSource: AllInDataSource
     get() = allInDataSource
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
+    embeddedServer(Netty, port = hostPort, host = hostIP) {
         extracted()
     }.start(wait = true)
 }

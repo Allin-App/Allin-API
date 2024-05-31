@@ -133,6 +133,16 @@ class PostgresDataSource : AllInDataSource() {
                )
             """.trimIndent()
         )
+
+        database.execute(
+            """
+                CREATE TABLE IF NOT EXISTS userimage
+                (
+                    user_id VARCHAR(255) PRIMARY KEY,
+                    image bytea
+                )
+            """.trimIndent()
+        )
     }
 
     override val userDataSource: UserDataSource by lazy { PostgresUserDataSource(database) }

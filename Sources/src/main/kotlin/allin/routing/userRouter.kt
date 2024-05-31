@@ -15,11 +15,15 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.io.File
 import java.util.*
 
 val RegexCheckerUser = AppConfig.regexChecker
 val CryptManagerUser = AppConfig.cryptManager
 val tokenManagerUser = AppConfig.tokenManager
+val imageManagerUser = AppConfig.imageManager
+val urlManager = AppConfig.urlManager
+
 const val DEFAULT_COINS = 500
 
 
@@ -102,6 +106,23 @@ fun Application.userRouter() {
                 } ?: call.respond(HttpStatusCode.NotFound, ApiMessage.USER_NOT_FOUND)
             } else {
                 call.respond(HttpStatusCode.NotFound, ApiMessage.INCORRECT_LOGIN_PASSWORD)
+            }
+        }
+
+        get("/users/images/{fileName}") {
+            val fileName = call.parameters["fileName"]
+            val urlfile = "images/$fileName"
+            val file = File("$urlfile.png")
+            if (file.exists()) {
+                call.respondFile(file)
+            } else {
+                val imageBytes = userDataSource.getImage(fileName.toString())
+                if (imageBytes != null) {
+                    imageManagerUser.saveImage(urlfile, imageBytes)
+                    call.respondFile(file)
+                } else {
+                    call.respond(HttpStatusCode.NotFound, "File not found")
+                }
             }
         }
 
@@ -196,6 +217,44 @@ fun Application.userRouter() {
                     }
                 }
             }
+
+            post("/users/image", {
+                description = "Allow you to add a profil image"
+
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    body<CheckUser> {
+                        description = "User information"
+                    }
+                }
+                response {
+                    HttpStatusCode.Accepted to {
+                        description = "Image added"
+                    }
+                    HttpStatusCode.NotFound to {
+                        description = "User not found"
+                        body(ApiMessage.INCORRECT_LOGIN_PASSWORD)
+                    }
+                }
+
+            }) {
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+
+                        val base64Image = call.receiveText()
+
+                        val urlfile = "images/${user.id}"
+                        val imageByteArray = imageManagerUser.saveImage(urlfile, base64Image)
+                        if (imageByteArray != null && imageByteArray.isNotEmpty()) {
+                            userDataSource.removeImage(user.id)
+                            userDataSource.addImage(user.id, imageByteArray)
+                            call.respond(HttpStatusCode.OK, "${urlManager.getURL()}users/${urlfile}")
+                        }
+                        call.respond(HttpStatusCode.Conflict)
+                    }
+                }
+            }
+
         }
     }
 }

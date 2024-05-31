@@ -8,4 +8,6 @@ object AppConfig {
     val tokenManager = TokenManager.getInstance(config)
     val regexChecker = RegexChecker()
     val cryptManager = CryptManager()
+    val imageManager = ImageManager()
+    val urlManager = URLManager()
 }

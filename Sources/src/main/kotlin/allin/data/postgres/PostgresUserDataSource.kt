@@ -1,9 +1,7 @@
 package allin.data.postgres
 
 import allin.data.UserDataSource
-import allin.data.postgres.entities.UserEntity
-import allin.data.postgres.entities.UsersEntity
-import allin.data.postgres.entities.users
+import allin.data.postgres.entities.*
 import allin.dto.UserDTO
 import allin.ext.executeWithResult
 import allin.model.User
@@ -20,7 +18,7 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
         database.users
             .find { (it.username eq username) or (it.email eq username) }
-            ?.let { it.toUserDTO() to it.password }
+            ?.let { it.toUserDTO(database) to it.password }
             ?: (null to null)
 
     override fun addUser(user: User) {
@@ -83,4 +81,25 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
         return false
     }
 
+    override fun addImage(userid: String, image: ByteArray) {
+        database.usersimage.add(UserImageEntity {
+            id = userid
+            this.image = image
+        })
+    }
+
+    override fun removeImage(userid: String) {
+        database.usersimage.removeIf { it.id eq userid }
+    }
+
+    override fun getImage(userid: String): String? {
+            val resultSet = database.executeWithResult("SELECT encode(image, 'base64') AS image FROM userimage WHERE user_id = '${userid}'")?: return null
+            if (resultSet.next()) {
+                val base64Image: String? = resultSet.getString("image")
+                if (base64Image != null) {
+                    return base64Image
+                }
+            }
+        return null
+    }
 }

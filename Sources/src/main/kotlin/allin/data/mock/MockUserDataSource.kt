@@ -11,7 +11,20 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
 
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
         users.find { (it.username == username) or (it.email == username) }?.let {
-            it.toDto() to it.password
+            Pair(
+                UserDTO(
+                    id = it.id,
+                    username = it.username,
+                    email = it.email,
+                    nbCoins = it.nbCoins,
+                    token = it.token,
+                    image = null,
+                    nbBets = MockBetDataSource(mockData).getHistory(it.username).count(),
+                    nbFriends = MockFriendDataSource(mockData).getFriendFromUserId(it.id).count(),
+                    bestWin = MockParticipationDataSource(mockData).getBestWinFromUserid(it.id)
+                ),
+                it.password
+            )
         } ?: Pair(null, null)
 
     override fun addUser(user: User) {
@@ -46,4 +59,23 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
         lastGifts[username] = ZonedDateTime.now()
         return value
     }
+
+    override fun addImage(userid: String, image: ByteArray) {
+        val user = users.find { it.id == userid }
+        if (user != null) {
+            user.image = image.toString()
+        }
+    }
+
+    override fun removeImage(userid: String) {
+        val user = users.find { it.id == userid }
+        if (user != null) {
+            user.image = null
+        }
+    }
+
+    override fun getImage(userid: String): String? {
+        return users.find { it.id == userid }?.image
+    }
+
 }
