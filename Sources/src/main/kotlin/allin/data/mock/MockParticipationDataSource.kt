@@ -15,7 +15,11 @@ class MockParticipationDataSource(private val mockData: MockDataSource.MockData)
         betInfos.replaceAll {
             if (participation.betId == it.id) {
                 betTotalStakes = it.totalStakes + participation.stake
-                it.copy(totalStakes = betTotalStakes)
+                val betTotalParticipants = it.totalParticipants + 1
+                it.copy(
+                    totalStakes = betTotalStakes,
+                    totalParticipants = betTotalParticipants
+                )
             } else {
                 it
             }
@@ -54,7 +58,11 @@ class MockParticipationDataSource(private val mockData: MockDataSource.MockData)
         betInfos.replaceAll {
             if (participation?.betId == it.id) {
                 betTotalStakes = it.totalStakes - participation.stake
-                it.copy(totalStakes = betTotalStakes)
+                val betTotalParticipants = it.totalParticipants - 1
+                it.copy(
+                    totalStakes = betTotalStakes,
+                    totalParticipants = betTotalParticipants
+                )
             } else {
                 it
             }

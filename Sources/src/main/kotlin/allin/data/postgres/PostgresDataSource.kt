@@ -107,7 +107,8 @@ class PostgresDataSource : AllInDataSource() {
             """
             CREATE TABLE IF not exists betInfo ( 
                 id VARCHAR(255) PRIMARY KEY, 
-                totalStakes int
+                totalStakes int,
+                totalParticipants int
             )
             """.trimIndent()
         )

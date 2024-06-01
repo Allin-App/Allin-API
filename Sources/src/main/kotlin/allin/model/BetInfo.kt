@@ -4,8 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BetInfo(
-    val id: String,
-    val totalStakes: Int,
+    var id: String,
+    var totalStakes: Int,
+    var totalParticipants: Int
 )
 
 @Serializable

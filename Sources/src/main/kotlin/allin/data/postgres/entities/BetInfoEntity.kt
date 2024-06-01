@@ -13,11 +13,13 @@ interface BetInfoEntity : Entity<BetInfoEntity> {
 
     var id: String
     var totalStakes: Int
+    var totalParticipants: Int
 }
 
 object BetInfosEntity : Table<BetInfoEntity>("betinfo") {
     val id = varchar("id").primaryKey().bindTo { it.id }
     val totalStakes = int("totalstakes").bindTo { it.totalStakes }
+    val totalParticipants = int("totalparticipants").bindTo { it.totalParticipants }
 }
 
 val Database.betInfos get() = this.sequenceOf(BetInfosEntity)

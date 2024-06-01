@@ -20,7 +20,9 @@ data class Bet(
     var isPrivate: Boolean,
     var response: List<String>,
     val createdBy: String = "",
-    var popularityscore: Int = 0
+    var popularityscore: Int = 0,
+    val totalStakes: Int = 0,
+    val totalParticipants: Int = 0
 )
 
 @Serializable

@@ -25,8 +25,9 @@ interface BetEntity : Entity<BetEntity> {
     var createdBy: String
     var popularityscore: Int
 
-    fun toBet(database: Database) =
-        Bet(
+    fun toBet(database: Database): Bet {
+        val betInfo = database.betInfos.find { it.id eq this.id }
+        return Bet(
             id = id,
             theme = theme,
             sentenceBet = sentenceBet,
@@ -42,7 +43,10 @@ interface BetEntity : Entity<BetEntity> {
             },
             createdBy = createdBy,
             popularityscore = popularityscore,
+            totalStakes = betInfo?.totalStakes ?: 0,
+            totalParticipants = betInfo?.totalParticipants ?: 0
         )
+    }
 
     fun toBetDetail(database: Database, username: String): BetDetail {
         val bet = this.toBet(database)

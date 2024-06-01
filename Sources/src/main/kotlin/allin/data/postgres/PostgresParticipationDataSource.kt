@@ -23,9 +23,11 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
         val betInfo = database.betInfos.find { it.id eq participation.betId } ?: BetInfoEntity {
             this.id = participation.betId
             this.totalStakes = 0
+            this.totalParticipants = 0
         }
 
         betInfo.totalStakes += participation.stake
+        betInfo.totalParticipants++
         database.betInfos.update(betInfo)
 
         database.betAnswerInfos.filter { it.betId eq participation.betId }.forEach {
@@ -50,6 +52,7 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
         val participation = database.participations.find { it.id eq id } ?: return false
         database.betInfos.find { it.id eq participation.bet.id }?.let { betInfo ->
             betInfo.totalStakes -= participation.stake
+            betInfo.totalParticipants--
 
             database.betAnswerInfos.filter { it.betId eq participation.bet.id }.forEach {
                 if (it.response == participation.answer) {

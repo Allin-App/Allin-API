@@ -189,6 +189,14 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             }
         )
 
+        database.betInfos.add(
+            BetInfoEntity {
+                this.id = bet.id
+                this.totalStakes = 0
+                this.totalParticipants = 0
+            }
+        )
+
         if (bet.type == BetType.CUSTOM) {
             bet.response.forEach { selected ->
                 database.responses.add(

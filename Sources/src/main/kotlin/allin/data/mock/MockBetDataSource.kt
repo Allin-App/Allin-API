@@ -73,7 +73,7 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
 
     override fun addBet(bet: Bet) {
         bets += bet
-        betInfos += BetInfo(id = bet.id, totalStakes = 0)
+        betInfos += BetInfo(id = bet.id, totalStakes = 0, totalParticipants = 0)
         bet.response.forEach {
             answerInfos += BetAnswerInfo(
                 betId = bet.id,
