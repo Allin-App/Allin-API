@@ -7,5 +7,4 @@ interface ParticipationDataSource {
     fun getParticipationFromBetId(betid: String): List<Participation>
     fun getParticipationFromUserId(username: String, betid: String): List<Participation>
     fun deleteParticipation(id: String): Boolean
-    fun getBestWinFromUserid(userId: String): Int?
 }

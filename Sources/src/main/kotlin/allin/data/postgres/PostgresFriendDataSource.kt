@@ -5,11 +5,13 @@ import allin.data.postgres.entities.FriendEntity
 import allin.data.postgres.entities.friends
 import allin.data.postgres.entities.users
 import allin.dto.UserDTO
+import allin.ext.length
 import allin.ext.levenshteinLessEq
 import allin.ext.toLowerCase
 import allin.model.FriendStatus
 import org.ktorm.database.Database
 import org.ktorm.dsl.and
+import org.ktorm.dsl.div
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.notEq
 import org.ktorm.entity.*
@@ -67,24 +69,29 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
         database.friends.any { (it.sender eq firstUser) and (it.receiver eq secondUser) }
 
     override fun filterUsersByUsername(fromUserId: String, search: String): List<UserDTO> {
-        val maxSize = search.length / 2
         return database.users
             .filter { (it.id notEq fromUserId) }
             .mapColumns {
                 tupleOf(
                     it.id,
-                    it.username.toLowerCase().levenshteinLessEq(search.lowercase(), maxSize)
+                    it.username,
+                    it.username.toLowerCase().levenshteinLessEq(
+                        search.lowercase(),
+                        (it.username.length() / 2)
+                    )
                 )
             }
-            .filter { (_, distance) ->
+            .filter { (_, username, distance) ->
+                val maxSize = ((username?.length ?: 0) / 2)
                 distance?.let { it <= maxSize } ?: false
             }
             .sortedBy { it.second }
-            .mapNotNull { (id, _) ->
+            .mapNotNull { (id, _, _) ->
                 id?.let {
                     val user = database.users.find { it.id eq id }
                     user?.toUserDTO(database, friendStatus = getFriendStatus(fromUserId, user.id))
                 }
             }
     }
+
 }

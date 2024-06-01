@@ -88,9 +88,4 @@ class MockParticipationDataSource(private val mockData: MockDataSource.MockData)
 
         return result
     }
-
-    override fun getBestWinFromUserid(userId: String) =
-        mockData.participations.filter { it.id == userId }.maxBy { it.stake }.stake
-
-
 }

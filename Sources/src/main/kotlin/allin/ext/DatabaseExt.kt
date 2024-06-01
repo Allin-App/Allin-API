@@ -1,7 +1,6 @@
 package allin.ext
 
 import org.ktorm.database.Database
-import org.ktorm.expression.ArgumentExpression
 import org.ktorm.expression.FunctionExpression
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.schema.IntSqlType
@@ -33,6 +32,14 @@ fun Database.execute(request: String) {
         }
 }
 
+fun ColumnDeclaring<String>.length(): FunctionExpression<Int> {
+    return FunctionExpression(
+        functionName = "LENGTH",
+        arguments = listOf(this.asExpression()),
+        sqlType = IntSqlType
+    )
+}
+
 fun ColumnDeclaring<String>.toLowerCase(): FunctionExpression<String> {
     return FunctionExpression(
         functionName = "LOWER",
@@ -60,8 +67,8 @@ fun ColumnDeclaring<String>.levenshteinLessEq(
     )
 }
 
-fun ColumnDeclaring<String>.levenshteinLessEq(target: String, max: Int): FunctionExpression<Int> =
+fun ColumnDeclaring<String>.levenshteinLessEq(target: String, max: ColumnDeclaring<Int>): FunctionExpression<Int> =
     levenshteinLessEq(
         wrapArgument(target),
-        ArgumentExpression(max, IntSqlType)
+        max
     )

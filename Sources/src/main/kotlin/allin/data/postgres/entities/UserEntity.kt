@@ -1,17 +1,13 @@
 package allin.data.postgres.entities
 
-import allin.data.postgres.PostgresBetDataSource
-import allin.data.postgres.PostgresFriendDataSource
-import allin.data.postgres.PostgresParticipationDataSource
 import allin.dto.UserDTO
 import allin.model.FriendStatus
 import allin.routing.imageManagerUser
 import allin.utils.AppConfig
 import org.ktorm.database.Database
+import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
-import org.ktorm.entity.Entity
-import org.ktorm.entity.find
-import org.ktorm.entity.sequenceOf
+import org.ktorm.entity.*
 import org.ktorm.schema.Table
 import org.ktorm.schema.int
 import org.ktorm.schema.timestamp
@@ -36,9 +32,19 @@ interface UserEntity : Entity<UserEntity> {
             nbCoins = nbCoins,
             token = null,
             image = getImage(id, database),
-            nbBets = PostgresBetDataSource(database).getHistory(username).count(),
-            nbFriends = PostgresFriendDataSource(database).getFriendFromUserId(id).count(),
-            bestWin = PostgresParticipationDataSource(database).getBestWinFromUserid(id)?: 0,
+            nbBets = database.participations.count { it.username eq this.username },
+            nbFriends = database.friends
+                .filter { it.receiver eq this.id }
+                .mapNotNull { p -> database.friends.any { (it.sender eq this.id) and (it.receiver eq p.sender) } }
+                .count(),
+            bestWin = database.participations
+                .filter { (it.id eq this.id) }
+                .mapNotNull { p ->
+                    if (database.betResults.any { (it.betId eq p.bet.id) and (it.result eq p.answer) }) {
+                        p.stake
+                    } else null
+                }
+                .maxOrNull() ?: 0,
             friendStatus = friendStatus
         )
 

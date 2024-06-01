@@ -14,5 +14,5 @@ data class UserDTO(
     var nbBets: Int,
     var nbFriends: Int,
     var bestWin: Int,
-    var friendStatus: FriendStatus?,
+    var friendStatus: FriendStatus?
 )

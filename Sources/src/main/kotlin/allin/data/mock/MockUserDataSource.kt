@@ -10,21 +10,30 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
     private val lastGifts get() = mockData.lastGifts
 
     override fun getUserByUsername(username: String): Pair<UserDTO?, String?> =
-        users.find { (it.username == username) or (it.email == username) }?.let {
+        users.find { (it.username == username) or (it.email == username) }?.let { usr ->
             Pair(
                 UserDTO(
-                    id = it.id,
-                    username = it.username,
-                    email = it.email,
-                    nbCoins = it.nbCoins,
-                    token = it.token,
+                    id = usr.id,
+                    username = usr.username,
+                    email = usr.email,
+                    nbCoins = usr.nbCoins,
+                    token = usr.token,
                     image = null,
-                    nbBets = MockBetDataSource(mockData).getHistory(it.username).count(),
-                    nbFriends = MockFriendDataSource(mockData).getFriendFromUserId(it.id).count(),
-                    bestWin = MockParticipationDataSource(mockData).getBestWinFromUserid(it.id),
+                    nbBets = mockData.participations.count { it.username == usr.username },
+                    nbFriends = mockData.friends.count { f ->
+                        f.receiver == usr.username &&
+                                mockData.friends.any { it.sender == usr.username && it.receiver == f.sender }
+                    },
+                    bestWin = mockData.participations
+                        .filter {
+                            (it.id == usr.id) &&
+                                    (mockData.results.find { r -> r.betId == it.betId })?.result == it.answer
+                        }
+                        .maxBy { it.stake }
+                        .stake,
                     friendStatus = null,
                 ),
-                it.password
+                usr.password
             )
         } ?: Pair(null, null)
 

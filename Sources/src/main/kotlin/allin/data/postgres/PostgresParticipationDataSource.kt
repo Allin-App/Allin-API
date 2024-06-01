@@ -68,9 +68,6 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
         return participation.delete() > 0
     }
 
-    override fun getBestWinFromUserid(userId: String) =
-        database.participations.filter { it.id eq userId }.maxBy { it.stake }
-
 
 }
 
