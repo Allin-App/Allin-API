@@ -211,7 +211,15 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
                 infos = answerInfos.filter { it.betId == this.id }
             ),
             participations = participations,
-            userParticipation = participation
+            userParticipation = participation,
+            wonParticipation = if (this.status == FINISHED) {
+                val result = results.find { it.betId == this.id }
+                result?.let { r ->
+                    participations
+                        .filter { it.answer == r.result }
+                        .maxBy { it.stake }
+                }
+            } else null
         )
     }
 

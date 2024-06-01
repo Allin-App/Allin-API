@@ -62,8 +62,15 @@ interface BetEntity : Entity<BetEntity> {
             bet = bet,
             answers = getBetAnswerDetail(bet, participationEntities, answerInfos),
             participations = participationEntities,
-            userParticipation = userParticipation?.toParticipation()
-
+            userParticipation = userParticipation?.toParticipation(),
+            wonParticipation = if (bet.status == BetStatus.FINISHED) {
+                val result = database.betResults.find { it.betId eq this.id }
+                result?.let { r ->
+                    participationEntities
+                        .filter { it.answer == r.result }
+                        .maxBy { it.stake }
+                }
+            } else null
         )
     }
 
