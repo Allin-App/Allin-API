@@ -5,7 +5,7 @@ import allin.data.postgres.entities.FriendEntity
 import allin.data.postgres.entities.friends
 import allin.data.postgres.entities.users
 import allin.dto.UserDTO
-import allin.ext.levenshtein
+import allin.ext.levenshteinLessEq
 import allin.ext.toLowerCase
 import allin.model.FriendStatus
 import org.ktorm.database.Database
@@ -50,7 +50,7 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
                 } else {
                     database.users.find { usr ->
                         usr.id eq it.sender
-                    }?.toUserDTO(database,friendStatus = FriendStatus.NOT_FRIEND)
+                    }?.toUserDTO(database, friendStatus = FriendStatus.NOT_FRIEND)
                 }
             }
     }
@@ -66,10 +66,25 @@ class PostgresFriendDataSource(private val database: Database) : FriendDataSourc
     override fun isFriend(firstUser: String, secondUser: String) =
         database.friends.any { (it.sender eq firstUser) and (it.receiver eq secondUser) }
 
-    override fun filterUsersByUsername(fromUserId: String, search: String): List<UserDTO> =
-        database.users
-            .filter { it.id notEq fromUserId }
-            .sortedBy { it.username.toLowerCase().levenshtein(search.lowercase()) }
-            .take(10)
-            .map { user -> user.toUserDTO(database,friendStatus = getFriendStatus(fromUserId, user.id)) }
+    override fun filterUsersByUsername(fromUserId: String, search: String): List<UserDTO> {
+        val maxSize = search.length / 2
+        return database.users
+            .filter { (it.id notEq fromUserId) }
+            .mapColumns {
+                tupleOf(
+                    it.id,
+                    it.username.toLowerCase().levenshteinLessEq(search.lowercase(), maxSize)
+                )
+            }
+            .filter { (_, distance) ->
+                distance?.let { it <= maxSize } ?: false
+            }
+            .sortedBy { it.second }
+            .mapNotNull { (id, _) ->
+                id?.let {
+                    val user = database.users.find { it.id eq id }
+                    user?.toUserDTO(database, friendStatus = getFriendStatus(fromUserId, user.id))
+                }
+            }
+    }
 }

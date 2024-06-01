@@ -1,6 +1,7 @@
 package allin.ext
 
 import org.ktorm.database.Database
+import org.ktorm.expression.ArgumentExpression
 import org.ktorm.expression.FunctionExpression
 import org.ktorm.schema.ColumnDeclaring
 import org.ktorm.schema.IntSqlType
@@ -48,13 +49,19 @@ fun ColumnDeclaring<String>.toUpperCase(): FunctionExpression<String> {
     )
 }
 
-fun ColumnDeclaring<String>.levenshtein(target: ColumnDeclaring<String>): FunctionExpression<Int> {
+fun ColumnDeclaring<String>.levenshteinLessEq(
+    target: ColumnDeclaring<String>,
+    max: ColumnDeclaring<Int>
+): FunctionExpression<Int> {
     return FunctionExpression(
-        functionName = "levenshtein",
-        arguments = listOf(this.asExpression(), target.asExpression()),
+        functionName = "levenshtein_less_equal",
+        arguments = listOf(this.asExpression(), target.asExpression(), max.asExpression()),
         sqlType = IntSqlType
     )
 }
 
-fun ColumnDeclaring<String>.levenshtein(target: String): FunctionExpression<Int> =
-    levenshtein(wrapArgument(target))
+fun ColumnDeclaring<String>.levenshteinLessEq(target: String, max: Int): FunctionExpression<Int> =
+    levenshteinLessEq(
+        wrapArgument(target),
+        ArgumentExpression(max, IntSqlType)
+    )
