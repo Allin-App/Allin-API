@@ -34,8 +34,9 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
             if (it.response == participation.answer) {
                 it.totalStakes += participation.stake
             }
-            val probability = it.totalStakes / betInfo.totalStakes.toFloat()
-            it.odds = 1 / probability
+
+            val probability = (it.totalStakes / betInfo.totalStakes.toFloat())
+            it.odds = if (probability == 0f) 1f else 1 / probability
             it.flushChanges()
         }
     }
