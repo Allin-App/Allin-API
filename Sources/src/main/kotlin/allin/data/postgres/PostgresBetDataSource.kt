@@ -253,5 +253,13 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
                 }
             }
     }
-
+    override fun addPrivateBet(bet: Bet) {
+        addBet(bet)
+        bet.userInvited?.forEach{
+            database.privatebets.add(PrivateBetEntity{
+                betId=bet.id
+                userId=it
+            })
+        }
+    }
 }

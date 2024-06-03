@@ -233,4 +233,8 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
         bet.popularityscore = score
     }
 
+    override fun addPrivateBet(bet: Bet) {
+        TODO()
+    }
+
 }

@@ -57,7 +57,10 @@ fun Application.betRouter() {
                         call.respond(HttpStatusCode.Conflict, ApiMessage.BET_ALREADY_EXIST)
                     } ?: run {
                         val betWithId = bet.copy(id = id, createdBy = user.first?.username.toString())
-                        betDataSource.addBet(betWithId)
+
+                        if(bet.isPrivate && bet.userInvited?.isNotEmpty() == true){
+                            betDataSource.addPrivateBet(betWithId)
+                        } else betDataSource.addBet(betWithId)
                         logManager.log("Routing","CREATED /bets/add\t${betWithId}")
                         call.respond(HttpStatusCode.Created, betWithId)
                     }
@@ -330,7 +333,7 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","GET /bets/confirm/{id}")
+                logManager.log("Routing", "GET /bets/confirm/{id}")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         val betId = call.parameters["id"] ?: ""
@@ -338,10 +341,10 @@ fun Application.betRouter() {
 
                         if (betDataSource.getBetById(betId)?.createdBy == user.username) {
                             betDataSource.confirmBet(betId, result)
-                            logManager.log("Routing","ACCEPTED /bets/confirm/{id}")
+                            logManager.log("Routing", "ACCEPTED /bets/confirm/{id}")
                             call.respond(HttpStatusCode.OK)
                         } else {
-                            logManager.log("Routing","UNAUTHORIZED /bets/confirm/{id}")
+                            logManager.log("Routing", "UNAUTHORIZED /bets/confirm/{id}")
                             call.respond(HttpStatusCode.Unauthorized)
                         }
 

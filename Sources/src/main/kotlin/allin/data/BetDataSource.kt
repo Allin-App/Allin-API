@@ -19,4 +19,5 @@ interface BetDataSource {
     fun getCurrent(username: String): List<BetDetail>
     fun getMostPopularBet(): Bet?
     fun updatePopularityScore(betId: String)
+    fun addPrivateBet(bet: Bet)
 }
