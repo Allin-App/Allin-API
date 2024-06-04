@@ -87,7 +87,7 @@ fun Application.betRouter() {
             }) {
                 logManager.log("Routing","POST /bets/gets")
                 hasToken { principal ->
-                    verifyUserFromToken(userDataSource, principal) { _, _ ->
+                    verifyUserFromToken(userDataSource, principal) { user , _ ->
                         val filtersRequest =
                             kotlin.runCatching { call.receiveNullable<BetFiltersRequest>() }.getOrNull()
                         val filters =
