@@ -1,6 +1,7 @@
 package allin.routing
 
 import allin.dataSource
+import allin.dto.UserDTO
 import allin.ext.hasToken
 import allin.ext.verifyUserFromToken
 import allin.model.*
@@ -21,6 +22,7 @@ val tokenManagerBet = AppConfig.tokenManager
 fun Application.betRouter() {
     val userDataSource = this.dataSource.userDataSource
     val betDataSource = this.dataSource.betDataSource
+    val participationDataSource = this.dataSource.participationDataSource
     val logManager = AppConfig.logManager
 
     routing {
@@ -344,11 +346,38 @@ fun Application.betRouter() {
                             logManager.log("Routing","UNAUTHORIZED /bets/confirm/{id}")
                             call.respond(HttpStatusCode.Unauthorized)
                         }
-
                     }
                 }
             }
+            post("/bets/users", {
+                description = "gets all userDTO of a bet"
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    pathParameter<String>("Id of the desired bet")
+                    body<List<UserDTO>> {
+                        description = "UserDTO of the bet"
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to {
+                        description = "The final answer has been set"
+                    }
+                    HttpStatusCode.Unauthorized to {
+                        description = "The user is not the creator of the bet"
+                    }
+                }
+            }) {
+                logManager.log("Routing","POST /bets/users")
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        val id = call.receive<Map<String, String>>()["id"] ?: ""
+                        val participations = participationDataSource.getParticipationFromBetId(id)
+                        val users = participations.map { userDataSource.getUserByUsername(it.username).first }.toSet().take(4).toList()
+                        call.respond(users)
+                    }
+                }
         }
 
     }
+}
 }
