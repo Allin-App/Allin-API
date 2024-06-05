@@ -197,12 +197,27 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             }
         )
 
-        if (bet.type == BetType.CUSTOM) {
-            bet.response.forEach { selected ->
+        val responses = if (bet.type == BetType.BINARY) {
+            listOf(YES_VALUE, NO_VALUE)
+        } else {
+            bet.response
+        }
+
+        responses.forEach { response ->
+            database.betAnswerInfos.add(
+                BetAnswerInfoEntity {
+                    this.betId = bet.id
+                    this.response = response
+                    this.totalStakes = 0
+                    this.odds = 1f
+                }
+            )
+
+            if (bet.type == BetType.CUSTOM) {
                 database.responses.add(
                     ResponseEntity {
                         this.betId = bet.id
-                        this.response = selected
+                        this.response = response
                     }
                 )
             }
