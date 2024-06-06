@@ -47,9 +47,6 @@ class MockParticipationDataSource(private val mockData: MockDataSource.MockData)
     override fun getParticipationFromBetId(betid: String): List<Participation> =
         participations.filter { it.betId == betid }
 
-    /*override fun getParticipationFromUserId(username: String, betid: String): List<Participation> =
-        participations.filter { it.betId == betid && it.username == username }
-*/
     override fun deleteParticipation(id: String): Boolean {
         val participation = participations.find { it.id == id }
         val result = participations.remove(participation)

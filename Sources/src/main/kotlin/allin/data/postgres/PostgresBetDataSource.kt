@@ -17,7 +17,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
     override fun getAllBets(filters: List<BetFilter>, userDTO: UserDTO): List<Bet> {
         return when {
             filters.isEmpty() -> database.bets.map { it.toBet(database) }
-                .filter { (!it.isPrivate) or (isInvited(it.id, userDTO.id)) or (it.createdBy == userDTO.id) }
+                .filter { (!it.isPrivate) or (isInvited(it.id, userDTO.id)) or (it.createdBy == userDTO.username) }
 
             filters.size == 1 -> {
                 val filter = filters.first()
