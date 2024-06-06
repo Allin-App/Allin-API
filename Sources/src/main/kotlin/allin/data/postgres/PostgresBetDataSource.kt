@@ -65,12 +65,12 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             .map { it.toBet(database) }
     }
 
-    override fun getToConfirm(username: String): List<BetDetail> {
+    override fun getToConfirm(user: UserDTO): List<BetDetail> {
         return database.bets
             .filter {
-                (it.createdBy eq username) and (BetsEntity.status eq BetStatus.CLOSING)
+                (it.createdBy eq user.id) and (BetsEntity.status eq BetStatus.CLOSING)
             }
-            .map { it.toBetDetail(database, username) }
+            .map { it.toBetDetail(database, user.username) }
     }
 
     override fun confirmBet(betId: String, result: String) {
@@ -282,7 +282,16 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
         }
     }
 
-    override fun isInvited(betid: String, userId: String): Boolean {
-        return database.privatebets.filter { (it.betid eq betid) and (it.userId eq userId) }.isNotEmpty()
+    override fun isInvited(betid: String, userId: String) =
+        database.privatebets.filter { (it.betid eq betid) and (it.userId eq userId) }.isNotEmpty()
+
+
+    override fun addUserInPrivatebet(updatedPrivateBet: UpdatedPrivateBet) {
+        updatedPrivateBet.usersInvited?.forEach {
+            database.privatebets.add(PrivateBetEntity {
+                betId = updatedPrivateBet.betid
+                userId = it
+            })
+        }
     }
 }

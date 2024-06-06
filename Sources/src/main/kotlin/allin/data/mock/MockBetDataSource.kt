@@ -113,9 +113,9 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
         }
     }
 
-    override fun getToConfirm(username: String): List<BetDetail> =
-        bets.filter { it.createdBy == username && it.status == CLOSING }
-            .map { it.toBetDetail(username) }
+    override fun getToConfirm(user: UserDTO): List<BetDetail> =
+        bets.filter { it.createdBy == user.id && it.status == CLOSING }
+            .map { it.toBetDetail(user.username) }
 
     override fun confirmBet(betId: String, result: String) {
         results.add(
@@ -235,11 +235,20 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
     }
 
     override fun addPrivateBet(bet: Bet) {
-        TODO()
+        addBet(bet)
+        bet.userInvited?.forEach {
+            mockData.privatebets.add(InvitationBet(bet.id, it))
+        }
     }
 
-    override fun isInvited(betid: String, userId: String): Boolean {
-        TODO("Not yet implemented")
+    override fun isInvited(betid: String, userId: String) =
+        mockData.privatebets.filter { (it.betid == betid) and (it.userId == userId) }.isNotEmpty()
+
+
+    override fun addUserInPrivatebet(updatedPrivateBet: UpdatedPrivateBet) {
+        updatedPrivateBet.usersInvited?.forEach {
+            mockData.privatebets.add(InvitationBet(updatedPrivateBet.betid, it))
+        }
     }
 
 }

@@ -33,3 +33,15 @@ data class UpdatedBetData(
     val isPrivate: Boolean,
     val response: List<String>
 )
+
+@Serializable
+data class InvitationBet(
+    val betid: String,
+    val userId: String
+)
+
+@Serializable
+data class UpdatedPrivateBet(
+    val betid: String,
+    val usersInvited: List<String>? = null
+)

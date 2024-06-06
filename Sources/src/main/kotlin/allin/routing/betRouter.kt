@@ -232,7 +232,7 @@ fun Application.betRouter() {
                 logManager.log("Routing", "GET /bets/toConfirm")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        val response = betDataSource.getToConfirm(user.username)
+                        val response = betDataSource.getToConfirm(user)
                         logManager.log("Routing", "ACCEPTED /bets/toConfirm\t${response}")
                         call.respond(HttpStatusCode.Accepted, response)
                     }
@@ -346,7 +346,7 @@ fun Application.betRouter() {
                         val betId = call.parameters["id"] ?: ""
                         val result = call.receive<String>()
 
-                        if (betDataSource.getBetById(betId)?.createdBy == user.username) {
+                        if (betDataSource.getBetById(betId)?.createdBy == user.id) {
                             betDataSource.confirmBet(betId, result)
                             logManager.log("Routing", "ACCEPTED /bets/confirm/{id}")
                             call.respond(HttpStatusCode.OK)
@@ -375,17 +375,48 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","POST /bets/users")
+                logManager.log("Routing", "POST /bets/users")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         val id = call.receive<Map<String, String>>()["id"] ?: ""
                         val participations = participationDataSource.getParticipationFromBetId(id)
-                        val users = participations.map { userDataSource.getUserByUsername(it.username).first }.toSet().take(4).toList()
+                        val users =
+                            participations.map { userDataSource.getUserByUsername(it.username).first }.toSet().take(4)
+                                .toList()
                         call.respond(users)
                     }
                 }
+            }
+            post("/bets/pvbet/update", {
+                description = "Add new users to a private bet"
+                request {
+                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    body<UpdatedPrivateBet> {
+                        description = "Bet id and list of new users"
+                    }
+                }
+                response {
+                    HttpStatusCode.OK to {
+                        description = "The final answer has been set"
+                    }
+                    HttpStatusCode.Unauthorized to {
+                        description = "The user is not the creator of the bet"
+                    }
+                }
+            }) {
+                logManager.log("Routing", "POST /bets/pvbet/update")
+                hasToken { principal ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                        val updateRequest = call.receive<UpdatedPrivateBet>()
+                        val bet = betDataSource.getBetById(updateRequest.betid)
+                        if (user.username != bet?.createdBy) {
+                            call.respond(HttpStatusCode.Forbidden, ApiMessage.USER_DOESNT_HAVE_PERMISSION)
+                        }
+                        betDataSource.addUserInPrivatebet(updateRequest)
+                        call.respond(HttpStatusCode.Accepted, updateRequest)
+                    }
+                }
+            }
         }
-
     }
-}
 }

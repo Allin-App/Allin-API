@@ -13,7 +13,7 @@ interface BetDataSource {
     fun removeBet(id: String): Boolean
     fun updateBet(data: UpdatedBetData): Boolean
     fun updateBetStatuses(date: ZonedDateTime)
-    fun getToConfirm(username: String): List<BetDetail>
+    fun getToConfirm(user: UserDTO): List<BetDetail>
     fun confirmBet(betId: String, result: String)
     fun getWonNotifications(username: String): List<BetResultDetail>
     fun getHistory(username: String): List<BetResultDetail>
@@ -22,4 +22,5 @@ interface BetDataSource {
     fun updatePopularityScore(betId: String)
     fun addPrivateBet(bet: Bet)
     fun isInvited(betid: String, userId: String): Boolean
+    fun addUserInPrivatebet(updatedPrivateBet: UpdatedPrivateBet)
 }
