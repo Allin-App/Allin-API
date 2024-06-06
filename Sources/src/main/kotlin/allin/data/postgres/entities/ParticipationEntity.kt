@@ -5,8 +5,7 @@ import allin.utils.AppConfig
 import org.ktorm.database.Database
 import org.ktorm.dsl.eq
 import org.ktorm.entity.Entity
-import org.ktorm.entity.filter
-import org.ktorm.entity.map
+import org.ktorm.entity.first
 import org.ktorm.entity.sequenceOf
 import org.ktorm.schema.Table
 import org.ktorm.schema.int
@@ -28,7 +27,7 @@ interface ParticipationEntity : Entity<ParticipationEntity> {
             userId = userid,
             answer = answer,
             stake = stake,
-            username = database.users.filter { it.id eq userid }.map { it.username }.first,
+            username = database.users.first { it.id eq userid }.username,
             imageUser = AppConfig.imageManager.getImage(id, database)
         )
 }

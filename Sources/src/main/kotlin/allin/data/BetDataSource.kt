@@ -7,7 +7,7 @@ import java.time.ZonedDateTime
 interface BetDataSource {
     fun getAllBets(filters: List<BetFilter>, userDTO: UserDTO): List<Bet>
     fun getBetById(id: String): Bet?
-    fun getBetDetailById(id: String, username: String): BetDetail?
+    fun getBetDetailById(id: String, userid: String): BetDetail?
     fun getBetsNotFinished(): List<Bet>
     fun addBet(bet: Bet)
     fun removeBet(id: String): Boolean
@@ -15,9 +15,9 @@ interface BetDataSource {
     fun updateBetStatuses(date: ZonedDateTime)
     fun getToConfirm(user: UserDTO): List<BetDetail>
     fun confirmBet(betId: String, result: String)
-    fun getWonNotifications(username: String): List<BetResultDetail>
-    fun getHistory(username: String): List<BetResultDetail>
-    fun getCurrent(username: String): List<BetDetail>
+    fun getWonNotifications(userid: String): List<BetResultDetail>
+    fun getHistory(userid: String): List<BetResultDetail>
+    fun getCurrent(userid: String): List<BetDetail>
     fun getMostPopularBet(): Bet?
     fun updatePopularityScore(betId: String)
     fun addPrivateBet(bet: Bet)
