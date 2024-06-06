@@ -44,6 +44,10 @@
 - Pour stocker les données des utilisateurs et des paris, nous utilisons une base de données PostgreSQL sur laquelle l'API s'appuie pour récupérer et enregistrer des données. En raison de sa conformité aux dernières normes SQL, garantissant une compatibilité et une évolutivité optimales, ainsi que de son efficacité à gérer un grand nombre de données.
 </br>
 
+<img src="Documentation/Images/ktorm.png" width="50" /> **Ktorm**
+
+- Nous avons choisi Ktorm comme ORM pour notre projet en raison de sa compatibilité native avec le framework Ktor. Ktorm permet de mapper notre modèle aux tables de la base de données PostgreSQL de manière fluide et efficace, réduisant les erreurs potentielles liées à la manipulation directe de SQL.
+
 # Outils
 
 Pour la partie API, nous utilisons plusieurs outils et méthodes :
@@ -65,6 +69,10 @@ Afin de garantir la sécurité des échanges d'informations entre notre applicat
 Ils sont essentiels pour une transmission sécurisée des données entre les différentes couches de l'application.
 Contribuent ainsi à maintenir l'intégrité et la cohérence des données tout au long du processus.
 
+### Mock et Base de données
+
+En cas de problème sur le déployement et l'accès à la base de données, des mocks seront utilisables afin de simuler le comportement que pourrait avoir la base de données mais de manière temporaire. Ces mocks permettront de continuer le développement et les tests de l'application sans interruption, garantissant ainsi la productivité. Une fois que l'accès à la base de données sera rétabli, il suffira de désactiver les mocks pour revenir à l'utilisation normale de la base de données PostgreSQL.
+
 # Controllers
 
 Notre API est organisée en utilisant une séparation logique des routes par le biais de controllers. 
@@ -79,6 +87,8 @@ Ce controller est dédié à l'authentification et aux données liées à l'util
 Le controller BET gère toutes les opérations liées aux paris. Il permet de récupérer, ajouter, modifier et supprimer des paris. 
 
 :white_check_mark: Cette séparation permet une gestion plus claire et modulaire des fonctionnalités de l'API, facilitant la maintenance et l'extension de notre système.
+
+
 
 # Déploiement
 
