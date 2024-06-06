@@ -41,7 +41,7 @@ interface BetEntity : Entity<BetEntity> {
             } else {
                 database.responses.filter { it.betId eq id }.map { it.response }
             },
-            createdBy = createdBy,
+            createdBy = database.users.first { it.id eq createdBy }.username,
             popularityscore = popularityscore,
             totalStakes = betInfo?.totalStakes ?: 0,
             totalParticipants = betInfo?.totalParticipants ?: 0

@@ -46,22 +46,22 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","POST /bets/add")
+                logManager.log("Routing", "POST /bets/add")
                 hasToken { principal ->
                     val bet = call.receive<Bet>()
                     val id = UUID.randomUUID().toString()
                     val username = tokenManagerBet.getUsernameFromToken(principal)
                     val user = userDataSource.getUserByUsername(username)
                     betDataSource.getBetById(id)?.let {
-                        logManager.log("Routing","${ApiMessage.BET_ALREADY_EXIST} /bets/add")
+                        logManager.log("Routing", "${ApiMessage.BET_ALREADY_EXIST} /bets/add")
                         call.respond(HttpStatusCode.Conflict, ApiMessage.BET_ALREADY_EXIST)
                     } ?: run {
-                        val betWithId = bet.copy(id = id, createdBy = user.first?.username.toString())
+                        val betWithId = bet.copy(id = id, createdBy = user.first?.id.toString())
 
-                        if(bet.isPrivate && bet.userInvited?.isNotEmpty() == true){
+                        if (bet.isPrivate && bet.userInvited?.isNotEmpty() == true) {
                             betDataSource.addPrivateBet(betWithId)
                         } else betDataSource.addBet(betWithId)
-                        logManager.log("Routing","CREATED /bets/add\t${betWithId}")
+                        logManager.log("Routing", "CREATED /bets/add\t${betWithId}")
                         call.respond(HttpStatusCode.Created, betWithId)
                     }
                 }
@@ -85,15 +85,15 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","POST /bets/gets")
+                logManager.log("Routing", "POST /bets/gets")
                 hasToken { principal ->
-                    verifyUserFromToken(userDataSource, principal) { user , _ ->
+                    verifyUserFromToken(userDataSource, principal) { user, _ ->
                         val filtersRequest =
                             kotlin.runCatching { call.receiveNullable<BetFiltersRequest>() }.getOrNull()
                         val filters =
                             filtersRequest?.filters ?: emptyList() // Use provided filters or empty list if null
-                        logManager.log("Routing","ACCEPTED /bets/gets\t${filters}")
-                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets(filters))
+                        logManager.log("Routing", "ACCEPTED /bets/gets\t${filters}")
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getAllBets(filters, user))
                     }
                 }
             }
@@ -114,15 +114,15 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","GET /bets/popular")
+                logManager.log("Routing", "GET /bets/popular")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { _, _ ->
                         val bet = betDataSource.getMostPopularBet()
                         if (bet != null) {
-                            logManager.log("Routing","ACCEPTED /bets/popular\t${bet}")
+                            logManager.log("Routing", "ACCEPTED /bets/popular\t${bet}")
                             call.respond(HttpStatusCode.Accepted, bet)
                         }
-                        logManager.log("Routing","${ApiMessage.BET_NOT_FOUND} /bets/popular")
+                        logManager.log("Routing", "${ApiMessage.BET_NOT_FOUND} /bets/popular")
                         call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
                     }
                 }
@@ -147,13 +147,12 @@ fun Application.betRouter() {
                 }
             }
         }) {
-            logManager.log("Routing","GET /bets/get/{id}")
+            logManager.log("Routing", "GET /bets/get/{id}")
             val id = call.parameters["id"] ?: ""
             betDataSource.getBetById(id)?.let { bet ->
-                logManager.log("Routing","ACCEPTED /bets/get/{id}\t ${bet}")
+                logManager.log("Routing", "ACCEPTED /bets/get/{id}\t ${bet}")
                 call.respond(HttpStatusCode.Accepted, bet)
-            } ?:
-            logManager.log("Routing","${ApiMessage.BET_NOT_FOUND} /bets/get/{id}")
+            } ?: logManager.log("Routing", "${ApiMessage.BET_NOT_FOUND} /bets/get/{id}")
             call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
         }
 
@@ -174,13 +173,13 @@ fun Application.betRouter() {
                 }
             }
         }) {
-            logManager.log("Routing","POST /bets/delete")
+            logManager.log("Routing", "POST /bets/delete")
             val id = call.receive<Map<String, String>>()["id"] ?: ""
             if (betDataSource.removeBet(id)) {
-                logManager.log("Routing","ACCEPTED /bets/delete")
+                logManager.log("Routing", "ACCEPTED /bets/delete")
                 call.respond(HttpStatusCode.Accepted)
             } else {
-                logManager.log("Routing","${ApiMessage.BET_NOT_FOUND} /bets/delete")
+                logManager.log("Routing", "${ApiMessage.BET_NOT_FOUND} /bets/delete")
                 call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
             }
         }
@@ -202,13 +201,13 @@ fun Application.betRouter() {
                 }
             }
         }) {
-            logManager.log("Routing","POST /bets/update")
+            logManager.log("Routing", "POST /bets/update")
             val updatedBetData = call.receive<UpdatedBetData>()
             if (betDataSource.updateBet(updatedBetData)) {
-                logManager.log("Routing","ACCEPTED /bets/delete")
+                logManager.log("Routing", "ACCEPTED /bets/delete")
                 call.respond(HttpStatusCode.Accepted)
             } else {
-                logManager.log("Routing","${ApiMessage.BET_NOT_FOUND} /bets/delete")
+                logManager.log("Routing", "${ApiMessage.BET_NOT_FOUND} /bets/delete")
                 call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
             }
         }
@@ -228,11 +227,11 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","GET /bets/toConfirm")
+                logManager.log("Routing", "GET /bets/toConfirm")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         val response = betDataSource.getToConfirm(user.username)
-                        logManager.log("Routing","ACCEPTED /bets/toConfirm\t${response}")
+                        logManager.log("Routing", "ACCEPTED /bets/toConfirm\t${response}")
                         call.respond(HttpStatusCode.Accepted, response)
                     }
                 }
@@ -254,10 +253,10 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","GET /bets/getWon")
+                logManager.log("Routing", "GET /bets/getWon")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        logManager.log("Routing","ACCEPTED /bets/getWon")
+                        logManager.log("Routing", "ACCEPTED /bets/getWon")
                         call.respond(HttpStatusCode.Accepted, betDataSource.getWonNotifications(user.username))
                     }
                 }
@@ -279,10 +278,13 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","GET /bets/history")
+                logManager.log("Routing", "GET /bets/history")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        logManager.log("Routing","ACCEPTED /bets/toConfirm\t${betDataSource.getHistory(user.username)}")
+                        logManager.log(
+                            "Routing",
+                            "ACCEPTED /bets/toConfirm\t${betDataSource.getHistory(user.username)}"
+                        )
                         call.respond(HttpStatusCode.Accepted, betDataSource.getHistory(user.username))
                     }
                 }
@@ -304,10 +306,13 @@ fun Application.betRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","GET /bets/current")
+                logManager.log("Routing", "GET /bets/current")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
-                        logManager.log("Routing","ACCEPTED /bets/toConfirm\t${betDataSource.getCurrent(user.username)}")
+                        logManager.log(
+                            "Routing",
+                            "ACCEPTED /bets/toConfirm\t${betDataSource.getCurrent(user.username)}"
+                        )
                         call.respond(HttpStatusCode.Accepted, betDataSource.getCurrent(user.username))
                     }
                 }
