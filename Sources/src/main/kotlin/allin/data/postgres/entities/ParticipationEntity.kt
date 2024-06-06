@@ -28,7 +28,7 @@ interface ParticipationEntity : Entity<ParticipationEntity> {
 }
 
 object ParticipationsEntity : Table<ParticipationEntity>("participation") {
-    val id = varchar("id").primaryKey()
+    val id = varchar("id").primaryKey().bindTo { it.id }
     val betId = varchar("bet").references(BetsEntity) { it.bet }
     val username = varchar("username").bindTo { it.username }
     val answer = varchar("answer").bindTo { it.answer }
