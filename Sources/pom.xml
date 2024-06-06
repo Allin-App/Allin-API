@@ -73,11 +73,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.ktor</groupId>
-            <artifactId>ktor-network-tls-certificates-jvm</artifactId>
-            <version>${ktor_version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j_version}</version>

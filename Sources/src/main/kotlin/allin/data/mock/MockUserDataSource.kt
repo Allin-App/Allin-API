@@ -19,7 +19,7 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
                     nbCoins = usr.nbCoins,
                     token = usr.token,
                     image = null,
-                    nbBets = mockData.participations.count { it.username == usr.username },
+                    nbBets = mockData.participations.count { it.userId == usr.id },
                     nbFriends = mockData.friends.count { f ->
                         f.receiver == usr.username &&
                                 mockData.friends.any { it.sender == usr.username && it.receiver == f.sender }
@@ -84,8 +84,32 @@ class MockUserDataSource(private val mockData: MockDataSource.MockData) : UserDa
         }
     }
 
-    override fun getImage(userid: String): String? {
-        return users.find { it.id == userid }?.image
-    }
+    override fun getImage(userid: String) =
+        users.find { it.id == userid }?.image
 
+
+    override fun getUserById(id: String) =
+        mockData.users.find { it.id == id }?.let { usr ->
+            UserDTO(
+                id = usr.id,
+                username = usr.username,
+                email = usr.email,
+                nbCoins = usr.nbCoins,
+                token = usr.token,
+                image = null,
+                nbBets = mockData.participations.count { it.userId == usr.id },
+                nbFriends = mockData.friends.count { f ->
+                    f.receiver == usr.username &&
+                            mockData.friends.any { it.sender == usr.username && it.receiver == f.sender }
+                },
+                bestWin = mockData.participations
+                    .filter {
+                        (it.id == usr.id) &&
+                                (mockData.results.find { r -> r.betId == it.betId })?.result == it.answer
+                    }
+                    .maxBy { it.stake }
+                    .stake,
+                friendStatus = null,
+            )
+        }
 }

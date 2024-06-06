@@ -10,12 +10,12 @@ interface BetResultNotificationEntity : Entity<BetResultNotificationEntity> {
     companion object : Entity.Factory<BetResultNotificationEntity>()
 
     var betId: String
-    var username: String
+    var userid: String
 }
 
 object BetResultNotificationsEntity : Table<BetResultNotificationEntity>("betresultnotification") {
     val betId = varchar("betid").primaryKey().bindTo { it.betId }
-    val username = varchar("username").primaryKey().bindTo { it.username }
+    val userid = varchar("userid").primaryKey().bindTo { it.userid }
 }
 
 val Database.betResultNotifications get() = this.sequenceOf(BetResultNotificationsEntity)

@@ -47,13 +47,13 @@ fun Application.participationRouter() {
                 }
 
             }) {
-                logManager.log("Routing","POST /participations/add")
+                logManager.log("Routing", "POST /participations/add")
                 hasToken { principal ->
                     val participation = call.receive<ParticipationRequest>()
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
 
-                        if(betDataSource.getBetById(participation.betId)== null){
-                            logManager.log("Routing","${ApiMessage.BET_NOT_FOUND} /participations/add")
+                        if (betDataSource.getBetById(participation.betId) == null) {
+                            logManager.log("Routing", "${ApiMessage.BET_NOT_FOUND} /participations/add")
                             call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
                         }
 
@@ -62,18 +62,19 @@ fun Application.participationRouter() {
                                 Participation(
                                     id = UUID.randomUUID().toString(),
                                     betId = participation.betId,
-                                    username = user.username,
+                                    userId = user.id,
                                     answer = participation.answer,
-                                    stake = participation.stake
+                                    stake = participation.stake,
+                                    username = user.username
                                 )
                             )
 
                             userDataSource.removeCoins(username = user.username, amount = participation.stake)
                             betDataSource.updatePopularityScore(participation.betId)
-                            logManager.log("Routing","CREATED /participations/add")
+                            logManager.log("Routing", "CREATED /participations/add")
                             call.respond(HttpStatusCode.Created)
                         } else {
-                            logManager.log("Routing","${ApiMessage.NOT_ENOUGH_COINS} /participations/add")
+                            logManager.log("Routing", "${ApiMessage.NOT_ENOUGH_COINS} /participations/add")
                             call.respond(HttpStatusCode.Forbidden, ApiMessage.NOT_ENOUGH_COINS)
                         }
                     }
@@ -97,14 +98,14 @@ fun Application.participationRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","DELETE /participations/delete")
+                logManager.log("Routing", "DELETE /participations/delete")
                 hasToken {
                     val participationId = call.receive<String>()
                     if (participationDataSource.deleteParticipation(participationId)) {
-                        logManager.log("Routing","ACCEPTED /participations/delete")
+                        logManager.log("Routing", "ACCEPTED /participations/delete")
                         call.respond(HttpStatusCode.NoContent)
                     } else {
-                        logManager.log("Routing","${ApiMessage.PARTICIPATION_NOT_FOUND} /participations/delete")
+                        logManager.log("Routing", "${ApiMessage.PARTICIPATION_NOT_FOUND} /participations/delete")
                         call.respond(HttpStatusCode.NotFound, ApiMessage.PARTICIPATION_NOT_FOUND)
                     }
                 }

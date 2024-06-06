@@ -15,4 +15,5 @@ interface UserDataSource {
     fun addImage(userid: String, image: ByteArray)
     fun removeImage(userid: String)
     fun getImage(userid: String): String?
+    fun getUserById(id: String): UserDTO?
 }

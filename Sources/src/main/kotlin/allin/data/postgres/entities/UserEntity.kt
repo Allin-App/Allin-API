@@ -2,7 +2,6 @@ package allin.data.postgres.entities
 
 import allin.dto.UserDTO
 import allin.model.FriendStatus
-import allin.routing.imageManagerUser
 import allin.utils.AppConfig
 import org.ktorm.database.Database
 import org.ktorm.dsl.and
@@ -31,8 +30,8 @@ interface UserEntity : Entity<UserEntity> {
             email = email,
             nbCoins = nbCoins,
             token = null,
-            image = getImage(id, database),
-            nbBets = database.participations.count { it.username eq this.username },
+            image = AppConfig.imageManager.getImage(id, database),
+            nbBets = database.participations.count { it.userid eq this.id },
             nbFriends = database.friends
                 .filter { it.receiver eq this.id }
                 .mapNotNull { p -> database.friends.any { (it.sender eq this.id) and (it.receiver eq p.sender) } }
@@ -48,14 +47,6 @@ interface UserEntity : Entity<UserEntity> {
             friendStatus = friendStatus
         )
 
-    fun getImage(userId: String, database: Database): String? {
-        val imageByte = database.usersimage.find { it.id eq id }?.image ?: return null
-        val urlfile = "images/$userId"
-        if (!imageManagerUser.imageAvailable(urlfile)) {
-            imageManagerUser.saveImage(urlfile, imageByte)
-        }
-        return "${AppConfig.urlManager.getURL()}users/${urlfile}"
-    }
 }
 
 object UsersEntity : Table<UserEntity>("users") {

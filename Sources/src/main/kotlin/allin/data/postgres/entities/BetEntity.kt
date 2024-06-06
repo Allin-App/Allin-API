@@ -48,11 +48,11 @@ interface BetEntity : Entity<BetEntity> {
         )
     }
 
-    fun toBetDetail(database: Database, username: String): BetDetail {
+    fun toBetDetail(database: Database, userid: String): BetDetail {
         val bet = this.toBet(database)
         val participations = database.participations.filter { it.betId eq bet.id }
-        val userParticipation = participations.find { it.username eq username }
-        val participationEntities = participations.map { it.toParticipation() }
+        val userParticipation = participations.find { it.userid eq userid }
+        val participationEntities = participations.map { it.toParticipation(database) }
 
         val answerInfos = database.betAnswerInfos
             .filter { it.betId eq bet.id }
@@ -62,7 +62,7 @@ interface BetEntity : Entity<BetEntity> {
             bet = bet,
             answers = getBetAnswerDetail(bet, participationEntities, answerInfos),
             participations = participationEntities,
-            userParticipation = userParticipation?.toParticipation(),
+            userParticipation = userParticipation?.toParticipation(database),
             wonParticipation = if (bet.status == BetStatus.FINISHED) {
                 val result = database.betResults.find { it.betId eq this.id }
                 result?.let { r ->

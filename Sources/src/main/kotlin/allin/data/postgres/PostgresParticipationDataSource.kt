@@ -4,7 +4,6 @@ import allin.data.ParticipationDataSource
 import allin.data.postgres.entities.*
 import allin.model.Participation
 import org.ktorm.database.Database
-import org.ktorm.dsl.and
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.insert
 import org.ktorm.entity.*
@@ -15,7 +14,7 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
         database.insert(ParticipationsEntity) {
             set(it.id, participation.id)
             set(it.betId, participation.betId)
-            set(it.username, participation.username)
+            set(it.userid, participation.userId)
             set(it.answer, participation.answer)
             set(it.stake, participation.stake)
         }
@@ -42,12 +41,7 @@ class PostgresParticipationDataSource(private val database: Database) : Particip
     }
 
     override fun getParticipationFromBetId(betid: String): List<Participation> =
-        database.participations.filter { it.betId eq betid }.map { it.toParticipation() }
-
-    override fun getParticipationFromUserId(username: String, betid: String): List<Participation> =
-        database.participations.filter {
-            (ParticipationsEntity.betId eq betid) and (ParticipationsEntity.username eq username)
-        }.map { it.toParticipation() }
+        database.participations.filter { it.betId eq betid }.map { it.toParticipation(database) }
 
     override fun deleteParticipation(id: String): Boolean {
         val participation = database.participations.find { it.id eq id } ?: return false

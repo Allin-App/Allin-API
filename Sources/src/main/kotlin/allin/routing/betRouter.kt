@@ -259,7 +259,7 @@ fun Application.betRouter() {
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         logManager.log("Routing", "ACCEPTED /bets/getWon")
-                        call.respond(HttpStatusCode.Accepted, betDataSource.getWonNotifications(user.username))
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getWonNotifications(user.id))
                     }
                 }
             }
@@ -285,9 +285,9 @@ fun Application.betRouter() {
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         logManager.log(
                             "Routing",
-                            "ACCEPTED /bets/toConfirm\t${betDataSource.getHistory(user.username)}"
+                            "ACCEPTED /bets/toConfirm\t${betDataSource.getHistory(user.id)}"
                         )
-                        call.respond(HttpStatusCode.Accepted, betDataSource.getHistory(user.username))
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getHistory(user.id))
                     }
                 }
             }
@@ -313,9 +313,9 @@ fun Application.betRouter() {
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         logManager.log(
                             "Routing",
-                            "ACCEPTED /bets/toConfirm\t${betDataSource.getCurrent(user.username)}"
+                            "ACCEPTED /bets/toConfirm\t${betDataSource.getCurrent(user.id)}"
                         )
-                        call.respond(HttpStatusCode.Accepted, betDataSource.getCurrent(user.username))
+                        call.respond(HttpStatusCode.Accepted, betDataSource.getCurrent(user.id))
                     }
                 }
             }
@@ -378,7 +378,7 @@ fun Application.betRouter() {
                         val id = call.receive<Map<String, String>>()["id"] ?: ""
                         val participations = participationDataSource.getParticipationFromBetId(id)
                         val users =
-                            participations.map { userDataSource.getUserByUsername(it.username).first }.toSet().take(4)
+                            participations.map { userDataSource.getUserById(it.id) }.toSet().take(4)
                                 .toList()
                         call.respond(HttpStatusCode.Accepted, users)
                     }

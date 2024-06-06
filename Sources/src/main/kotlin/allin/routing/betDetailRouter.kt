@@ -40,19 +40,19 @@ fun Application.betDetailRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","GET /betdetail/get/{id}")
+                logManager.log("Routing", "GET /betdetail/get/{id}")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
                         val id = call.parameters["id"].toString()
-                        val result = betDataSource.getBetDetailById(id, user.username)
+                        val result = betDataSource.getBetDetailById(id, user.id)
                         if (result != null) {
-                            logManager.log("Routing","ACCEPTED GET /betdetail/get/{id}\t${result}")
+                            logManager.log("Routing", "ACCEPTED GET /betdetail/get/{id}\t${result}")
                             call.respond(
                                 HttpStatusCode.Accepted,
                                 result
                             )
                         } else {
-                            logManager.log("Routing","${ApiMessage.BET_NOT_FOUND} GET /betdetail/get/{id}")
+                            logManager.log("Routing", "${ApiMessage.BET_NOT_FOUND} GET /betdetail/get/{id}")
                             call.respond(HttpStatusCode.NotFound, ApiMessage.BET_NOT_FOUND)
                         }
                     }

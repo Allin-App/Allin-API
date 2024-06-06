@@ -55,8 +55,8 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
     override fun getBetById(id: String): Bet? =
         database.bets.find { it.id eq id }?.toBet(database)
 
-    override fun getBetDetailById(id: String, username: String): BetDetail? =
-        database.bets.find { it.id eq id }?.toBetDetail(database, username)
+    override fun getBetDetailById(id: String, userid: String): BetDetail? =
+        database.bets.find { it.id eq id }?.toBetDetail(database, userid)
 
     override fun getBetsNotFinished(): List<Bet> {
         val currentTime = ZonedDateTime.now(ZoneId.of("+02:00"))
@@ -70,7 +70,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             .filter {
                 (it.createdBy eq user.id) and (BetsEntity.status eq BetStatus.CLOSING)
             }
-            .map { it.toBetDetail(database, user.username) }
+            .map { it.toBetDetail(database, user.id) }
     }
 
     override fun confirmBet(betId: String, result: String) {
@@ -97,27 +97,27 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             database.betResultNotifications.add(
                 BetResultNotificationEntity {
                     this.betId = betId
-                    this.username = participation.username
+                    this.userid = participation.userid
                 }
             )
 
             val amount = (participation.stake * (resultAnswerInfo?.odds ?: 1f)).roundToInt()
             database.update(UsersEntity) { usr ->
                 set(usr.nbCoins, usr.nbCoins + amount)
-                where { usr.username eq participation.username }
+                where { usr.id eq participation.userid }
             }
         }
     }
 
-    override fun getWonNotifications(username: String): List<BetResultDetail> {
+    override fun getWonNotifications(userid: String): List<BetResultDetail> {
         return database.betResultNotifications
-            .filter { it.username eq username }
+            .filter { it.userid eq userid }
             .flatMap { notif ->
                 notif.delete()
 
                 database.participations
                     .filter {
-                        (it.username eq username) and
+                        (it.id eq userid) and
                                 (it.betId eq notif.betId)
                     }
                     .mapNotNull { participation ->
@@ -132,9 +132,9 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             }
     }
 
-    override fun getHistory(username: String): List<BetResultDetail> {
+    override fun getHistory(userid: String): List<BetResultDetail> {
         return database.participations
-            .filter { it.username eq username }
+            .filter { it.userid eq userid }
             .mapNotNull { participation ->
                 database.betResults
                     .find { it.betId eq participation.bet.id }
@@ -145,14 +145,14 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             }
     }
 
-    override fun getCurrent(username: String): List<BetDetail> {
+    override fun getCurrent(userid: String): List<BetDetail> {
         return database.participations
-            .filter { it.username eq username }
+            .filter { it.userid eq userid }
             .mapNotNull {
                 if (it.bet.status !in listOf(BetStatus.FINISHED, BetStatus.CANCELLED)) {
                     it.bet.toBetDetail(
                         database = database,
-                        username = username
+                        userid = userid
                     )
                 } else null
             }
@@ -257,7 +257,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
                         database.participations
                             .filter { it.betId eq bet.id }
                             .forEach { participation ->
-                                database.users.find { it.username eq participation.username }?.let { user ->
+                                database.users.find { it.id eq participation.userid }?.let { user ->
                                     user.nbCoins += participation.stake
                                     user.flushChanges()
                                 }

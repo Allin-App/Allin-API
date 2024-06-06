@@ -21,6 +21,9 @@ class PostgresUserDataSource(private val database: Database) : UserDataSource {
             ?.let { it.toUserDTO(database) to it.password }
             ?: (null to null)
 
+    override fun getUserById(id: String): UserDTO? =
+        database.users.find { it.id eq id }?.toUserDTO(database)
+
     override fun addUser(user: User) {
         database.users.add(
             UserEntity {

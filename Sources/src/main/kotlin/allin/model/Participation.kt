@@ -6,9 +6,11 @@ import kotlinx.serialization.Serializable
 data class Participation(
     val id: String,
     val betId: String,
-    val username: String,
+    val userId: String,
     val answer: String,
-    val stake: Int
+    val stake: Int,
+    val username: String,
+    val imageUser: String? = null
 )
 
 @Serializable

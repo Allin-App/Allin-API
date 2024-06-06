@@ -75,8 +75,8 @@ class PostgresDataSource : AllInDataSource() {
             """
             CREATE TABLE IF NOT EXISTS betresultnotification (
                 betid VARCHAR(255),
-                username varchar(250),
-                CONSTRAINT pk_id_username PRIMARY KEY (betid, username)
+                userid varchar(250),
+                CONSTRAINT pk_id_username PRIMARY KEY (betid, userid)
             )
             """.trimIndent()
         )
@@ -86,7 +86,7 @@ class PostgresDataSource : AllInDataSource() {
             CREATE TABLE IF NOT EXISTS participation (
                 id VARCHAR(255) PRIMARY KEY,
                 bet VARCHAR(255),
-                username varchar(250),
+                userid varchar(250),
                 answer varchar(250),
                 stake int
             )

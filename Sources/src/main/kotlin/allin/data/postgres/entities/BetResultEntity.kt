@@ -36,7 +36,7 @@ interface BetResultEntity : Entity<BetResultEntity> {
         return BetResultDetail(
             betResult = this.toBetResult(),
             bet = bet.toBet(database),
-            participation = participationEntity.toParticipation(),
+            participation = participationEntity.toParticipation(database),
             amount = (participationEntity.stake * (answerInfo?.odds ?: 1f)).roundToInt(),
             won = participationEntity.answer == result
         )
