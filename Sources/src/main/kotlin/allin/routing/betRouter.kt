@@ -346,9 +346,9 @@ fun Application.betRouter() {
                         val betId = call.parameters["id"] ?: ""
                         val result = call.receive<String>()
 
-                        if (betDataSource.getBetById(betId)?.createdBy == user.id) {
+                        if (betDataSource.getBetById(betId)?.createdBy == user.username) {
                             betDataSource.confirmBet(betId, result)
-                            logManager.log("Routing", "ACCEPTED /bets/confirm/{id}")
+                            logManager.log("Routing", "ACCEPTED /bets/confirm/{id} $result")
                             call.respond(HttpStatusCode.OK)
                         } else {
                             logManager.log("Routing", "UNAUTHORIZED /bets/confirm/{id}")
