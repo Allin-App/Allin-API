@@ -29,7 +29,6 @@ steps:
       - export SONAR_SCANNER_OPTS="-server"
       - sonar-scanner -D sonar.projectKey=Api-Allin -D sonar.sources=./Sources -D sonar.host.url=https://codefirst.iut.uca.fr/sonar
 
-
 ---
 
 kind: pipeline
