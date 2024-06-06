@@ -144,6 +144,17 @@ class PostgresDataSource : AllInDataSource() {
                 )
             """.trimIndent()
         )
+
+        database.execute(
+            """
+                CREATE TABLE IF NOT EXISTS privatebet
+                (
+                    betid VARCHAR(255),
+                    userid VARCHAR(255),
+                    CONSTRAINT pk_privatebet PRIMARY KEY (betid,userid)
+                )
+            """.trimIndent()
+        )
     }
 
     override val userDataSource: UserDataSource by lazy { PostgresUserDataSource(database) }

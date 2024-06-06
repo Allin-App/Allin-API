@@ -1,10 +1,11 @@
 package allin.data
 
+import allin.dto.UserDTO
 import allin.model.*
 import java.time.ZonedDateTime
 
 interface BetDataSource {
-    fun getAllBets(filters: List<BetFilter>): List<Bet>
+    fun getAllBets(filters: List<BetFilter>, userDTO: UserDTO): List<Bet>
     fun getBetById(id: String): Bet?
     fun getBetDetailById(id: String, username: String): BetDetail?
     fun getBetsNotFinished(): List<Bet>
@@ -19,4 +20,6 @@ interface BetDataSource {
     fun getCurrent(username: String): List<BetDetail>
     fun getMostPopularBet(): Bet?
     fun updatePopularityScore(betId: String)
+    fun addPrivateBet(bet: Bet)
+    fun isInvited(betid: String, userId: String): Boolean
 }
