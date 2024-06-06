@@ -1,6 +1,7 @@
 package allin.data.mock
 
 import allin.data.BetDataSource
+import allin.dto.UserDTO
 import allin.model.*
 import allin.model.BetStatus.*
 import java.time.ZonedDateTime
@@ -15,7 +16,7 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
     private val betInfos get() = mockData.betInfos
     private val answerInfos get() = mockData.answerInfos
 
-    override fun getAllBets(filters: List<BetFilter>): List<Bet> {
+    override fun getAllBets(filters: List<BetFilter>, userDTO: UserDTO): List<Bet> {
         return when {
             filters.isEmpty() -> bets
 
@@ -231,6 +232,14 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
         val participations = mockData.participations.filter { it.betId == betId }
         val score = participations.size * participations.size + participations.sumOf { it.stake }
         bet.popularityscore = score
+    }
+
+    override fun addPrivateBet(bet: Bet) {
+        TODO()
+    }
+
+    override fun isInvited(betid: String, userId: String): Boolean {
+        TODO("Not yet implemented")
     }
 
 }

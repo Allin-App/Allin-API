@@ -2,6 +2,7 @@ package allin.data.postgres
 
 import allin.data.BetDataSource
 import allin.data.postgres.entities.*
+import allin.dto.UserDTO
 import allin.model.*
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
@@ -13,9 +14,10 @@ import kotlin.math.roundToInt
 
 class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
-    override fun getAllBets(filters: List<BetFilter>): List<Bet> {
+    override fun getAllBets(filters: List<BetFilter>, userDTO: UserDTO): List<Bet> {
         return when {
             filters.isEmpty() -> database.bets.map { it.toBet(database) }
+                .filter { (!it.isPrivate) or (isInvited(it.id, userDTO.id)) or (it.createdBy == userDTO.id) }
 
             filters.size == 1 -> {
                 val filter = filters.first()
@@ -28,6 +30,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
                         it.status inList listOf(BetStatus.IN_PROGRESS, BetStatus.WAITING, BetStatus.CLOSING)
                     }
                 }.map { it.toBet(database) }
+                    .filter { (!it.isPrivate) or (isInvited(it.id, userDTO.id)) or (it.createdBy == userDTO.id) }
             }
 
             else -> {
@@ -44,10 +47,10 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
                     (public or invitation) and (finished or inProgress)
                 }.map { it.toBet(database) }
+                    .filter { (!it.isPrivate) or (isInvited(it.id, userDTO.id)) or (it.createdBy == userDTO.id) }
             }
         }
     }
-
 
     override fun getBetById(id: String): Bet? =
         database.bets.find { it.id eq id }?.toBet(database)
@@ -269,4 +272,17 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
             }
     }
 
+    override fun addPrivateBet(bet: Bet) {
+        addBet(bet)
+        bet.userInvited?.forEach {
+            database.privatebets.add(PrivateBetEntity {
+                betId = bet.id
+                userId = it
+            })
+        }
+    }
+
+    override fun isInvited(betid: String, userId: String): Boolean {
+        return database.privatebets.filter { (it.betid eq betid) and (it.userId eq userId) }.isNotEmpty()
+    }
 }

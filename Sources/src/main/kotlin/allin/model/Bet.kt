@@ -22,7 +22,8 @@ data class Bet(
     val createdBy: String = "",
     var popularityscore: Int = 0,
     val totalStakes: Int = 0,
-    val totalParticipants: Int = 0
+    val totalParticipants: Int = 0,
+    val userInvited: List<String>? = null
 )
 
 @Serializable
