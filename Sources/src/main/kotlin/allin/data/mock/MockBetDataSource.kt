@@ -87,30 +87,30 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
 
     override fun updateBetStatuses(date: ZonedDateTime) {
         bets.forEachIndexed { idx, bet ->
-            if (bet.status != CANCELLED && bet.status != FINISHED) {
-                if (date >= bet.endRegistration) {
-                    if (date >= bet.endBet) {
-                        if (date.plusWeeks(1) >= bet.endBet) {
-                            bets[idx] = bet.copy(status = CANCELLED)
-
-                            participations
-                                .filter { it.betId == bets[idx].id }
-                                .forEach { p ->
-                                    users.replaceAll {
-                                        if (it.username == p.username) {
-                                            it.copy(nbCoins = it.nbCoins + p.stake)
-                                        } else it
-                                    }
-                                }
-                        } else {
-                            bets[idx] = bet.copy(status = CLOSING)
-                        }
-                    } else {
-                        bets[idx] = bet.copy(status = WAITING)
+            if (bet.status != CANCELLED && bet.status != FINISHED && date >= bet.endRegistration) {
+                bets[idx] = when {
+                    date >= bet.endBet && date.plusWeeks(1) >= bet.endBet -> {
+                        cancelBet(bet)
                     }
+
+                    date >= bet.endBet -> bet.copy(status = CLOSING)
+                    else -> bet.copy(status = WAITING)
                 }
             }
         }
+    }
+
+    private fun cancelBet(bet: Bet): Bet {
+        participations
+            .filter { it.betId == bet.id }
+            .forEach { p ->
+                users.replaceAll { user ->
+                    if (user.username == p.username) {
+                        user.copy(nbCoins = user.nbCoins + p.stake)
+                    } else user
+                }
+            }
+        return bet.copy(status = CANCELLED)
     }
 
     override fun getToConfirm(user: UserDTO): List<BetDetail> =

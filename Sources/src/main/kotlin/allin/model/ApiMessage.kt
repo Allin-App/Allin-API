@@ -19,4 +19,9 @@ object ApiMessage {
     const val FRIENDS_REQUEST_HIMSELF = "The receiver can't be the sender."
     const val FILE_NOT_FOUND = "File not found."
     const val USER_DOESNT_HAVE_PERMISSION = "This user can't delete or modify this."
+    const val JWT_TOKEN_INFO = "JWT token of the logged user"
+    const val ID_BET_INFO = "Id of the desired bet"
+    const val BET_NOT_FOUND_INFO = "Bet not found in the selected source"
+    const val NOT_CREATOR_INFO = "The user is not the creator of the bet"
+    const val USER_UPDATE_INFO = "New User information"
 }

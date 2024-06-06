@@ -37,7 +37,7 @@ fun Application.userRouter() {
             description = "Allows a user to register"
             request {
                 body<UserRequest> {
-                    description = "User information"
+                    description = ApiMessage.USER_UPDATE_INFO
                 }
             }
             response {
@@ -57,16 +57,16 @@ fun Application.userRouter() {
                 }
             }
         }) {
-            logManager.log("Routing","POST /users/register")
+            logManager.log("Routing", "POST /users/register")
             val tempUser = call.receive<UserRequest>()
             if (RegexCheckerUser.isEmailInvalid(tempUser.email)) {
-                logManager.log("Routing","${ApiMessage.INVALID_MAIL} /users/register")
+                logManager.log("Routing", "${ApiMessage.INVALID_MAIL} /users/register")
                 call.respond(HttpStatusCode.Forbidden, ApiMessage.INVALID_MAIL)
             } else if (userDataSource.userExists(tempUser.username)) {
-                logManager.log("Routing","${ApiMessage.USER_ALREADY_EXISTS} /users/register")
+                logManager.log("Routing", "${ApiMessage.USER_ALREADY_EXISTS} /users/register")
                 call.respond(HttpStatusCode.Conflict, ApiMessage.USER_ALREADY_EXISTS)
             } else if (userDataSource.emailExists(tempUser.email)) {
-                logManager.log("Routing","${ApiMessage.MAIL_ALREADY_EXISTS} /users/register")
+                logManager.log("Routing", "${ApiMessage.MAIL_ALREADY_EXISTS} /users/register")
                 call.respond(HttpStatusCode.Conflict, ApiMessage.MAIL_ALREADY_EXISTS)
             } else {
                 val user = User(
@@ -83,7 +83,7 @@ fun Application.userRouter() {
                 CryptManagerUser.passwordCrypt(user)
                 user.token = tokenManagerUser.generateOrReplaceJWTToken(user)
                 userDataSource.addUser(user)
-                logManager.log("Routing","ACCEPTED /users/register\t${user}")
+                logManager.log("Routing", "ACCEPTED /users/register\t${user}")
                 call.respond(HttpStatusCode.Created, user)
             }
         }
@@ -92,7 +92,7 @@ fun Application.userRouter() {
             description = "Allows a user to login"
             request {
                 body<CheckUser> {
-                    description = "User information"
+                    description = ApiMessage.USER_UPDATE_INFO
                 }
             }
             response {
@@ -106,25 +106,24 @@ fun Application.userRouter() {
                 }
             }
         }) {
-            logManager.log("Routing","POST /users/login")
+            logManager.log("Routing", "POST /users/login")
             val checkUser = call.receive<CheckUser>()
             val user = userDataSource.getUserByUsername(checkUser.login)
             if (CryptManagerUser.passwordDecrypt(user.second ?: "", checkUser.password)) {
                 user.first?.let { userDtoWithToken ->
                     userDtoWithToken.token = tokenManagerUser.generateOrReplaceJWTToken(userDtoWithToken)
-                    logManager.log("Routing","ACCEPTED /users/login\t${userDtoWithToken}")
+                    logManager.log("Routing", "ACCEPTED /users/login\t${userDtoWithToken}")
                     call.respond(HttpStatusCode.OK, userDtoWithToken)
-                } ?:
-                logManager.log("Routing","${ApiMessage.USER_NOT_FOUND} /users/login")
+                } ?: logManager.log("Routing", "${ApiMessage.USER_NOT_FOUND} /users/login")
                 call.respond(HttpStatusCode.NotFound, ApiMessage.USER_NOT_FOUND)
             } else {
-                logManager.log("Routing","${ApiMessage.INCORRECT_LOGIN_PASSWORD} /users/login")
+                logManager.log("Routing", "${ApiMessage.INCORRECT_LOGIN_PASSWORD} /users/login")
                 call.respond(HttpStatusCode.NotFound, ApiMessage.INCORRECT_LOGIN_PASSWORD)
             }
         }
 
         get("/users/images/{fileName}") {
-            logManager.log("Routing","GET /users/images/{fileName}")
+            logManager.log("Routing", "GET /users/images/{fileName}")
             val fileName = call.parameters["fileName"]
             val urlfile = "images/$fileName"
             val file = File("$urlfile.png")
@@ -134,10 +133,10 @@ fun Application.userRouter() {
                 val imageBytes = userDataSource.getImage(fileName.toString())
                 if (imageBytes != null) {
                     imageManagerUser.saveImage(urlfile, imageBytes)
-                    logManager.log("Routing","ACCEPTED /users/images/{fileName}")
+                    logManager.log("Routing", "ACCEPTED /users/images/{fileName}")
                     call.respondFile(file)
                 } else {
-                    logManager.log("Routing","${ApiMessage.FILE_NOT_FOUND} /users/images/{fileName}")
+                    logManager.log("Routing", "${ApiMessage.FILE_NOT_FOUND} /users/images/{fileName}")
                     call.respond(HttpStatusCode.NotFound, ApiMessage.FILE_NOT_FOUND)
                 }
             }
@@ -148,9 +147,9 @@ fun Application.userRouter() {
                 description = "Allow you to delete your account"
 
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                     body<CheckUser> {
-                        description = "User information"
+                        description = ApiMessage.USER_UPDATE_INFO
                     }
                 }
                 response {
@@ -170,19 +169,19 @@ fun Application.userRouter() {
                 }
 
             }) {
-                logManager.log("Routing","POST /users/delete")
+                logManager.log("Routing", "POST /users/delete")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { _, password ->
                         val checkUser = call.receive<CheckUser>()
                         if (CryptManagerUser.passwordDecrypt(password, checkUser.password)) {
                             if (!userDataSource.deleteUser(checkUser.login)) {
-                                logManager.log("Routing","${ApiMessage.USER_CANT_BE_DELETE} /users/delete")
+                                logManager.log("Routing", "${ApiMessage.USER_CANT_BE_DELETE} /users/delete")
                                 call.respond(HttpStatusCode.InternalServerError, ApiMessage.USER_CANT_BE_DELETE)
                             }
-                            logManager.log("Routing","ACCEPTED /users/delete")
+                            logManager.log("Routing", "ACCEPTED /users/delete")
                             call.respond(HttpStatusCode.Accepted, password)
                         } else {
-                            logManager.log("Routing","${ApiMessage.INCORRECT_LOGIN_PASSWORD} /users/delete")
+                            logManager.log("Routing", "${ApiMessage.INCORRECT_LOGIN_PASSWORD} /users/delete")
                             call.respond(HttpStatusCode.NotFound, ApiMessage.INCORRECT_LOGIN_PASSWORD)
                         }
 
@@ -193,7 +192,7 @@ fun Application.userRouter() {
             get("/users/token", {
                 description = "Allows you to retrieve the user linked to a JWT token"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                 }
                 response {
                     HttpStatusCode.OK to {
@@ -203,10 +202,10 @@ fun Application.userRouter() {
                     }
                 }
             }) {
-                logManager.log("Routing","GET /users/token")
+                logManager.log("Routing", "GET /users/token")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { userDto, _ ->
-                        logManager.log("Routing","ACCEPTED /users/token\t${userDto}")
+                        logManager.log("Routing", "ACCEPTED /users/token\t${userDto}")
                         call.respond(HttpStatusCode.OK, userDto)
                     }
                 }
@@ -214,7 +213,7 @@ fun Application.userRouter() {
             get("/users/gift", {
                 description = "Allows you to collect your daily gift"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                 }
                 response {
                     HttpStatusCode.OK to {
@@ -230,15 +229,15 @@ fun Application.userRouter() {
                 }
 
             }) {
-                logManager.log("Routing","GET /users/gift")
+                logManager.log("Routing", "GET /users/gift")
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { userDto, _ ->
                         if (userDataSource.canHaveDailyGift(userDto.username)) {
                             val dailyGift = (DAILY_GIFT_MIN..DAILY_GIFT_MAX).random()
                             userDataSource.addCoins(userDto.username, dailyGift)
-                            logManager.log("Routing","ACCEPTED /users/gift\t${dailyGift}")
+                            logManager.log("Routing", "ACCEPTED /users/gift\t${dailyGift}")
                             call.respond(HttpStatusCode.OK, dailyGift)
-                            logManager.log("Routing","${ApiMessage.NO_GIFT} /users/gift")
+                            logManager.log("Routing", "${ApiMessage.NO_GIFT} /users/gift")
                         } else call.respond(HttpStatusCode.MethodNotAllowed, ApiMessage.NO_GIFT)
                     }
                 }
@@ -248,9 +247,9 @@ fun Application.userRouter() {
                 description = "Allow you to add a profil image"
 
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                     body<CheckUser> {
-                        description = "User information"
+                        description = ApiMessage.USER_UPDATE_INFO
                     }
                 }
                 response {
@@ -264,7 +263,7 @@ fun Application.userRouter() {
                 }
 
             }) {
-                logManager.log("Routing","POST /users/images")
+                logManager.log("Routing", "POST /users/images")
 
                 hasToken { principal ->
                     verifyUserFromToken(userDataSource, principal) { user, _ ->
@@ -276,11 +275,11 @@ fun Application.userRouter() {
                         if (imageByteArray != null && imageByteArray.isNotEmpty()) {
                             userDataSource.removeImage(user.id)
                             userDataSource.addImage(user.id, imageByteArray)
-                            logManager.log("Routing","ACCEPTED /users/images")
+                            logManager.log("Routing", "ACCEPTED /users/images")
                             call.respond(HttpStatusCode.OK, "${urlManager.getURL()}users/${urlfile}")
                         }
-                        logManager.log("Routing","${ApiMessage.FILE_NOT_FOUND} /users/images")
-                        call.respond(HttpStatusCode.Conflict,ApiMessage.FILE_NOT_FOUND)
+                        logManager.log("Routing", "${ApiMessage.FILE_NOT_FOUND} /users/images")
+                        call.respond(HttpStatusCode.Conflict, ApiMessage.FILE_NOT_FOUND)
                     }
                 }
             }

@@ -30,7 +30,7 @@ fun Application.betRouter() {
             post("/bets/add", {
                 description = "Allows a user to create a new bet"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                     body<Bet> {
                         description = "Bet to add in the selected source"
                     }
@@ -73,7 +73,7 @@ fun Application.betRouter() {
             post("/bets/gets", {
                 description = "Allows you to recover all bets"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                     body<List<BetFilter>> {
                         description = "List of filters"
                     }
@@ -105,7 +105,7 @@ fun Application.betRouter() {
             get("/bets/popular", {
                 description = "Allows you to recover the most popular public bets"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                 }
                 response {
                     HttpStatusCode.Accepted to {
@@ -134,7 +134,7 @@ fun Application.betRouter() {
         get("/bets/get/{id}", {
             description = "Retrieves a specific bet"
             request {
-                pathParameter<UUID>("Id of the desired bet")
+                pathParameter<String>(ApiMessage.ID_BET_INFO)
             }
             response {
                 HttpStatusCode.Accepted to {
@@ -144,7 +144,7 @@ fun Application.betRouter() {
                     }
                 }
                 HttpStatusCode.NotFound to {
-                    description = "Bet not found in the selected source"
+                    description = ApiMessage.BET_NOT_FOUND_INFO
                     body(ApiMessage.BET_NOT_FOUND)
                 }
             }
@@ -162,7 +162,7 @@ fun Application.betRouter() {
             description = "Delete a specific bet"
             request {
                 body<Map<String, String>> {
-                    description = "Id of the desired bet"
+                    description = ApiMessage.ID_BET_INFO
                 }
             }
             response {
@@ -170,7 +170,7 @@ fun Application.betRouter() {
                     description = "The bet has been deleted"
                 }
                 HttpStatusCode.NotFound to {
-                    description = "Bet not found in the selected source"
+                    description = ApiMessage.BET_NOT_FOUND_INFO
                     body(ApiMessage.BET_NOT_FOUND)
                 }
             }
@@ -198,7 +198,7 @@ fun Application.betRouter() {
                     description = "The bet has been updated"
                 }
                 HttpStatusCode.NotFound to {
-                    description = "Bet not found in the selected source"
+                    description = ApiMessage.BET_NOT_FOUND_INFO
                     body(ApiMessage.BET_NOT_FOUND)
                 }
             }
@@ -218,7 +218,7 @@ fun Application.betRouter() {
             get("/bets/toConfirm", {
                 description = "Allows a user to know which bets can be validated"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                 }
                 response {
                     HttpStatusCode.Accepted to {
@@ -244,7 +244,7 @@ fun Application.betRouter() {
             get("/bets/getWon", {
                 description = "Allows a user to know their won bets"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                 }
                 response {
                     HttpStatusCode.Accepted to {
@@ -269,7 +269,7 @@ fun Application.betRouter() {
             get("/bets/history", {
                 description = "Allows a user to know own history of bets"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                 }
                 response {
                     HttpStatusCode.Accepted to {
@@ -297,7 +297,7 @@ fun Application.betRouter() {
             get("/bets/current", {
                 description = "Allows a user to know current bets"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                 }
                 response {
                     HttpStatusCode.Accepted to {
@@ -323,10 +323,10 @@ fun Application.betRouter() {
 
         authenticate {
             post("/bets/confirm/{id}", {
-                description = "allows the creator of a bet to confrm the final answer"
+                description = "allows the creator of a bet to confirm the final answer"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
-                    pathParameter<UUID>("Id of the desired bet")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
+                    pathParameter<String>(ApiMessage.ID_BET_INFO)
                     body<String> {
                         description = "Final answer of the bet"
                     }
@@ -336,7 +336,7 @@ fun Application.betRouter() {
                         description = "The final answer has been set"
                     }
                     HttpStatusCode.Unauthorized to {
-                        description = "The user is not the creator of the bet"
+                        description = ApiMessage.NOT_CREATOR_INFO
                     }
                 }
             }) {
@@ -360,47 +360,44 @@ fun Application.betRouter() {
             post("/bets/users", {
                 description = "gets all userDTO of a bet"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
-                    pathParameter<String>("Id of the desired bet")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
+                    pathParameter<String>(ApiMessage.ID_BET_INFO)
                     body<List<UserDTO>> {
                         description = "UserDTO of the bet"
                     }
                 }
                 response {
-                    HttpStatusCode.OK to {
-                        description = "The final answer has been set"
-                    }
-                    HttpStatusCode.Unauthorized to {
-                        description = "The user is not the creator of the bet"
+                    HttpStatusCode.Accepted to {
+                        description = "List of 4 user of the selected bet"
                     }
                 }
             }) {
                 logManager.log("Routing", "POST /bets/users")
                 hasToken { principal ->
-                    verifyUserFromToken(userDataSource, principal) { user, _ ->
+                    verifyUserFromToken(userDataSource, principal) { _, _ ->
                         val id = call.receive<Map<String, String>>()["id"] ?: ""
                         val participations = participationDataSource.getParticipationFromBetId(id)
                         val users =
                             participations.map { userDataSource.getUserByUsername(it.username).first }.toSet().take(4)
                                 .toList()
-                        call.respond(users)
+                        call.respond(HttpStatusCode.Accepted, users)
                     }
                 }
             }
             post("/bets/pvbet/update", {
                 description = "Add new users to a private bet"
                 request {
-                    headerParameter<JWTPrincipal>("JWT token of the logged user")
+                    headerParameter<JWTPrincipal>(ApiMessage.JWT_TOKEN_INFO)
                     body<UpdatedPrivateBet> {
                         description = "Bet id and list of new users"
                     }
                 }
                 response {
-                    HttpStatusCode.OK to {
-                        description = "The final answer has been set"
+                    HttpStatusCode.Accepted to {
+                        description = "Invited users list updated"
                     }
                     HttpStatusCode.Unauthorized to {
-                        description = "The user is not the creator of the bet"
+                        description = ApiMessage.NOT_CREATOR_INFO
                     }
                 }
             }) {
@@ -410,7 +407,7 @@ fun Application.betRouter() {
                         val updateRequest = call.receive<UpdatedPrivateBet>()
                         val bet = betDataSource.getBetById(updateRequest.betid)
                         if (user.username != bet?.createdBy) {
-                            call.respond(HttpStatusCode.Forbidden, ApiMessage.USER_DOESNT_HAVE_PERMISSION)
+                            call.respond(HttpStatusCode.Unauthorized, ApiMessage.USER_DOESNT_HAVE_PERMISSION)
                         }
                         betDataSource.addUserInPrivatebet(updateRequest)
                         call.respond(HttpStatusCode.Accepted, updateRequest)
