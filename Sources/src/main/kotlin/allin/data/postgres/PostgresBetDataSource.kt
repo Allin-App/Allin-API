@@ -21,7 +21,6 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
             filters.size == 1 -> {
                 val filter = filters.first()
-
                 when (filter) {
                     BetFilter.PUBLIC -> database.bets.filter { !it.isPrivate }
                     BetFilter.INVITATION -> database.bets.filter { it.isPrivate }
