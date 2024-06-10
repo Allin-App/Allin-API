@@ -117,7 +117,7 @@ class PostgresBetDataSource(private val database: Database) : BetDataSource {
 
                 database.participations
                     .filter {
-                        (it.id eq userid) and
+                        (it.userid eq userid) and
                                 (it.betId eq notif.betId)
                     }
                     .mapNotNull { participation ->

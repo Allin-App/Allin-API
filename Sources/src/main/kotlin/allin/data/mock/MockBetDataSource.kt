@@ -143,11 +143,11 @@ class MockBetDataSource(private val mockData: MockDataSource.MockData) : BetData
             }
     }
 
-    override fun getWonNotifications(username: String): List<BetResultDetail> {
+    override fun getWonNotifications(userid: String): List<BetResultDetail> {
         return bets.map { bet ->
             val notification = resultNotifications.find { it.first == bet.id } ?: return@map null
             val result = results.find { it.betId == bet.id } ?: return@map null
-            val participation = participations.find { it.username == username && it.betId == bet.id }
+            val participation = participations.find { it.userId == userid && it.betId == bet.id }
                 ?: return@map null
 
             if (participation.answer == result.result) {
