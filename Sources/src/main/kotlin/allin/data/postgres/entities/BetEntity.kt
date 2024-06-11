@@ -58,20 +58,25 @@ interface BetEntity : Entity<BetEntity> {
             .filter { it.betId eq bet.id }
             .map { it.toBetAnswerInfo() }
 
-        return BetDetail(
+        val betD = BetDetail(
             bet = bet,
             answers = getBetAnswerDetail(bet, participationEntities, answerInfos),
             participations = participationEntities,
             userParticipation = userParticipation?.toParticipation(database),
-            wonParticipation = if (bet.status == BetStatus.FINISHED) {
-                val result = database.betResults.find { it.betId eq this.id }
-                result?.let { r ->
+            wonParticipation = if (participationEntities.isEmpty()) {
+                null
+            } else if (bet.status == BetStatus.FINISHED) {
+                database.betResults.find { it.betId eq this.id }?.let { r ->
                     participationEntities
                         .filter { it.answer == r.result }
                         .maxBy { it.stake }
                 }
             } else null
         )
+
+
+        return betD
+
     }
 
 }
